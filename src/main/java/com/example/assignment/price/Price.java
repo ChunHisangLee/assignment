@@ -18,7 +18,8 @@ public class Price {
         }
     }
 
-    public int getPrice(int time) {
-        return priceList[time % 72];
+    public int getPrice(long time) {
+        int num = (int) time % 72;
+        return priceList[num];
     }
 }

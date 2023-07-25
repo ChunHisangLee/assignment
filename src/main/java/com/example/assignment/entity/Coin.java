@@ -7,7 +7,7 @@ import java.math.RoundingMode;
 
 @Data
 public class Coin {
-    private Long id;
+    private Integer coinId;
     private String name;
     private BigDecimal baseAmount;
     private BigDecimal minAmount;
@@ -15,14 +15,6 @@ public class Coin {
     private BigDecimal dayMaxAmount;
 
     public Coin() {
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public void setBaseAmount(BigDecimal baseAmount) {
