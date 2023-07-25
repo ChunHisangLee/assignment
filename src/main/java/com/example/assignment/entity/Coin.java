@@ -1,9 +1,6 @@
 package com.example.assignment.entity;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -29,18 +26,18 @@ public class Coin {
     }
 
     public void setBaseAmount(BigDecimal baseAmount) {
-        this.baseAmount = baseAmount.setScale(8, RoundingMode.HALF_UP);
+        this.baseAmount = baseAmount.setScale(2, RoundingMode.DOWN);
     }
 
     public void setMinAmount(BigDecimal minAmount) {
-        this.minAmount = minAmount.setScale(8, RoundingMode.HALF_UP);
+        this.minAmount = minAmount.setScale(2, RoundingMode.DOWN);
     }
 
     public void setMaxAmount(BigDecimal maxAmount) {
-        this.maxAmount = maxAmount.setScale(8, RoundingMode.HALF_UP);
+        this.maxAmount = maxAmount.setScale(2, RoundingMode.DOWN);
     }
 
     public void setDayMaxAmount(BigDecimal dayMaxAmount) {
-        this.dayMaxAmount = dayMaxAmount.setScale(8, RoundingMode.HALF_UP);
+        this.dayMaxAmount = dayMaxAmount.setScale(2, RoundingMode.DOWN);
     }
 }

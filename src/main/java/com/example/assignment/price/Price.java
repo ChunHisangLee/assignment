@@ -2,8 +2,6 @@ package com.example.assignment.price;
 
 import lombok.Data;
 
-import java.time.Instant;
-
 @Data
 public class Price {
     final int initNum = 100;
