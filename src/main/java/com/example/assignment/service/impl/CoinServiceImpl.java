@@ -4,7 +4,7 @@ import com.example.assignment.entity.Coin;
 import com.example.assignment.mapper.CoinMapper;
 import com.example.assignment.service.ICoinService;
 import com.example.assignment.service.ex.InsertException;
-import com.example.assignment.service.ex.UserNameDuplicatedExecption;
+import com.example.assignment.service.ex.UserNameDuplicatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ public class CoinServiceImpl implements ICoinService {
         String name = coin.getName();
         Coin result = coinMapper.findByName(name);
         if (result != null) {
-            throw new UserNameDuplicatedExecption("該幣別資料已經存在!");
+            throw new UserNameDuplicatedException("該幣別資料已經存在!");
         }
         coin.setBaseAmount(coin.getBaseAmount());
         coin.setMinAmount(coin.getMinAmount());

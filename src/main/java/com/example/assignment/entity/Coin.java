@@ -1,6 +1,7 @@
 package com.example.assignment.entity;
 
 import lombok.Data;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -9,9 +10,13 @@ import java.math.RoundingMode;
 public class Coin {
     private Integer coinId;
     private String name;
+    @Getter
     private BigDecimal baseAmount;
+    @Getter
     private BigDecimal minAmount;
+    @Getter
     private BigDecimal maxAmount;
+    @Getter
     private BigDecimal dayMaxAmount;
 
     public Coin() {

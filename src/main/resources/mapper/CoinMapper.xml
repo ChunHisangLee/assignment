@@ -12,9 +12,9 @@
         <result column="dayMaxAmount" property="dayMaxAmount"></result>
     </resultMap>
     <insert id="insert" useGeneratedKeys="true" keyProperty="coinId">
-        INSERT INTO coin (name, baseAmount, minAmount, maxAmount,dayMaxAmount
+        INSERT INTO coin (name, baseAmount, minAmount, maxAmount, dayMaxAmount
         ) VALUES (
-        #{name} , #{baseAmount}, #{minAmount}, #{maxAmount},#{dayMaxAmount}
+        #{name}, #{baseAmount}, #{minAmount}, #{maxAmount}, #{dayMaxAmount}
         )
     </insert>
     <select id="findByName" resultMap="CoinEntityMap">

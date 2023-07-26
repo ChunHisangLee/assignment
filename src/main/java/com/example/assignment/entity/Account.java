@@ -1,6 +1,7 @@
 package com.example.assignment.entity;
 
 import lombok.Data;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -10,9 +11,13 @@ public class Account extends BaseEntity {
     private Integer userId;
     private Integer coinId;
     private String accountStatus;
+    @Getter
     private BigDecimal carryingAmount;
+    @Getter
     private BigDecimal balanceAmount;
+    @Getter
     private BigDecimal freezeAmount;
+    @Getter
     private BigDecimal netValue;
 
 

@@ -9,7 +9,8 @@ import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.IUserService;
 import com.example.assignment.service.ex.InsertException;
 import com.example.assignment.service.ex.ServiceException;
-import com.example.assignment.service.ex.UserNameDuplicatedExecption;
+import com.example.assignment.service.ex.UserNameDuplicatedException;
+import com.example.assignment.service.ex.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -34,7 +35,7 @@ public class UserServiceImpl implements IUserService {
         String userName = user.getUserName();
         User userQuery = userMapper.findByUserName(userName);
         if (userQuery != null) {
-            throw new UserNameDuplicatedExecption("該名稱已被註冊!");
+            throw new UserNameDuplicatedException("該名稱已被註冊!");
         }
 
         String oldPassword = user.getPassword();
@@ -68,7 +69,7 @@ public class UserServiceImpl implements IUserService {
         String userName = user.getUserName();
         User result = userMapper.findByUserName(userName);
         if (result == null) {
-            throw new UserNameDuplicatedExecption("無該筆資料!");
+            throw new UserNotFoundException("無該筆資料!");
         }
         Integer rows = userMapper.deleteByUserName(userName);
         if (rows != 1) {
