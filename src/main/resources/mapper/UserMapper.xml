@@ -12,10 +12,9 @@
         <result column="password" property="password"></result>
     </resultMap>
     <insert id="insert" useGeneratedKeys="true" keyProperty="userId">
-        INSERT INTO user(
-        name, userName, email, password
+        INSERT INTO user (name, userName, email, password,salt,createUser,createTime,updateUser,updateTime
         ) VALUES (
-        #{name} , #{userName}, #{email}, #{password}
+        #{name} , #{userName}, #{email}, #{password},#{salt},#{createUser},#{createTime},#{updateUser},#{updateTime}
         )
     </insert>
     <select id="findByUserName" resultMap="UserEntityMap">

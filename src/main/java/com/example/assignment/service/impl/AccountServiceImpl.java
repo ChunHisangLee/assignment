@@ -1,33 +1,38 @@
 package com.example.assignment.service.impl;
 
+import com.example.assignment.entity.Account;
 import com.example.assignment.entity.User;
-import com.example.assignment.mapper.UserMapper;
-import com.example.assignment.service.IUserService;
+import com.example.assignment.mapper.AccountMapper;
+import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.ex.InsertException;
 import com.example.assignment.service.ex.UserNameDuplicatedExecption;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
 @Service
-public class UserServiceImpl implements IUserService {
+public class AccountServiceImpl implements IAccountService {
     @Autowired
-    private UserMapper userMapper;
+    private AccountMapper accountMapper;
+    @Autowired
+    private Account account;
 
     @Override
-    public void reg(User user) {
+    public void reg(Integer userId,Integer coinId){
+        account.setUserId(userId);
+        account.setCoinId(coinId);
+        account.setAccountStatus("正常");
+        Integer userId =
         String userName = user.getUserName();
         User result = userMapper.findByUserName(userName);
         if (result != null) {
             throw new UserNameDuplicatedExecption("該名稱已被註冊!");
         }
-
-        String oldPassword = user.getPassword();
-        String salt = UUID.randomUUID().toString().toUpperCase();
-        user.setSalt(salt);
+        account
         String md5Password = getMD5Password(oldPassword, salt);
         user.setPassword(md5Password);
 

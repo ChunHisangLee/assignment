@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.assignment.mapper.AccountMapper">
+    <insert id="insert">
+        INSERT INTO account (userId, coinId,accountStatus,createUser,createTime,updateUser,updateTime
+        ) VALUES (
+        #{userId} , #{coinId}, #{accountStatus}, #{createUser},#{createTime},#{updateUser},#{updateTime}
+        )
+    </insert>
+    <update id="setUSDNetValue">
+        UPDATE account
+        SET netValue=#{netValue}
+        WHERE userId = #{userId} AND coinId = #{coinId}
+    </update>
+</mapper>
