@@ -1,7 +1,6 @@
 package com.example.assignment.service;
 
 import com.example.assignment.entity.Coin;
-import com.example.assignment.entity.User;
 import com.example.assignment.service.ex.ServiceException;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
