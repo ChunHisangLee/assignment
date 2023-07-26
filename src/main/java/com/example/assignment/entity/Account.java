@@ -7,7 +7,7 @@ import java.math.RoundingMode;
 import java.util.Date;
 
 @Data
-public class Account {
+public class Account extends BaseEntity {
     private Integer userId;
     private Integer coinId;
     private String accountStatus;
@@ -15,8 +15,6 @@ public class Account {
     private BigDecimal balanceAmount;
     private BigDecimal freezeAmount;
     private BigDecimal netValue;
-    private Date updateTime;
-    private Date createTime;
 
 
     public void setCarryingAmount(BigDecimal carryingAmount) {
