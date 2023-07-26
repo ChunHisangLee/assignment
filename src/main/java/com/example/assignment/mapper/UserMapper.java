@@ -19,4 +19,11 @@ public interface UserMapper {
      * @return 沒找到傳回null值
      */
     User findByUserName(String userName);
+    /**
+     * 根據使用者的名稱來查詢使用者的數據
+     *
+     * @param userName 使用者名稱
+     * @return 刪除的行數
+     */
+    Integer deleteByUserName(String userName);
 }

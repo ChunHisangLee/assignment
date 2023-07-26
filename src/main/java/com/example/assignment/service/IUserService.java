@@ -7,5 +7,10 @@ public interface IUserService {
      * 使用者註冊
      * @param user
      */
-    void reg(User user);
+    void register(User user);
+    /**
+     * 使用者刪除
+     * @param user
+     */
+    void deleteUser(User user);
 }

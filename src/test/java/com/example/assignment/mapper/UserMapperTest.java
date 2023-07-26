@@ -29,4 +29,10 @@ public class UserMapperTest {
         User user = userMapper.findByUserName("JackIsGood2");
         System.out.println(user);
     }
+
+    @Test
+    public void deleteByUserName() {
+        Integer rows = userMapper.deleteByUserName("JackIsGood4");
+        System.out.println(rows);
+    }
 }

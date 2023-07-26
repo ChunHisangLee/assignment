@@ -20,4 +20,7 @@
     <select id="findByUserName" resultMap="UserEntityMap">
         SELECT * FROM user WHERE userName = #{userName}
     </select>
+    <delete id="deleteByUserName">
+        DELETE FROM user WHERE userName = #{userName}
+    </delete>
 </mapper>

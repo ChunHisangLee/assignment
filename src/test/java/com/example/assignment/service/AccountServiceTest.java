@@ -17,15 +17,14 @@ public class AccountServiceTest {
     private IUserService userService;
 
     @Test
-    public void reg() {
+    public void createAccount() {
         try {
             User user = new User();
             user.setName("Jack");
             user.setUserName("JackIsGood7");
             user.setEmail("jackisgood7@gmail.com");
             user.setPassword("Aa123456");
-            userService.reg(user);
-            accountService.reg(user,1);
+            accountService.createAccount(user, "USD");
             System.out.println("OK!!");
         } catch (ServiceException e) {
             System.out.println(e.getClass().getSimpleName());

@@ -14,16 +14,37 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class UserServiceTest {
     @Autowired
     private IUserService userService;
+    @Autowired
+    private IAccountService accountService;
 
     @Test
-    public void reg() {
+    public void register() {
         try {
             User user = new User();
             user.setName("Jack");
             user.setUserName("JackIsGood6");
             user.setEmail("jackisgood6@gmail.com");
             user.setPassword("Aa123456");
-            userService.reg(user);
+            userService.register(user);
+            System.out.println("OK!!");
+
+            userService.register(user);
+            accountService.createAccount(user, "USD");
+            accountService.createAccount(user, "BTC");
+            System.out.println("OK!!");
+
+        } catch (ServiceException e) {
+            System.out.println(e.getClass().getSimpleName());
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @Test
+    public void deleteUser() {
+        try {
+            User user = new User();
+            user.setUserName("JackIsGood3");
+            userService.deleteUser(user);
             System.out.println("OK!!");
         } catch (ServiceException e) {
             System.out.println(e.getClass().getSimpleName());

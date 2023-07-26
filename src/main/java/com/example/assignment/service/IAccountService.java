@@ -7,7 +7,7 @@ public interface IAccountService {
      * 使用者帳號資料註冊
      *
      * @param user
-     * @param coinId
+     * @param coinName
      */
-    void reg(User user, Integer coinId);
+    void createAccount(User user, String coinName);
 }
