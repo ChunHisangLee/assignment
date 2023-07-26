@@ -11,7 +11,7 @@
     </insert>
     <update id="setUSDNetValue">
         UPDATE account
-        SET netValue=#{netValue}
+        SET netValue = #{netValue}
         WHERE userId = #{userId} AND coinId = #{coinId}
     </update>
 </mapper>
