@@ -1,4 +1,4 @@
-package com.example.assignment.price;
+package com.example.assignment.entity;
 
 import lombok.Data;
 

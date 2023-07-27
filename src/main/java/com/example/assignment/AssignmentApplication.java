@@ -1,6 +1,6 @@
 package com.example.assignment;
 
-import com.example.assignment.price.Price;
+import com.example.assignment.entity.Price;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
