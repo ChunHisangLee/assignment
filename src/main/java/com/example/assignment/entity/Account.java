@@ -22,19 +22,19 @@ public class Account extends BaseEntity {
 
 
     public void setCarryingAmount(BigDecimal carryingAmount) {
-        this.carryingAmount = carryingAmount.setScale(2, RoundingMode.DOWN);
+        this.carryingAmount = carryingAmount.setScale(5, RoundingMode.DOWN);
     }
 
     public void setBalanceAmount(BigDecimal balanceAmount) {
-        this.balanceAmount = balanceAmount.setScale(2, RoundingMode.DOWN);
+        this.balanceAmount = balanceAmount.setScale(5, RoundingMode.DOWN);
     }
 
     public void setFreezeAmount(BigDecimal freezeAmount) {
-        this.freezeAmount = freezeAmount.setScale(2, RoundingMode.DOWN);
+        this.freezeAmount = freezeAmount.setScale(5, RoundingMode.DOWN);
     }
 
     public void setNetValue(BigDecimal netValue) {
-        this.netValue = netValue.setScale(2, RoundingMode.DOWN);
+        this.netValue = netValue.setScale(5, RoundingMode.DOWN);
     }
 }
 

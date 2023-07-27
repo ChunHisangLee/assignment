@@ -14,4 +14,7 @@
         SET netValue = #{netValue}
         WHERE userId = #{userId} AND coinId = #{coinId}
     </update>
+    <select id="findByKey" resultType="com.example.assignment.entity.Account">
+        SELECT * FROM account WHERE userId = #{userId} AND coinId = #{coinId}
+    </select>
 </mapper>

@@ -67,8 +67,8 @@ public class UserServiceImpl implements IUserService {
     @Override
     public void deleteUser(User user) {
         String userName = user.getUserName();
-        User result = userMapper.findByUserName(userName);
-        if (result == null) {
+        User userQuery = userMapper.findByUserName(userName);
+        if (userQuery == null) {
             throw new UserNotFoundException("無該筆資料!");
         }
         Integer rows = userMapper.deleteByUserName(userName);
