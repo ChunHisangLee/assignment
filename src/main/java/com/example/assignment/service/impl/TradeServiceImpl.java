@@ -4,12 +4,14 @@ import com.example.assignment.entity.*;
 import com.example.assignment.mapper.AccountMapper;
 import com.example.assignment.mapper.CoinMapper;
 import com.example.assignment.mapper.UserMapper;
+import com.example.assignment.service.IPriceService;
 import com.example.assignment.service.ITradeService;
 import com.example.assignment.service.ex.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,9 +24,11 @@ public class TradeServiceImpl implements ITradeService {
     private AccountMapper accountMapper;
     @Autowired
     private CoinMapper coinMapper;
+    @Autowired
+    private IPriceService priceService;
 
     @Override
-    public List<Trade> createTrade(Integer price, Double quantity, String direction, String userName, String coinName, Date date) {
+    public List<Trade> createTrade(Double quantity, String direction, String userName, String coinName) {
         List<Trade> list = new ArrayList<>();
         Trade trade = new Trade();
         User userQuery = userMapper.findByUserName(userName);
@@ -39,6 +43,9 @@ public class TradeServiceImpl implements ITradeService {
         if (accountQuery == null) {
             throw new UserNotFoundException("該用戶無 " + coinName + " 帳戶資料!");
         }
+        Instant instant = Instant.now();
+        long seconds = instant.getEpochSecond() / 5;
+        Integer price = priceService.getPrice(seconds);
         trade.setUserId(userQuery.getUserId());
         trade.setCoinId(coinQuery.getCoinId());
         trade.setTransPrice(BigDecimal.valueOf(price));
@@ -52,7 +59,7 @@ public class TradeServiceImpl implements ITradeService {
             changeAmount = BigDecimal.valueOf(-1 * quantity);
         }
         trade.setAfterBalance(trade.getBeforeBalance().add(changeAmount));
-        trade.setTransTime(date);
+        trade.setTransTime(Date.from(instant));
         list.add(trade);
 
         Coin coinUSD = coinMapper.findByName("USD");
@@ -80,7 +87,7 @@ public class TradeServiceImpl implements ITradeService {
             changeAmount = BigDecimal.valueOf(-1 * price * quantity);
         }
         trade.setAfterBalance(trade.getBeforeBalance().add(changeAmount));
-        trade.setTransTime(date);
+        trade.setTransTime(Date.from(instant));
         list.add(trade);
         return list;
     }

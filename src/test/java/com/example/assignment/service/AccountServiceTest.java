@@ -13,8 +13,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class AccountServiceTest {
     @Autowired
     private IAccountService accountService;
-    @Autowired
-    private IUserService userService;
 
     @Test
     public void createAccount() {
