@@ -3,21 +3,13 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.assignment.mapper.CoinMapper">
-    <resultMap id="CoinEntityMap" type="com.example.assignment.entity.Coin">
-        <id column="coinId" property="coinId"></id>
-        <result column="name" property="name"></result>
-        <result column="baseAmount" property="baseAmount"></result>
-        <result column="minAmount" property="minAmount"></result>
-        <result column="maxAmount" property="maxAmount"></result>
-        <result column="dayMaxAmount" property="dayMaxAmount"></result>
-    </resultMap>
     <insert id="insert" useGeneratedKeys="true" keyProperty="coinId">
         INSERT INTO coin (name, baseAmount, minAmount, maxAmount, dayMaxAmount
         ) VALUES (
         #{name}, #{baseAmount}, #{minAmount}, #{maxAmount}, #{dayMaxAmount}
         )
     </insert>
-    <select id="findByName" resultMap="CoinEntityMap">
+    <select id="findByName" resultType="com.example.assignment.entity.Coin">
         SELECT * FROM coin WHERE name = #{name}
     </select>
 </mapper>

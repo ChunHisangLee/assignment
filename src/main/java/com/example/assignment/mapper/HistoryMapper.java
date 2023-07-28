@@ -5,10 +5,10 @@ import com.example.assignment.entity.Trade;
 
 public interface HistoryMapper {
     /**
-     * 插入交易資料
+     * Insert trading data
      *
-     * @param trade 交易資料
-     * @return 插入的行數
+     * @param trade trading data
+     * @return the row to be inserted
      */
     Integer insert(Trade trade);
 }

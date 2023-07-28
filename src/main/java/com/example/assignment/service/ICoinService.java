@@ -4,8 +4,8 @@ import com.example.assignment.entity.Coin;
 
 public interface ICoinService {
     /**
-     * 使用者註冊
-     * @param coin
+     * Create coin data
+     * @param coin  coin Class
      */
     void createCoin(Coin coin);
 }

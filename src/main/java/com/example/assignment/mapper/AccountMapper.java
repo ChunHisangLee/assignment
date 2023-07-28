@@ -2,33 +2,41 @@ package com.example.assignment.mapper;
 
 import com.example.assignment.entity.Account;
 
+import java.time.Instant;
+
 
 public interface AccountMapper {
     /**
-     * 插入使用者帳戶資料
+     * Insert account data
      *
-     * @param account 使用者帳戶資料
-     * @return 插入的行數
+     * @param account account data
+     * @return the row to be inserted
      */
     Integer insert(Account account);
 
     /**
-     * 設定帳戶初始值
+     * Set the initial net value of USD
      *
-     * @param userId   使用者ID
-     * @param coinId   幣別ID
-     * @param netValue 淨值
-     * @return 插入的行數
+     * @param account  setting time
+     * @return the row to be updated
      */
 
-    Integer setUSDNetValue(Integer userId, Integer coinId, Integer netValue);
+    Integer setUSDNetValue(Account account);
 
     /**
-     * 查詢帳戶資料
+     * Query the account data
      *
-     * @param userId 使用者ID
-     * @param coinId 幣別ID
+     * @param userId user ID
+     * @param coinId coin ID
      * @return Account
      */
     Account findByKey(Integer userId, Integer coinId);
+    /**
+     * Update the Trading balance
+     *
+     * @param account  setting time
+     * @return the row to be updated
+     */
+
+    Integer updateTradingBalance(Account account);
 }

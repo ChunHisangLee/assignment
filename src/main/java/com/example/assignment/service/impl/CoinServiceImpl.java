@@ -16,17 +16,13 @@ public class CoinServiceImpl implements ICoinService {
     @Override
     public void createCoin(Coin coin) {
         String name = coin.getName();
-        Coin result = coinMapper.findByName(name);
-        if (result != null) {
-            throw new UserNameDuplicatedException("該幣別資料已經存在!");
+        Coin coinQuery = coinMapper.findByName(name);
+        if (coinQuery != null) {
+            throw new UserNameDuplicatedException("The coin data has exist!");
         }
-        coin.setBaseAmount(coin.getBaseAmount());
-        coin.setMinAmount(coin.getMinAmount());
-        coin.setMaxAmount(coin.getMaxAmount());
-        coin.setDayMaxAmount(coin.getDayMaxAmount());
         Integer rows = coinMapper.insert(coin);
         if (rows != 1) {
-            throw new InsertException("在新增的過程中產生了未知的異常");
+            throw new InsertException("Unknown exception!");
         }
     }
 }

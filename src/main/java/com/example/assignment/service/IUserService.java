@@ -4,13 +4,13 @@ import com.example.assignment.entity.User;
 
 public interface IUserService {
     /**
-     * 使用者註冊
-     * @param user
+     * Register the user data
+     * @param user  user Class
      */
     void register(User user);
     /**
-     * 使用者刪除
-     * @param user
+     * Delete user
+     * @param user  user Class
      */
     void deleteUser(User user);
 }

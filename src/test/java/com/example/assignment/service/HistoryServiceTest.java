@@ -1,14 +1,17 @@
-package com.example.assignment.service.impl;
+package com.example.assignment.service;
 
 import com.example.assignment.entity.*;
 import com.example.assignment.mapper.AccountMapper;
 import com.example.assignment.mapper.CoinMapper;
+import com.example.assignment.mapper.HistoryMapper;
 import com.example.assignment.mapper.UserMapper;
-import com.example.assignment.service.IPriceService;
-import com.example.assignment.service.ITradeService;
+import com.example.assignment.service.ex.InsertException;
 import com.example.assignment.service.ex.UserNotFoundException;
+import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -16,8 +19,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Service
-public class TradeServiceImpl implements ITradeService {
+@SpringBootTest
+@RunWith(SpringRunner.class)
+public class HistoryServiceTest {
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -26,9 +30,15 @@ public class TradeServiceImpl implements ITradeService {
     private CoinMapper coinMapper;
     @Autowired
     private IPriceService priceService;
+    @Autowired
+    private HistoryMapper historyMapper;
 
-    @Override
-    public List<Trade> createTrade(Double quantity, String direction, String userName, String coinName) {
+    @Test
+    public void createHistory() {
+        Double quantity = 1.25;
+        String direction = String.valueOf(TradeDirection.BUY);
+        String userName = "JackIsGood7";
+        String coinName = "BTC";
         List<Trade> list = new ArrayList<>();
         User userQuery = userMapper.findByUserName(userName);
         if (userQuery == null) {
@@ -87,7 +97,7 @@ public class TradeServiceImpl implements ITradeService {
         }
         tradeUSD.setTransType(direction);
         tradeUSD.setTransQuantity(BigDecimal.valueOf(price * quantity));
-        tradeUSD.setBeforeBalance(accountQuery.getNetValue());
+        tradeUSD.setBeforeBalance(accountUSD.getNetValue());
         if (direction.equals(String.valueOf(TradeDirection.BUY))) {
             changeAmount = BigDecimal.valueOf(price * quantity);
         } else {
@@ -102,6 +112,13 @@ public class TradeServiceImpl implements ITradeService {
         accountUSD.setUpdateUser(userQuery.getUserName());
         accountUSD.setUpdateTime(Date.from(instant));
         accountMapper.updateTradingBalance(accountUSD);
-        return list;
+
+        for (Trade tradeItem : list) {
+            Integer rows = historyMapper.insert(tradeItem);
+            if (rows != 1) {
+                throw new InsertException("Unknown exception!");
+            }
+        }
+        System.out.println("OK!!");
     }
 }

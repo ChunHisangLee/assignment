@@ -26,22 +26,10 @@ class AssignmentApplicationTests {
     }
 
     @Test
-    void setPrice() {
-        priceService.setPrice();
-    }
-
-    @Test
     void getPrice() {
         Instant instant = Instant.now();
         long seconds = instant.getEpochSecond() / 5;
-        priceService.getPrice(seconds);
-        priceService.getPrice(seconds + 5);
-        priceService.getPrice(seconds + 10);
-        priceService.getPrice(seconds + 15);
-        priceService.getPrice(seconds + 20);
-        priceService.getPrice(seconds + 25);
-        priceService.getPrice(seconds + 30);
-        priceService.getPrice(seconds + 35);
-        priceService.getPrice(seconds + 40);
+        System.out.println(seconds);
+        System.out.println(priceService.getPrice(seconds));
     }
 }

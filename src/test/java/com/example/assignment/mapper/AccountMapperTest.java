@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Date;
+
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class AccountMapperTest {
@@ -16,16 +20,22 @@ public class AccountMapperTest {
     @Test
     public void insert() {
         Account account = new Account();
-        account.setUserId(1);
+        account.setUserId(4);
         account.setCoinId(1);
-        account.setAccountStatus("正常");
+        account.setAccountStatus("Normal");
         Integer rows = accountMapper.insert(account);
         System.out.println(rows);
     }
 
     @Test
     public void setUSDNetValue() {
-        Integer rows = accountMapper.setUSDNetValue(1, 1, 1000);
+        Instant instant = Instant.now();
+        Account account = new Account();
+        account.setUserId(4);
+        account.setCoinId(1);
+        account.setNetValue(BigDecimal.valueOf(1000));
+        account.setUpdateTime(Date.from(instant));
+        Integer rows = accountMapper.setUSDNetValue(account);
         System.out.println(rows);
     }
 }

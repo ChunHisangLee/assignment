@@ -8,9 +8,11 @@ import com.example.assignment.mapper.CoinMapper;
 import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.ex.InsertException;
 import com.example.assignment.service.ex.UserNameDuplicatedException;
+import com.example.assignment.service.ex.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Date;
 
 @Service
@@ -22,22 +24,26 @@ public class AccountServiceImpl implements IAccountService {
 
     @Override
     public void createAccount(User user, String coinName) {
+        Coin coinQuery = coinMapper.findByName(coinName);
+        if (coinQuery == null) {
+            throw new UserNotFoundException("The coin data doesn't exist!");
+        }
+        Account accountQuery = accountMapper.findByKey(user.getUserId(), coinQuery.getCoinId());
+        if (accountQuery != null) {
+            throw new UserNameDuplicatedException("The user already has a(n) " + coinName + " account!");
+        }
         Account account = new Account();
         account.setUserId(user.getUserId());
-        Coin coinQuery = coinMapper.findByName(coinName);
-        if (coinQuery != null) {
-            throw new UserNameDuplicatedException("該幣別資料已經存在!");
-        }
         account.setCoinId(coinQuery.getCoinId());
-        account.setAccountStatus("正常");
+        account.setAccountStatus("Normal");
         account.setCreateUser(user.getUserName());
         account.setUpdateUser(user.getUserName());
-        Date date = new Date();
-        account.setCreateTime(date);
-        account.setUpdateTime(date);
+        Instant instant = Instant.now();
+        account.setCreateTime(Date.from(instant));
+        account.setUpdateTime(Date.from(instant));
         Integer rows = accountMapper.insert(account);
         if (rows != 1) {
-            throw new InsertException("在註冊的過程中產生了未知的異常");
+            throw new InsertException("Unknown exception!");
         }
     }
 }

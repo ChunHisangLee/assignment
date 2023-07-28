@@ -5,17 +5,17 @@ import com.example.assignment.entity.Coin;
 
 public interface CoinMapper {
     /**
-     * 插入幣別資料
+     * Insert coin data
      *
-     * @param coin 幣別資料
-     * @return 插入的行數
+     * @param coin coin data
+     * @return the row to be inserted
      */
     Integer insert(Coin coin);
     /**
-     * 根據使幣別名稱查詢幣別的數據
+     * Query coin data by coin name
      *
-     * @param name 幣別名稱
-     * @return 沒找到傳回null值
+     * @param name coin name
+     * @return if not find, return null value
      */
     Coin findByName(String name);
 }

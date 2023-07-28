@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface IHistoryService {
     /**
-     * 儲存交易歷史資料
+     * Save trading history data
      *
-     * @param list
+     * @param list an ArrayList of trade
      */
     void createHistory(List<Trade> list);
 }

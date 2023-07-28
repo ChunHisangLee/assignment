@@ -1,5 +1,6 @@
 package com.example.assignment.service.impl;
 
+import com.example.assignment.entity.Account;
 import com.example.assignment.entity.Coin;
 import com.example.assignment.entity.User;
 import com.example.assignment.mapper.AccountMapper;
@@ -15,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
@@ -35,7 +38,7 @@ public class UserServiceImpl implements IUserService {
         String userName = user.getUserName();
         User userQuery = userMapper.findByUserName(userName);
         if (userQuery != null) {
-            throw new UserNameDuplicatedException("該名稱已被註冊!");
+            throw new UserNameDuplicatedException("The userName has been registered!");
         }
 
         String oldPassword = user.getPassword();
@@ -47,20 +50,26 @@ public class UserServiceImpl implements IUserService {
         user.setIsDeleted(0);
         user.setCreateUser(user.getUserName());
         user.setUpdateUser(user.getUserName());
-        Date date = new Date();
-        user.setCreateTime(date);
-        user.setUpdateTime(date);
+        Instant instant = Instant.now();
+        user.setCreateTime(Date.from(instant));
+        user.setUpdateTime(Date.from(instant));
         Integer rows = userMapper.insert(user);
         if (rows != 1) {
-            throw new InsertException("在註冊的過程中產生了未知的異常");
+            throw new InsertException("Unknown exception!");
         }
 
         accountService.createAccount(user, "USD");
         Coin coinQuery = coinMapper.findByName("USD");
         if (coinQuery == null) {
-            throw new ServiceException("該幣別資料不存在!");
+            throw new ServiceException("The coin data doesn't exist!");
         }
-        accountMapper.setUSDNetValue(user.getUserId(), coinQuery.getCoinId(), INITIAL_VALUE);
+        Account account = new Account();
+        account.setUserId(user.getUserId());
+        account.setCoinId(coinQuery.getCoinId());
+        account.setNetValue(BigDecimal.valueOf(INITIAL_VALUE));
+        instant = Instant.now();
+        account.setUpdateTime(Date.from(instant));
+        accountMapper.setUSDNetValue(account);
         accountService.createAccount(user, "BTC");
     }
 
@@ -69,11 +78,11 @@ public class UserServiceImpl implements IUserService {
         String userName = user.getUserName();
         User userQuery = userMapper.findByUserName(userName);
         if (userQuery == null) {
-            throw new UserNotFoundException("無該筆資料!");
+            throw new UserNotFoundException("The user data doesn't exist!");
         }
         Integer rows = userMapper.deleteByUserName(userName);
         if (rows != 1) {
-            throw new InsertException("在刪除的過程中產生了未知的異常");
+            throw new InsertException("Unknown exception!");
         }
     }
 

@@ -1,11 +1,13 @@
 package com.example.assignment.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class Account extends BaseEntity {
     private Integer userId;

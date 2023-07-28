@@ -1,14 +1,15 @@
-package com.example.assignment.service.impl;
+package com.example.assignment.service;
 
 import com.example.assignment.entity.*;
 import com.example.assignment.mapper.AccountMapper;
 import com.example.assignment.mapper.CoinMapper;
 import com.example.assignment.mapper.UserMapper;
-import com.example.assignment.service.IPriceService;
-import com.example.assignment.service.ITradeService;
 import com.example.assignment.service.ex.UserNotFoundException;
+import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -16,8 +17,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Service
-public class TradeServiceImpl implements ITradeService {
+@SpringBootTest
+@RunWith(SpringRunner.class)
+public class TradeServiceTest {
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -27,8 +29,12 @@ public class TradeServiceImpl implements ITradeService {
     @Autowired
     private IPriceService priceService;
 
-    @Override
-    public List<Trade> createTrade(Double quantity, String direction, String userName, String coinName) {
+    @Test
+    public void createTrade() {
+        Double quantity = 1.25;
+        String direction = String.valueOf(TradeDirection.BUY);
+        String userName = "JackIsGood7";
+        String coinName = "BTC";
         List<Trade> list = new ArrayList<>();
         User userQuery = userMapper.findByUserName(userName);
         if (userQuery == null) {
@@ -62,12 +68,6 @@ public class TradeServiceImpl implements ITradeService {
         trade.setTransTime(Date.from(instant));
         list.add(trade);
 
-        accountQuery.setCarryingAmount(accountQuery.getCarryingAmount().add(changeAmount));
-        accountQuery.setNetValue(accountQuery.getNetValue().add(changeAmount));
-        accountQuery.setUpdateUser(userQuery.getUserName());
-        accountQuery.setUpdateTime(Date.from(instant));
-        accountMapper.updateTradingBalance(accountQuery);
-
         Trade tradeUSD = new Trade();
         Coin coinUSD = coinMapper.findByName("USD");
         if (coinUSD == null) {
@@ -87,7 +87,7 @@ public class TradeServiceImpl implements ITradeService {
         }
         tradeUSD.setTransType(direction);
         tradeUSD.setTransQuantity(BigDecimal.valueOf(price * quantity));
-        tradeUSD.setBeforeBalance(accountQuery.getNetValue());
+        tradeUSD.setBeforeBalance(accountUSD.getNetValue());
         if (direction.equals(String.valueOf(TradeDirection.BUY))) {
             changeAmount = BigDecimal.valueOf(price * quantity);
         } else {
@@ -96,12 +96,6 @@ public class TradeServiceImpl implements ITradeService {
         tradeUSD.setAfterBalance(tradeUSD.getBeforeBalance().add(changeAmount));
         tradeUSD.setTransTime(Date.from(instant));
         list.add(tradeUSD);
-
-        accountUSD.setCarryingAmount(accountUSD.getCarryingAmount().add(changeAmount));
-        accountUSD.setNetValue(accountUSD.getNetValue().add(changeAmount));
-        accountUSD.setUpdateUser(userQuery.getUserName());
-        accountUSD.setUpdateTime(Date.from(instant));
-        accountMapper.updateTradingBalance(accountUSD);
-        return list;
+        System.out.println(list);
     }
 }

@@ -4,10 +4,10 @@ import com.example.assignment.entity.User;
 
 public interface IAccountService {
     /**
-     * 使用者帳號資料註冊
+     * Create a user account
      *
-     * @param user
-     * @param coinName
+     * @param user  user Class
+     * @param coinName  coin name
      */
     void createAccount(User user, String coinName);
 }
