@@ -66,7 +66,7 @@ public class TradeServiceTest {
         }
         trade.setAfterBalance(trade.getBeforeBalance().add(changeAmount));
         trade.setTransTime(Date.from(instant));
-        synchronized (list) {
+        synchronized (trade) {
             list.add(trade);
         }
 
@@ -97,7 +97,7 @@ public class TradeServiceTest {
         }
         tradeUSD.setAfterBalance(tradeUSD.getBeforeBalance().add(changeAmount));
         tradeUSD.setTransTime(Date.from(instant));
-        synchronized (list) {
+        synchronized (tradeUSD) {
             list.add(tradeUSD);
         }
         System.out.println(list);
