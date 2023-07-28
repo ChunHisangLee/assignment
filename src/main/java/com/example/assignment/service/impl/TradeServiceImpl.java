@@ -18,6 +18,7 @@ import java.util.List;
 
 @Service
 public class TradeServiceImpl implements ITradeService {
+    //改成service
     @Autowired
     private UserMapper userMapper;
     @Autowired

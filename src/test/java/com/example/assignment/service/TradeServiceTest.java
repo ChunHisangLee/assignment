@@ -37,17 +37,17 @@ public class TradeServiceTest {
         String coinName = "BTC";
         List<Trade> list = new ArrayList<>();
         User userQuery = userMapper.findByUserName(userName);
-        if (userQuery == null) {
-            throw new UserNotFoundException("The user data doesn't exist!");
-        }
+//        if (userQuery == null) {
+//            throw new UserNotFoundException("The user data doesn't exist!");
+//        }
         Coin coinQuery = coinMapper.findByName(coinName);
-        if (coinQuery == null) {
-            throw new UserNotFoundException("The coin data doesn't exist!");
-        }
+//        if (coinQuery == null) {
+//            throw new UserNotFoundException("The coin data doesn't exist!");
+//        }
         Account accountQuery = accountMapper.findByKey(userQuery.getUserId(), coinQuery.getCoinId());
-        if (accountQuery == null) {
-            throw new UserNotFoundException("The user doesn't have a(n) " + coinName + " account!");
-        }
+//        if (accountQuery == null) {
+//            throw new UserNotFoundException("The user doesn't have a(n) " + coinName + " account!");
+//        }
         Trade trade = new Trade();
         Instant instant = Instant.now();
         long seconds = instant.getEpochSecond() / 5;
