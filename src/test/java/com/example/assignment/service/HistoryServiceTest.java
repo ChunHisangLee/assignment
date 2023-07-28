@@ -36,7 +36,7 @@ public class HistoryServiceTest {
     @Test
     public void createHistory() {
         Double quantity = 1.25;
-        String direction = String.valueOf(TradeDirection.BUY);
+        String direction = String.valueOf(TradeDirection.SELL);
         String userName = "JackIsGood7";
         String coinName = "BTC";
         List<Trade> list = new ArrayList<>();
@@ -70,7 +70,9 @@ public class HistoryServiceTest {
         }
         trade.setAfterBalance(trade.getBeforeBalance().add(changeAmount));
         trade.setTransTime(Date.from(instant));
-        list.add(trade);
+        synchronized (list) {
+            list.add(trade);
+        }
 
         accountQuery.setCarryingAmount(accountQuery.getCarryingAmount().add(changeAmount));
         accountQuery.setNetValue(accountQuery.getNetValue().add(changeAmount));
@@ -105,7 +107,9 @@ public class HistoryServiceTest {
         }
         tradeUSD.setAfterBalance(tradeUSD.getBeforeBalance().add(changeAmount));
         tradeUSD.setTransTime(Date.from(instant));
-        list.add(tradeUSD);
+        synchronized (list) {
+            list.add(tradeUSD);
+        }
 
         accountUSD.setCarryingAmount(accountUSD.getCarryingAmount().add(changeAmount));
         accountUSD.setNetValue(accountUSD.getNetValue().add(changeAmount));

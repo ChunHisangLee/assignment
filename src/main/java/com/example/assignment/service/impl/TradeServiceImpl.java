@@ -60,7 +60,10 @@ public class TradeServiceImpl implements ITradeService {
         }
         trade.setAfterBalance(trade.getBeforeBalance().add(changeAmount));
         trade.setTransTime(Date.from(instant));
-        list.add(trade);
+        synchronized (list) {
+            list.add(trade);
+        }
+
 
         accountQuery.setCarryingAmount(accountQuery.getCarryingAmount().add(changeAmount));
         accountQuery.setNetValue(accountQuery.getNetValue().add(changeAmount));
@@ -95,7 +98,9 @@ public class TradeServiceImpl implements ITradeService {
         }
         tradeUSD.setAfterBalance(tradeUSD.getBeforeBalance().add(changeAmount));
         tradeUSD.setTransTime(Date.from(instant));
-        list.add(tradeUSD);
+        synchronized (list) {
+            list.add(tradeUSD);
+        }
 
         accountUSD.setCarryingAmount(accountUSD.getCarryingAmount().add(changeAmount));
         accountUSD.setNetValue(accountUSD.getNetValue().add(changeAmount));

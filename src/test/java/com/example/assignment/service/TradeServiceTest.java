@@ -66,7 +66,9 @@ public class TradeServiceTest {
         }
         trade.setAfterBalance(trade.getBeforeBalance().add(changeAmount));
         trade.setTransTime(Date.from(instant));
-        list.add(trade);
+        synchronized (list) {
+            list.add(trade);
+        }
 
         Trade tradeUSD = new Trade();
         Coin coinUSD = coinMapper.findByName("USD");
@@ -95,7 +97,9 @@ public class TradeServiceTest {
         }
         tradeUSD.setAfterBalance(tradeUSD.getBeforeBalance().add(changeAmount));
         tradeUSD.setTransTime(Date.from(instant));
-        list.add(tradeUSD);
+        synchronized (list) {
+            list.add(tradeUSD);
+        }
         System.out.println(list);
     }
 }
