@@ -28,7 +28,7 @@ public interface AccountMapper {
      * @param coinId coin ID
      * @return Account
      */
-    Account findByKey(Integer userId, Integer coinId);
+    Account findByKey(String userId, Integer coinId);
     /**
      * Update the Trading balance
      *

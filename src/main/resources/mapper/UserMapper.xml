@@ -10,10 +10,10 @@
         #{updateTime}
         )
     </insert>
-    <select id="findByUserName" resultType="com.example.assignment.entity.User">
-        SELECT * FROM user WHERE userName = #{userName}
+    <select id="getUser" resultType="com.example.assignment.entity.User">
+        SELECT * FROM user WHERE userName = #{userName} OR userId = #{userId}
     </select>
-    <delete id="deleteByUserName">
-        DELETE FROM user WHERE userName = #{userName}
+    <delete id="deleteUser">
+        DELETE FROM user WHERE userId = #{userId}
     </delete>
 </mapper>

@@ -10,7 +10,7 @@ import java.math.RoundingMode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class Account extends BaseEntity {
-    private Integer userId;
+    private String userId;
     private Integer coinId;
     private String accountStatus;
     @Getter
@@ -21,6 +21,14 @@ public class Account extends BaseEntity {
     private BigDecimal freezeAmount;
     @Getter
     private BigDecimal netValue;
+    @Getter
+    private BigDecimal baseAmount;
+    @Getter
+    private BigDecimal minAmount;
+    @Getter
+    private BigDecimal maxAmount;
+    @Getter
+    private BigDecimal dayMaxAmount;
 
 
     public void setCarryingAmount(BigDecimal carryingAmount) {
@@ -37,6 +45,22 @@ public class Account extends BaseEntity {
 
     public void setNetValue(BigDecimal netValue) {
         this.netValue = netValue.setScale(5, RoundingMode.DOWN);
+    }
+
+    public void setBaseAmount(BigDecimal baseAmount) {
+        this.baseAmount = baseAmount.setScale(5, RoundingMode.DOWN);
+    }
+
+    public void setMinAmount(BigDecimal minAmount) {
+        this.minAmount = minAmount.setScale(5, RoundingMode.DOWN);
+    }
+
+    public void setMaxAmount(BigDecimal maxAmount) {
+        this.maxAmount = maxAmount.setScale(5, RoundingMode.DOWN);
+    }
+
+    public void setDayMaxAmount(BigDecimal dayMaxAmount) {
+        this.dayMaxAmount = dayMaxAmount.setScale(5, RoundingMode.DOWN);
     }
 }
 

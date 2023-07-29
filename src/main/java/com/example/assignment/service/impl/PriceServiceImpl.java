@@ -3,21 +3,22 @@ package com.example.assignment.service.impl;
 import com.example.assignment.service.IPriceService;
 import org.springframework.stereotype.Service;
 
-@Service
-// TODO: @Scheduled  & task
-public class PriceServiceImpl implements IPriceService {
-    final int initNum = 100;
-    final int maxNum = 460;
+import java.time.Instant;
+import java.util.concurrent.atomic.AtomicInteger;
 
+@Service
+public class PriceServiceImpl implements IPriceService {
+    private final AtomicInteger price = new AtomicInteger(100);
     @Override
-    public Integer getPrice(Long times) {
-        int num = (int) (times % 72);
-        int res;
+    public int getPrice() {
+        Instant instant = Instant.now();
+        int num = (int) ((instant.getEpochSecond() / 5) % 72);
         if (num <= 36) {
-            res = initNum + num * 10;
+            price.addAndGet(10);
+
         } else {
-            res = maxNum - (num - 36) * 10;
+            price.addAndGet(-10);
         }
-        return res;
+        return price.get();
     }
 }

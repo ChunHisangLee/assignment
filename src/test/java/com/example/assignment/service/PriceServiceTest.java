@@ -13,13 +13,6 @@ public class PriceServiceTest {
 
     @Test
     public void getPrice() {
-        int num = (int) (338102605 % 72);
-        int res;
-        if (num <= 36) {
-            res = initNum + num * 10;
-        } else {
-            res = maxNum - (num - 36) * 10;
-        }
-        System.out.println(res);
+        int num=
     }
 }

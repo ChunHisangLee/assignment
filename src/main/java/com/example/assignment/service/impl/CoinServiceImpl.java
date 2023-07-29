@@ -4,7 +4,6 @@ import com.example.assignment.entity.Coin;
 import com.example.assignment.mapper.CoinMapper;
 import com.example.assignment.service.ICoinService;
 import com.example.assignment.service.ex.InsertException;
-import com.example.assignment.service.ex.UserNameDuplicatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,14 +14,23 @@ public class CoinServiceImpl implements ICoinService {
 
     @Override
     public void createCoin(Coin coin) {
-        String name = coin.getName();
-        Coin coinQuery = coinMapper.findByName(name);
-        if (coinQuery != null) {
-            throw new UserNameDuplicatedException("The coin data has exist!");
-        }
         Integer rows = coinMapper.insert(coin);
         if (rows != 1) {
             throw new InsertException("Unknown exception!");
         }
+    }
+
+    @Override
+    public Coin getCoin(Coin coin) {
+        return coinMapper.getCoin(coin);
+    }
+
+    @Override
+    public Coin getCoin(String coinName) {
+        return coinMapper.getCoin(coinName);
+    }
+    @Override
+    public Coin getCoin(Integer coinId) {
+        return coinMapper.getCoin(coinId);
     }
 }

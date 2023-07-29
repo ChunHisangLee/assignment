@@ -9,7 +9,7 @@ import java.io.Serializable;
 @Data
 public class User extends BaseEntity implements Serializable {
 
-    private Integer userId;
+    private String userId;
     private String name;
     private String userName;
     private String email;

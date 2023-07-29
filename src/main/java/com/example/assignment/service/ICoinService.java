@@ -8,4 +8,7 @@ public interface ICoinService {
      * @param coin  coin Class
      */
     void createCoin(Coin coin);
+    Coin getCoin(Coin coin);
+    Coin getCoin(String coinName);
+    Coin getCoin(Integer coinId);
 }

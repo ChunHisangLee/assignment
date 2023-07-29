@@ -41,14 +41,16 @@ public class UserServiceTest {
 
     @Test
     public void deleteUser() {
-        try {
-            User user = new User();
-            user.setUserName("JackIsGood3");
-            userService.deleteUser(user);
-            System.out.println("OK!!");
-        } catch (ServiceException e) {
-            System.out.println(e.getClass().getSimpleName());
-            System.out.println(e.getMessage());
-        }
+        User user = new User();
+        user.setUserName("JackIsGood3");
+        userService.deleteUser(user);
+        System.out.println("OK!!");
+    }
+    @Test
+    public void getUser() {
+        User user = new User();
+        user.setUserName("JackIsGood3");
+        userService.deleteUser(user);
+        System.out.println("OK!!");
     }
 }

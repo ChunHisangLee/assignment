@@ -18,18 +18,9 @@ public class CoinServiceTest {
 
     @Test
     public void createCoin() {
-        try {
-            Coin coin = new Coin();
-            coin.setName("BTC");
-            coin.setBaseAmount(BigDecimal.valueOf(0.01));
-            coin.setMinAmount(BigDecimal.valueOf(0.01));
-            coin.setMaxAmount(BigDecimal.valueOf(1e3));
-            coin.setDayMaxAmount(BigDecimal.valueOf(1e6));
-            coinService.createCoin(coin);
-            System.out.println("OK!!");
-        } catch (ServiceException e) {
-            System.out.println(e.getClass().getSimpleName());
-            System.out.println(e.getMessage());
-        }
+        Coin coin = new Coin();
+        coin.setCoinName("USD");
+        coinService.createCoin(coin);
+        System.out.println("OK!!");
     }
 }

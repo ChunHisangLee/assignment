@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,18 +32,9 @@ public class TradeServiceImpl implements ITradeService {
     @Override
     public List<Trade> createTrade(Double quantity, String direction, String userName, String coinName) {
         List<Trade> list = new ArrayList<>();
-        User userQuery = userMapper.findByUserName(userName);
-        if (userQuery == null) {
-            throw new UserNotFoundException("The user data doesn't exist!");
-        }
-        Coin coinQuery = coinMapper.findByName(coinName);
-        if (coinQuery == null) {
-            throw new UserNotFoundException("The coin data doesn't exist!");
-        }
-        Account accountQuery = accountMapper.findByKey(userQuery.getUserId(), coinQuery.getCoinId());
-        if (accountQuery == null) {
-            throw new UserNotFoundException("The user doesn't have a(n) " + coinName + " account!");
-        }
+
+
+
         Trade trade = new Trade();
         Instant instant = Instant.now();
         long seconds = instant.getEpochSecond() / 5;
@@ -68,8 +60,7 @@ public class TradeServiceImpl implements ITradeService {
 
         accountQuery.setCarryingAmount(accountQuery.getCarryingAmount().add(changeAmount));
         accountQuery.setNetValue(accountQuery.getNetValue().add(changeAmount));
-        accountQuery.setUpdateUser(userQuery.getUserName());
-        accountQuery.setUpdateTime(Date.from(instant));
+        accountQuery.setUpdateTime(LocalDateTime.from(instant));
         accountMapper.updateTradingBalance(accountQuery);
 
         Trade tradeUSD = new Trade();

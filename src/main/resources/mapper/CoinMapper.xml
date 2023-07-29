@@ -9,7 +9,7 @@
         #{name}, #{baseAmount}, #{minAmount}, #{maxAmount}, #{dayMaxAmount}
         )
     </insert>
-    <select id="findByName" resultType="com.example.assignment.entity.Coin">
-        SELECT * FROM coin WHERE name = #{name}
+    <select id="getCoin" resultType="com.example.assignment.entity.Coin">
+        SELECT * FROM coin WHERE coinName = #{coinName} OR coinId = #{coinId}
     </select>
 </mapper>

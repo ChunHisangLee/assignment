@@ -3,11 +3,9 @@ package com.example.assignment.entity;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 @Data
 public class BaseEntity implements Serializable {
-    private String createUser;
-    private Date createTime;
-    private String updateUser;
-    private Date updateTime;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 }

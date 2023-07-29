@@ -1,13 +1,11 @@
 package com.example.assignment.service;
 
+import com.example.assignment.entity.Account;
+import com.example.assignment.entity.Coin;
 import com.example.assignment.entity.User;
 
 public interface IAccountService {
-    /**
-     * Create a user account
-     *
-     * @param user  user Class
-     * @param coinName  coin name
-     */
-    void createAccount(User user, String coinName);
+    void createAccount(User user, Coin coin);
+
+    Account getAccount(String userId, int coinId);
 }
