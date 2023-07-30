@@ -8,17 +8,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class PriceServiceImpl implements IPriceService {
-    private final AtomicInteger price = new AtomicInteger(100);
+    int price;
+
     @Override
     public int getPrice() {
-        Instant instant = Instant.now();
-        int num = (int) ((instant.getEpochSecond() / 5) % 72);
-        if (num <= 36) {
-            price.addAndGet(10);
-
-        } else {
-            price.addAndGet(-10);
-        }
-        return price.get();
+        return price;
     }
+
+    @Override
+    public void setPrice(int num) {
+        this.price = num;
+    }
+
 }

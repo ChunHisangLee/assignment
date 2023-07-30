@@ -15,5 +15,4 @@ public class User extends BaseEntity implements Serializable {
     private String email;
     private String password;
     private String salt;
-    private Integer isDeleted;
 }

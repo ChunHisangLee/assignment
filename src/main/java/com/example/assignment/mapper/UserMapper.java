@@ -7,6 +7,7 @@ public interface UserMapper {
     Integer insert(User user);
 
     User getUser(User user);
+
     User getUser(String userId);
 
     Integer deleteUser(User user);

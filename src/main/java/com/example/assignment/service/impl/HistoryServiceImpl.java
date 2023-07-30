@@ -1,13 +1,13 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.Trade;
+import com.example.assignment.entity.History;
 import com.example.assignment.mapper.HistoryMapper;
 import com.example.assignment.service.IHistoryService;
-import com.example.assignment.service.ex.InsertException;
+import com.example.assignment.service.exception.InsertException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.UUID;
 
 @Service
 public class HistoryServiceImpl implements IHistoryService {
@@ -15,12 +15,12 @@ public class HistoryServiceImpl implements IHistoryService {
     private HistoryMapper historyMapper;
 
     @Override
-    public void createHistory(List<Trade> list) {
-        for (Trade trade : list) {
-            Integer rows = historyMapper.insert(trade);
-            if (rows != 1) {
-                throw new InsertException("Unknown exception!");
-            }
+    public void createHistory(History history) {
+        String historyId = UUID.randomUUID().toString().toUpperCase();
+        history.setHistoryId(historyId);
+        Integer rows = historyMapper.insert(history);
+        if (rows != 1) {
+            throw new InsertException("Unknown exception!");
         }
     }
 }

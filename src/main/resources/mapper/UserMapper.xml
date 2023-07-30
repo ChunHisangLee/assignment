@@ -3,11 +3,10 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.assignment.mapper.UserMapper">
-    <insert id="insert" useGeneratedKeys="true" keyProperty="userId">
-        INSERT INTO user (name, userName, email, password, salt, createUser, createTime, updateUser, updateTime
+    <insert id="insert">
+        INSERT INTO user (userId, name, userName, email, password, salt, createTime, updateTime
         ) VALUES (
-        #{name} , #{userName}, #{email}, #{password}, #{salt}, #{createUser}, #{createTime}, #{updateUser},
-        #{updateTime}
+        #{userId} , #{name} , #{userName}, #{email}, #{password}, #{salt}, #{createTime}, #{updateTime}
         )
     </insert>
     <select id="getUser" resultType="com.example.assignment.entity.User">

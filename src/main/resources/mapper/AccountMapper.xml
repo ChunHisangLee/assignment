@@ -4,9 +4,9 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.assignment.mapper.AccountMapper">
     <insert id="insert">
-        INSERT INTO account (userId, coinId, accountStatus, createUser, createTime, updateUser, updateTime
+        INSERT INTO account (userId, coinId, accountStatus, createTime, updateTime
         ) VALUES (
-        #{userId}, #{coinId}, #{accountStatus}, #{createUser}, #{createTime}, #{updateUser}, #{updateTime}
+        #{userId}, #{coinId}, #{accountStatus}, #{createTime}, #{updateTime}
         )
     </insert>
     <update id="setUSDNetValue">
@@ -22,7 +22,6 @@
         UPDATE account SET
         carryingAmount = #{carryingAmount},
         netValue = #{netValue},
-        updateUser = #{updateUser},
         updateTime = #{updateTime}
         WHERE userId = #{userId} AND coinId = #{coinId}
     </update>

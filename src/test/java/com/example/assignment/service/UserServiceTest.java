@@ -1,56 +1,47 @@
 package com.example.assignment.service;
 
 import com.example.assignment.entity.User;
-import com.example.assignment.mapper.UserMapper;
-import com.example.assignment.service.ex.ServiceException;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.UUID;
+
 @SpringBootTest
 @RunWith(SpringRunner.class)
 public class UserServiceTest {
     @Autowired
     private IUserService userService;
-    @Autowired
-    private IAccountService accountService;
 
     @Test
     public void register() {
-        try {
-            User user = new User();
-            user.setName("Jack");
-            user.setUserName("JackIsGood6");
-            user.setEmail("jackisgood6@gmail.com");
-            user.setPassword("Aa123456");
-            userService.register(user);
-            System.out.println("OK!!");
-
-            userService.register(user);
-            accountService.createAccount(user, "USD");
-            accountService.createAccount(user, "BTC");
-            System.out.println("OK!!");
-
-        } catch (ServiceException e) {
-            System.out.println(e.getClass().getSimpleName());
-            System.out.println(e.getMessage());
-        }
+        User userI = new User();
+        userI.setUserId("***************");
+        userI.setUserName("Jack02");
+        userI.setPassword("Aa123456");
+        userService.register(userI);
+        System.out.println("OK!!");
     }
 
     @Test
     public void deleteUser() {
-        User user = new User();
-        user.setUserName("JackIsGood3");
-        userService.deleteUser(user);
+        User userD = new User();
+        userD.setUserId("***************");
+        userService.deleteUser(userD);
         System.out.println("OK!!");
     }
+
     @Test
     public void getUser() {
-        User user = new User();
-        user.setUserName("JackIsGood3");
-        userService.deleteUser(user);
-        System.out.println("OK!!");
+        User userG = new User();
+        userG.setUserName("Jack01");
+        userService.getUser(userG);
+        System.out.println(userG);
+        User user2 = new User();
+        userG.setUserId("************");
+        userService.getUser(user2);
+        System.out.println(user2);
     }
 }

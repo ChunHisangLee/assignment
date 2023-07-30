@@ -5,13 +5,13 @@ import com.example.assignment.entity.Coin;
 import com.example.assignment.entity.User;
 import com.example.assignment.mapper.AccountMapper;
 import com.example.assignment.service.IAccountService;
-import com.example.assignment.service.ex.InsertException;
+import com.example.assignment.service.exception.InsertException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Service
 public class AccountServiceImpl implements IAccountService {
@@ -24,12 +24,12 @@ public class AccountServiceImpl implements IAccountService {
         account.setUserId(user.getUserId());
         account.setCoinId(coin.getCoinId());
         if ("USD".equals(coin.getCoinName())) {
-            account.setNetValue(BigDecimal.valueOf(100));
+            account.setNetValue(BigDecimal.valueOf(1000));
         }
         account.setAccountStatus("Normal");
         Instant instant = Instant.now();
-        account.setCreateTime(LocalDateTime.from(instant));
-        account.setUpdateTime(LocalDateTime.from(instant));
+        account.setCreateTime(Date.from(instant));
+        account.setUpdateTime(Date.from(instant));
         Integer rows = accountMapper.insert(account);
         if (rows != 1) {
             throw new InsertException("Unknown exception!");

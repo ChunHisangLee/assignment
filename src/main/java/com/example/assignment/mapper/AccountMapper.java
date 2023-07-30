@@ -4,37 +4,11 @@ import com.example.assignment.entity.Account;
 
 
 public interface AccountMapper {
-    /**
-     * Insert account data
-     *
-     * @param account account data
-     * @return the row to be inserted
-     */
     Integer insert(Account account);
-
-    /**
-     * Set the initial net value of USD
-     *
-     * @param account  setting time
-     * @return the row to be updated
-     */
 
     Integer setUSDNetValue(Account account);
 
-    /**
-     * Query the account data
-     *
-     * @param userId user ID
-     * @param coinId coin ID
-     * @return Account
-     */
     Account findByKey(String userId, Integer coinId);
-    /**
-     * Update the Trading balance
-     *
-     * @param account  setting time
-     * @return the row to be updated
-     */
 
     Integer updateTradingBalance(Account account);
 }

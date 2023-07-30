@@ -1,14 +1,8 @@
 package com.example.assignment.mapper;
 
-import com.example.assignment.entity.Trade;
 
+import com.example.assignment.entity.History;
 
 public interface HistoryMapper {
-    /**
-     * Insert trading data
-     *
-     * @param trade trading data
-     * @return the row to be inserted
-     */
-    Integer insert(Trade trade);
+    Integer insert(History history);
 }

@@ -10,6 +10,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -20,7 +21,8 @@ public class AccountMapperTest {
     @Test
     public void insert() {
         Account account = new Account();
-        account.setUserId(4);
+        String userId = UUID.randomUUID().toString().toUpperCase();
+        account.setUserId(userId);
         account.setCoinId(1);
         account.setAccountStatus("Normal");
         Integer rows = accountMapper.insert(account);
@@ -31,7 +33,7 @@ public class AccountMapperTest {
     public void setUSDNetValue() {
         Instant instant = Instant.now();
         Account account = new Account();
-        account.setUserId(4);
+        account.setUserId("******");
         account.setCoinId(1);
         account.setNetValue(BigDecimal.valueOf(1000));
         account.setUpdateTime(Date.from(instant));

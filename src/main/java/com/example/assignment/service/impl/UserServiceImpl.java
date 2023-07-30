@@ -3,13 +3,13 @@ package com.example.assignment.service.impl;
 import com.example.assignment.entity.User;
 import com.example.assignment.mapper.UserMapper;
 import com.example.assignment.service.IUserService;
-import com.example.assignment.service.ex.InsertException;
+import com.example.assignment.service.exception.InsertException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -19,14 +19,16 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public void register(User user) {
+        String userId = UUID.randomUUID().toString().toUpperCase();
+        user.setUserId(userId);
         String oldPassword = user.getPassword();
         String salt = UUID.randomUUID().toString().toUpperCase();
         user.setSalt(salt);
         String md5Password = getMD5Password(oldPassword, salt);
         user.setPassword(md5Password);
         Instant instant = Instant.now();
-        user.setCreateTime(LocalDateTime.from(instant));
-        user.setUpdateTime(LocalDateTime.from(instant));
+        user.setCreateTime(Date.from(instant));
+        user.setUpdateTime(Date.from(instant));
         Integer rows = userMapper.insert(user);
         if (rows != 1) {
             throw new InsertException("Unknown exception!");

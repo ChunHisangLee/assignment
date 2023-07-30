@@ -6,14 +6,12 @@ import com.example.assignment.entity.User;
 import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.ICoinService;
 import com.example.assignment.service.IUserService;
-import com.example.assignment.service.ex.InsertException;
-import com.example.assignment.service.ex.ServiceException;
-import com.example.assignment.service.ex.UserNameDuplicatedException;
-import com.example.assignment.service.ex.UserNotFoundException;
+import com.example.assignment.service.exception.InsertException;
+import com.example.assignment.service.exception.ServiceException;
+import com.example.assignment.service.exception.UserNameDuplicatedException;
+import com.example.assignment.service.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("users")
@@ -26,7 +24,7 @@ public class UserController {
     private ICoinService coinService;
 
     @PostMapping("/register")
-    public Integer register(User user) {
+    public Integer register(@RequestBody User user) {
         User userQuery = userService.getUser(user);
         if (userQuery != null) {
             throw new UserNameDuplicatedException("The userName has been registered!");
@@ -56,7 +54,7 @@ public class UserController {
     }
 
     @PostMapping("/delete")
-    public Integer deleteUser(User user) {
+    public Integer deleteUser(@RequestBody User user) {
         User userQuery = userService.getUser(user);
         if (userQuery == null) {
             throw new UserNotFoundException("The userName doesn't exist!");

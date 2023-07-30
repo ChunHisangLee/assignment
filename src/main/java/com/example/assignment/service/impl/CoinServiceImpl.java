@@ -3,7 +3,7 @@ package com.example.assignment.service.impl;
 import com.example.assignment.entity.Coin;
 import com.example.assignment.mapper.CoinMapper;
 import com.example.assignment.service.ICoinService;
-import com.example.assignment.service.ex.InsertException;
+import com.example.assignment.service.exception.InsertException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,14 +21,10 @@ public class CoinServiceImpl implements ICoinService {
     }
 
     @Override
-    public Coin getCoin(Coin coin) {
-        return coinMapper.getCoin(coin);
-    }
-
-    @Override
     public Coin getCoin(String coinName) {
         return coinMapper.getCoin(coinName);
     }
+
     @Override
     public Coin getCoin(Integer coinId) {
         return coinMapper.getCoin(coinId);

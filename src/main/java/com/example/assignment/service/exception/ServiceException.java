@@ -1,4 +1,4 @@
-package com.example.assignment.service.ex;
+package com.example.assignment.service.exception;
 
 public class ServiceException extends RuntimeException {
     public ServiceException() {

@@ -16,23 +16,32 @@ public class UserMapperTest {
     @Test
     public void insert() {
         User user = new User();
+        user.setUserId("******");
         user.setName("Jack");
-        user.setUserName("JackIsGood2");
-        user.setEmail("jackisgood2@gmail.com");
+        user.setUserName("Jack01");
+        user.setEmail("jack01@gmail.com");
         user.setPassword("Aa123456");
+        user.setSalt("**********");
         Integer rows = userMapper.insert(user);
         System.out.println(rows);
     }
 
     @Test
-    public void findByUserName() {
-        User user = userMapper.findByUserName("JackIsGood2");
+    public void getUser() {
+        User userQuery = new User();
+        userQuery.setUserName("Jack01");
+        User user = userMapper.getUser(userQuery);
         System.out.println(user);
+        userQuery.setUserId("******");
+        User user2 = userMapper.getUser(userQuery.getUserId());
+        System.out.println(user2);
     }
 
     @Test
-    public void deleteByUserName() {
-        Integer rows = userMapper.deleteByUserName("JackIsGood4");
+    public void deleteUser() {
+        User user = new User();
+        user.setUserId("******");
+        Integer rows = userMapper.deleteUser(user);
         System.out.println(rows);
     }
 }
