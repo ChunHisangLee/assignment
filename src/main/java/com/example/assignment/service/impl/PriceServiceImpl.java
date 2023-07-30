@@ -3,9 +3,6 @@ package com.example.assignment.service.impl;
 import com.example.assignment.service.IPriceService;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.concurrent.atomic.AtomicInteger;
-
 @Service
 public class PriceServiceImpl implements IPriceService {
     int price;
