@@ -1,6 +1,8 @@
 package com.example.assignment.mapper;
 
 import com.example.assignment.entity.Account;
+import com.example.assignment.entity.Coin;
+import com.example.assignment.entity.User;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @SpringBootTest
@@ -39,5 +42,24 @@ public class AccountMapperTest {
         account.setUpdateTime(Date.from(instant));
         Integer rows = accountMapper.setUSDNetValue(account);
         System.out.println(rows);
+    }
+
+    @Test
+    public void findByKey() {
+        User user = new User();
+        user.setUserId("***************");
+        Coin coin = new Coin();
+        coin.setCoinId(1);
+        System.out.println(accountMapper.findByKey(user.getUserId(), coin.getCoinId()));
+    }
+
+    @Test
+    public void findByUserId() {
+        User user = new User();
+        user.setUserId("***************");
+        List<Account> accountList = accountMapper.findByUserId(user.getUserId());
+        for (Account account : accountList) {
+            System.out.println(account);
+        }
     }
 }

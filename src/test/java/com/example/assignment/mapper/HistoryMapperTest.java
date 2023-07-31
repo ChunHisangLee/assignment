@@ -2,6 +2,7 @@ package com.example.assignment.mapper;
 
 import com.example.assignment.entity.History;
 import com.example.assignment.entity.TradeDirection;
+import com.example.assignment.entity.User;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -19,7 +21,7 @@ public class HistoryMapperTest {
     private HistoryMapper historyMapper;
 
     @Test
-    public void createHistory() {
+    public void insert() {
         History history = new History();
         history.setHistoryId("*****************");
         history.setUserId("****");
@@ -35,5 +37,15 @@ public class HistoryMapperTest {
         history.setTransTime(Date.from(instant));
         Integer rows = historyMapper.insert(history);
         System.out.println(rows);
+    }
+
+    @Test
+    public void findByUserId() {
+        User user = new User();
+        user.setUserId("****************");
+        List<History> historyListList = historyMapper.findByUserId(user.getUserId());
+        for (History history : historyListList) {
+            System.out.println(history);
+        }
     }
 }

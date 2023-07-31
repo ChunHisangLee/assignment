@@ -12,6 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -22,7 +23,7 @@ public class HistoryServiceTest {
     @Test
     public void createHistory() {
         History history = new History();
-        history.setHistoryId("ABCD-EFGH-IJKLMNOPQRSTUVWXYZ-QWERTYU");
+        history.setHistoryId("ABCD-EFGH-IJKLMNOPQRSTUVWXYZ-QWEBTYU");
         history.setUserId("****************");
         history.setCoinId(2);
         history.setTransType(String.valueOf(TradeDirection.BUY));
@@ -37,10 +38,21 @@ public class HistoryServiceTest {
         historyService.createHistory(history);
         System.out.println("OK!!");
     }
+
+    @Test
+    public void getHistories() {
+        User user = new User();
+        user.setUserId("****************");
+        List<History> historyListList = historyService.getHistories(user.getUserId());
+        for (History history : historyListList) {
+            System.out.println(history);
+        }
+    }
+
     @Test
     public void deleteHistory() {
         User user = new User();
-        user.setUserId("***************");
+        user.setUserId("****************");
         historyService.deleteHistory(user.getUserId());
         System.out.println("OK!!");
     }

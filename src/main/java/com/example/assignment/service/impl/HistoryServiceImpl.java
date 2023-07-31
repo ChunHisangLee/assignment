@@ -30,7 +30,6 @@ public class HistoryServiceImpl implements IHistoryService {
         return historyMapper.findByUserId(userId);
     }
 
-
     @Override
     public Integer deleteHistory(String userId) {
         return historyMapper.deleteHistory(userId);

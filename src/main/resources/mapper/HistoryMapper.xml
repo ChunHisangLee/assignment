@@ -11,6 +11,9 @@
         #{afterBalance}, #{beforeBalanceUSD}, #{afterBalanceUSD}, #{transTime}
         )
     </insert>
+    <select id="findByUserId" resultType="com.example.assignment.entity.History">
+        SELECT * FROM history WHERE userId = #{userId}
+    </select>
     <delete id="deleteHistory">
         DELETE FROM history WHERE userId = #{userId}
     </delete>
