@@ -2,9 +2,11 @@ package com.example.assignment.controller;
 
 import com.example.assignment.entity.Account;
 import com.example.assignment.entity.Coin;
+import com.example.assignment.entity.History;
 import com.example.assignment.entity.User;
 import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.ICoinService;
+import com.example.assignment.service.IHistoryService;
 import com.example.assignment.service.IUserService;
 import com.example.assignment.service.exception.InsertException;
 import com.example.assignment.service.exception.ServiceException;
@@ -12,6 +14,8 @@ import com.example.assignment.service.exception.UserNameDuplicatedException;
 import com.example.assignment.service.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("users")
@@ -22,6 +26,8 @@ public class UserController {
     private IAccountService accountService;
     @Autowired
     private ICoinService coinService;
+    @Autowired
+    private IHistoryService historyService;
 
     @PostMapping("/register")
     public Integer register(@RequestBody User user) {
@@ -60,6 +66,22 @@ public class UserController {
             throw new UserNotFoundException("The userName doesn't exist!");
         }
         Integer rows = userService.deleteUser(user);
+        if (rows != 1) {
+            throw new InsertException("Unknown exception!");
+        }
+        List<Account> accountList = accountService.getAccounts(user.getUserId());
+        if (accountList == null) {
+            throw new UserNotFoundException("The user doesn't have any account!");
+        }
+        rows = accountService.deleteAccount(accountList.get(0).getUserId());
+        if (rows != 1) {
+            throw new InsertException("Unknown exception!");
+        }
+        List<History> historyList = historyService.getHistories(user.getUserId());
+        if (historyList == null) {
+            throw new UserNotFoundException("The user doesn't have any trading record!");
+        }
+        rows = historyService.deleteHistory(historyList.get(0).getUserId());
         if (rows != 1) {
             throw new InsertException("Unknown exception!");
         }

@@ -18,8 +18,6 @@ public class Account extends BaseEntity {
     @Getter
     private BigDecimal balanceAmount;
     @Getter
-    private BigDecimal freezeAmount;
-    @Getter
     private BigDecimal netValue;
     @Getter
     private BigDecimal baseAmount;
@@ -37,10 +35,6 @@ public class Account extends BaseEntity {
 
     public void setBalanceAmount(BigDecimal balanceAmount) {
         this.balanceAmount = balanceAmount.setScale(5, RoundingMode.DOWN);
-    }
-
-    public void setFreezeAmount(BigDecimal freezeAmount) {
-        this.freezeAmount = freezeAmount.setScale(5, RoundingMode.DOWN);
     }
 
     public void setNetValue(BigDecimal netValue) {

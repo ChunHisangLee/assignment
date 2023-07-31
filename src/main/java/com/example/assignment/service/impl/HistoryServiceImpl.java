@@ -7,6 +7,7 @@ import com.example.assignment.service.exception.InsertException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -22,5 +23,16 @@ public class HistoryServiceImpl implements IHistoryService {
         if (rows != 1) {
             throw new InsertException("Unknown exception!");
         }
+    }
+
+    @Override
+    public List<History> getHistories(String userId) {
+        return historyMapper.findByUserId(userId);
+    }
+
+
+    @Override
+    public Integer deleteHistory(String userId) {
+        return historyMapper.deleteHistory(userId);
     }
 }

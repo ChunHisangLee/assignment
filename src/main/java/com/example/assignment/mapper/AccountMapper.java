@@ -2,6 +2,8 @@ package com.example.assignment.mapper;
 
 import com.example.assignment.entity.Account;
 
+import java.util.List;
+
 
 public interface AccountMapper {
     Integer insert(Account account);
@@ -10,5 +12,9 @@ public interface AccountMapper {
 
     Account findByKey(String userId, Integer coinId);
 
+    List<Account> findByUserId(String userId);
+
     Integer updateTradingBalance(Account account);
+
+    Integer deleteAccount(String userId);
 }

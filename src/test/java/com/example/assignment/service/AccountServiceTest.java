@@ -24,4 +24,12 @@ public class AccountServiceTest {
         accountService.createAccount(user, coin);
         System.out.println("OK!!");
     }
+
+    @Test
+    public void deleteAccount() {
+        User user = new User();
+        user.setUserId("***************");
+        accountService.deleteAccount(user.getUserId());
+        System.out.println("OK!!");
+    }
 }

@@ -2,6 +2,7 @@ package com.example.assignment.service;
 
 import com.example.assignment.entity.History;
 import com.example.assignment.entity.TradeDirection;
+import com.example.assignment.entity.User;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,13 @@ public class HistoryServiceTest {
         Instant instant = Instant.now();
         history.setTransTime(Date.from(instant));
         historyService.createHistory(history);
+        System.out.println("OK!!");
+    }
+    @Test
+    public void deleteHistory() {
+        User user = new User();
+        user.setUserId("***************");
+        historyService.deleteHistory(user.getUserId());
         System.out.println("OK!!");
     }
 }

@@ -11,4 +11,7 @@
         #{afterBalance}, #{beforeBalanceUSD}, #{afterBalanceUSD}, #{transTime}
         )
     </insert>
+    <delete id="deleteHistory">
+        DELETE FROM history WHERE userId = #{userId}
+    </delete>
 </mapper>

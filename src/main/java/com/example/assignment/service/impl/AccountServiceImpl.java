@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class AccountServiceImpl implements IAccountService {
@@ -39,5 +40,14 @@ public class AccountServiceImpl implements IAccountService {
     @Override
     public Account getAccount(String userId, int coinId) {
         return accountMapper.findByKey(userId, coinId);
+    }
+    @Override
+    public List<Account> getAccounts(String userId) {
+        return accountMapper.findByUserId(userId);
+    }
+
+    @Override
+    public Integer deleteAccount(String userId) {
+        return accountMapper.deleteAccount(userId);
     }
 }
