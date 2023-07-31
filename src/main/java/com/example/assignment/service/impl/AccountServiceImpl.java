@@ -6,6 +6,7 @@ import com.example.assignment.entity.User;
 import com.example.assignment.mapper.AccountMapper;
 import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.exception.InsertException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class AccountServiceImpl implements IAccountService {
     private AccountMapper accountMapper;
 
     @Override
-    public void createAccount(User user, Coin coin) {
+    public void createAccount(@NotNull User user, @NotNull Coin coin) {
         Account account = new Account();
         account.setUserId(user.getUserId());
         account.setCoinId(coin.getCoinId());

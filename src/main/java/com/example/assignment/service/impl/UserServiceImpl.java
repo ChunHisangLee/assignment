@@ -4,6 +4,7 @@ import com.example.assignment.entity.User;
 import com.example.assignment.mapper.UserMapper;
 import com.example.assignment.service.IUserService;
 import com.example.assignment.service.exception.InsertException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -18,7 +19,7 @@ public class UserServiceImpl implements IUserService {
     private UserMapper userMapper;
 
     @Override
-    public void register(User user) {
+    public void register(@NotNull User user) {
         String userId = UUID.randomUUID().toString().toUpperCase();
         user.setUserId(userId);
         String oldPassword = user.getPassword();

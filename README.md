@@ -21,6 +21,7 @@ The following guides illustrate how to use some features concretely:
 * [DataBase: MySQL 8.0](https://dev.mysql.com/downloads/installer/)
    * username: root
    * password: Aa123456 
+   * url: jdbc:mysql://localhost:3306/assignment
 
 ### Development Environment
 * JDK 17.0.8

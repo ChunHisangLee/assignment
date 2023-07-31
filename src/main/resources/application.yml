@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     username: root
-    password: Chaojibai940!!
+    password: Aa123456
     url: jdbc:mysql://localhost:3306/assignment
 
 logging:

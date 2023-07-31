@@ -4,6 +4,7 @@ import com.example.assignment.entity.History;
 import com.example.assignment.mapper.HistoryMapper;
 import com.example.assignment.service.IHistoryService;
 import com.example.assignment.service.exception.InsertException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ public class HistoryServiceImpl implements IHistoryService {
     private HistoryMapper historyMapper;
 
     @Override
-    public void createHistory(History history) {
+    public void createHistory(@NotNull History history) {
         String historyId = UUID.randomUUID().toString().toUpperCase();
         history.setHistoryId(historyId);
         Integer rows = historyMapper.insert(history);
