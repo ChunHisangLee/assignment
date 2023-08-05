@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -38,10 +39,28 @@ public class AccountServiceImpl implements IAccountService {
         }
     }
 
+    /**
+     * Obtains the Account with a specific userId and coinId
+     * <p>
+     * It will return null if the Account doesn't exist
+     *
+     * @param userId the ID of a User
+     * @param coinId the ID of a Coin
+     * @return an Account or null
+     */
     @Override
     public Account getAccount(String userId, int coinId) {
         return accountMapper.findByKey(userId, coinId);
     }
+
+    /**
+     * Obtains the Account(s) with a specific userId
+     * <p>
+     * It will return null if the Account doesn't exist
+     *
+     * @param userId the ID of a User
+     * @return Account(s) or null
+     */
     @Override
     public List<Account> getAccounts(String userId) {
         return accountMapper.findByUserId(userId);

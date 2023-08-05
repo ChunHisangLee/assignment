@@ -51,7 +51,6 @@ public class UserServiceImpl implements IUserService {
         return userMapper.getUser(userId);
     }
 
-    // md5加密
     private String getMD5Password(String password, String salt) {
         for (int i = 0; i < 3; i++) {
             password = DigestUtils.md5DigestAsHex((salt + password + salt).getBytes()).toUpperCase();
