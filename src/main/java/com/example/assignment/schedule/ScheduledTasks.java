@@ -3,11 +3,8 @@ package com.example.assignment.schedule;
 import com.example.assignment.service.IPriceService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.time.Instant;
 
 @Component
 @Slf4j
@@ -15,19 +12,28 @@ import java.time.Instant;
 public class ScheduledTasks {
     final int initNum = 100;
     final int maxNum = 460;
-    @Autowired
-    private IPriceService priceService;
+    boolean isIncreased = true;
+    int price = initNum - 10;
+
+    private final IPriceService priceService;
+
+    public ScheduledTasks(IPriceService priceService) {
+        this.priceService = priceService;
+    }
 
     @Scheduled(fixedRate = 1000 * 5)
     public void setCurrentPrice() {
-        Instant instant = Instant.now();
-        int index = (int) ((instant.getEpochSecond() / 5) % 72);
-        int res;
-        if (index <= 36) {
-            res = initNum + index * 10;
+        if (isIncreased) {
+            price += 10;
         } else {
-            res = maxNum - (index - 36) * 10;
+            price -= 10;
         }
-        priceService.setPrice(res);
+        if (price == maxNum && isIncreased) {
+            isIncreased = false;
+        } else if (price == initNum && !isIncreased) {
+            isIncreased = true;
+        }
+        System.out.println(price);
+        priceService.setPrice(price);
     }
 }
