@@ -1,8 +1,1 @@
-com.example.assignment
-com.example.assignment.controller
-com.example.assignment.entity
-com.example.assignment.mapper
-com.example.assignment.schedule
-com.example.assignment.service
-com.example.assignment.service.exception
 com.example.assignment.service.impl
