@@ -4,6 +4,7 @@ import com.example.assignment.entity.*;
 import com.example.assignment.service.*;
 import com.example.assignment.service.exception.ServiceException;
 import com.example.assignment.service.exception.UserNotFoundException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,7 +30,7 @@ public class TradeController {
     private IHistoryService historyService;
 
     @PostMapping("/save")
-    public Integer createTrade(@RequestBody History history) {
+    public Integer createTrade(@RequestBody @NotNull History history) {
         User userQuery = userService.getUser(history.getUserId());
         if (userQuery == null) {
             throw new UserNotFoundException("The user data doesn't exist!");

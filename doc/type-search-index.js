@@ -1,1 +1,0 @@
-typeSearchIndex = [{"p":"com.example.assignment.service.impl","l":"AccountServiceImpl"},{"l":"All Classes and Interfaces","u":"allclasses-index.html"}];updateSearchResults();
