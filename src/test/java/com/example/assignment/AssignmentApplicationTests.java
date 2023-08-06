@@ -13,10 +13,6 @@ class AssignmentApplicationTests {
     private DataSource dataSource;
 
     @Test
-    void contextLoads() {
-    }
-
-    @Test
     void getConnection() throws SQLException {
         System.out.println(dataSource.getConnection());
     }
