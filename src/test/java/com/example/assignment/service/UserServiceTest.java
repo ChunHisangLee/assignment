@@ -26,7 +26,7 @@ public class UserServiceTest {
     @Test
     public void deleteUser() {
         User userD = new User();
-        userD.setUserId("***************");
+        userD.setUserId("3114A2E2-F1C1-4B4F-A921-FC9CC526638B");
         userService.deleteUser(userD);
         System.out.println("OK!!");
     }
