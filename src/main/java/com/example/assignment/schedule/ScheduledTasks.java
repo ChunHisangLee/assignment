@@ -1,19 +1,20 @@
 package com.example.assignment.schedule;
 
 import com.example.assignment.service.IPriceService;
-import lombok.Data;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-@Data
 public class ScheduledTasks {
-    final int initNum = 100;
-    final int maxNum = 460;
-    boolean isIncreased = true;
-    int price = initNum - 10;
+    private static final int INIT_NUM = 100;
+    private static final int MAX_NUM = 460;
+    @Getter
+    private boolean isIncreased = true;
+    @Getter
+    private int price = INIT_NUM - 10;
 
     private final IPriceService priceService;
 
@@ -28,12 +29,12 @@ public class ScheduledTasks {
         } else {
             price -= 10;
         }
-        if (price == maxNum && isIncreased) {
+        if (price == MAX_NUM && isIncreased) {
             isIncreased = false;
-        } else if (price == initNum && !isIncreased) {
+        } else if (price == INIT_NUM && !isIncreased) {
             isIncreased = true;
         }
-        System.out.println(price);
+        log.info("Current price: {}", price);
         priceService.setPrice(price);
     }
 }
