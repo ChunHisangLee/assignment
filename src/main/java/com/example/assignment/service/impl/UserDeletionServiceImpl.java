@@ -6,6 +6,7 @@ import com.example.assignment.entity.User;
 import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.IHistoryService;
 import com.example.assignment.service.IUserService;
+import com.example.assignment.service.UserDeletionService;
 import com.example.assignment.service.exception.InsertException;
 import com.example.assignment.service.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

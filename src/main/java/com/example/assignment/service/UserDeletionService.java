@@ -1,4 +1,4 @@
-package com.example.assignment.service.impl;
+package com.example.assignment.service;
 
 import com.example.assignment.entity.User;
 

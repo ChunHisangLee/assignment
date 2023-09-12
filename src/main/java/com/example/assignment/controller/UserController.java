@@ -2,8 +2,7 @@ package com.example.assignment.controller;
 
 import com.example.assignment.entity.User;
 import com.example.assignment.service.UserRegistrationService;
-import com.example.assignment.service.impl.UserDeletionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.assignment.service.UserDeletionService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
