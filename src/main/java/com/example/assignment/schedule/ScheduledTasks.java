@@ -12,6 +12,8 @@ public class ScheduledTasks {
     private static final int INIT_NUM = 100;
     private static final int MAX_NUM = 460;
     @Getter
+    private static ScheduledTasks instance;
+    @Getter
     private boolean isIncreased = true;
     @Getter
     private int price = INIT_NUM - 10;
@@ -20,6 +22,7 @@ public class ScheduledTasks {
 
     public ScheduledTasks(IPriceService priceService) {
         this.priceService = priceService;
+        instance = this;
     }
 
     @Scheduled(fixedRate = 1000 * 5)
