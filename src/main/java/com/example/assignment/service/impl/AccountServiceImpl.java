@@ -7,7 +7,6 @@ import com.example.assignment.mapper.AccountMapper;
 import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.exception.InsertException;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,8 +16,11 @@ import java.util.List;
 
 @Service
 public class AccountServiceImpl implements IAccountService {
-    @Autowired
-    private AccountMapper accountMapper;
+    private final AccountMapper accountMapper;
+
+    public AccountServiceImpl(AccountMapper accountMapper) {
+        this.accountMapper = accountMapper;
+    }
 
     @Override
     public void createAccount(@NotNull User user, @NotNull Coin coin) {

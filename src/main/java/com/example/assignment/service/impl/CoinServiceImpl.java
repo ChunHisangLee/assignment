@@ -4,19 +4,21 @@ import com.example.assignment.entity.Coin;
 import com.example.assignment.mapper.CoinMapper;
 import com.example.assignment.service.ICoinService;
 import com.example.assignment.service.exception.InsertException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CoinServiceImpl implements ICoinService {
-    @Autowired
-    private CoinMapper coinMapper;
+    private final CoinMapper coinMapper;
+
+    public CoinServiceImpl(CoinMapper coinMapper) {
+        this.coinMapper = coinMapper;
+    }
 
     @Override
     public void createCoin(Coin coin) {
         Integer rows = coinMapper.insert(coin);
         if (rows != 1) {
-            throw new InsertException("Unknown exception!");
+            throw new InsertException("Error inserting coin data!");
         }
     }
 

@@ -16,5 +16,4 @@ public class PriceServiceImpl implements IPriceService {
     public void setPrice(int num) {
         this.price = num;
     }
-
 }
