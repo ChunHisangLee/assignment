@@ -19,6 +19,7 @@ import java.util.Date;
 @RestController
 @RequestMapping("trade")
 public class TradeController {
+
     private final IUserService userService;
     private final IAccountService accountService;
     private final ICoinService coinService;
@@ -79,16 +80,18 @@ public class TradeController {
     }
 
     private BigDecimal getChangeAmount(History history, BigDecimal quantity) {
-        return history.getTransType().equals(String.valueOf(TradeDirection.BUY))
+        return history.getTransType().equals(TradeDirection.BUY.name())
                 ? quantity
-                : quantity.multiply(BigDecimal.valueOf(-1));
+                : quantity.negate();
     }
 
     private BigDecimal getChangeAmountUSD(History history, BigDecimal quantity) {
         int price = priceService.getPrice();
-        return history.getTransType().equals(String.valueOf(TradeDirection.BUY))
-                ? quantity.multiply(BigDecimal.valueOf(-1 * price))
-                : quantity.multiply(BigDecimal.valueOf(price));
+        BigDecimal priceBD = BigDecimal.valueOf(price);
+
+        return history.getTransType().equals(TradeDirection.BUY.name())
+                ? quantity.multiply(priceBD.negate())
+                : quantity.multiply(priceBD);
     }
 
     @PostMapping("/save")

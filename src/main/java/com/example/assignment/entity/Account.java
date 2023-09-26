@@ -29,33 +29,36 @@ public class Account extends BaseEntity implements Serializable {
     @Getter
     private BigDecimal dayMaxAmount;
 
+    private BigDecimal scaleAmount(BigDecimal amount) {
+        return amount.setScale(5, RoundingMode.DOWN);
+    }
 
     public void setCarryingAmount(BigDecimal carryingAmount) {
-        this.carryingAmount = carryingAmount.setScale(5, RoundingMode.DOWN);
+        this.carryingAmount = scaleAmount(carryingAmount);
     }
 
     public void setBalanceAmount(BigDecimal balanceAmount) {
-        this.balanceAmount = balanceAmount.setScale(5, RoundingMode.DOWN);
+        this.balanceAmount = scaleAmount(balanceAmount);
     }
 
     public void setNetValue(BigDecimal netValue) {
-        this.netValue = netValue.setScale(5, RoundingMode.DOWN);
+        this.netValue = scaleAmount(netValue);
     }
 
     public void setBaseAmount(BigDecimal baseAmount) {
-        this.baseAmount = baseAmount.setScale(5, RoundingMode.DOWN);
+        this.baseAmount = scaleAmount(baseAmount);
     }
 
     public void setMinAmount(BigDecimal minAmount) {
-        this.minAmount = minAmount.setScale(5, RoundingMode.DOWN);
+        this.minAmount = scaleAmount(minAmount);
     }
 
     public void setMaxAmount(BigDecimal maxAmount) {
-        this.maxAmount = maxAmount.setScale(5, RoundingMode.DOWN);
+        this.maxAmount = scaleAmount(maxAmount);
     }
 
     public void setDayMaxAmount(BigDecimal dayMaxAmount) {
-        this.dayMaxAmount = dayMaxAmount.setScale(5, RoundingMode.DOWN);
+        this.dayMaxAmount = scaleAmount(dayMaxAmount);
     }
 }
 
