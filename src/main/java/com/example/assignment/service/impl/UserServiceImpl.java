@@ -2,34 +2,29 @@ package com.example.assignment.service.impl;
 
 import com.example.assignment.entity.User;
 import com.example.assignment.mapper.UserMapper;
+import com.example.assignment.service.IPasswordService;
 import com.example.assignment.service.IUserService;
 import com.example.assignment.service.exception.InsertException;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
-
-import java.time.Instant;
-import java.util.Date;
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements IUserService {
-    @Autowired
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
+    private final IPasswordService passwordService;
+
+    public UserServiceImpl(UserMapper userMapper, IPasswordService passwordService) {
+        this.userMapper = userMapper;
+        this.passwordService = passwordService;
+    }
+
 
     @Override
-    public void register(@NotNull User user) {
-        String userId = UUID.randomUUID().toString().toUpperCase();
-        user.setUserId(userId);
-        String oldPassword = user.getPassword();
-        String salt = UUID.randomUUID().toString().toUpperCase();
-        user.setSalt(salt);
-        String md5Password = getMD5Password(oldPassword, salt);
-        user.setPassword(md5Password);
-        Instant instant = Instant.now();
-        user.setCreateTime(Date.from(instant));
-        user.setUpdateTime(Date.from(instant));
+    public void register(User user) {
+        user.setUserId(passwordService.generateUUID());
+        user.setSalt(passwordService.generateUUID());
+        user.setPassword(passwordService.hashPassword(user.getPassword(), user.getSalt()));
+        user.setCreateTime(passwordService.getCurrentTime());
+        user.setUpdateTime(passwordService.getCurrentTime());
         Integer rows = userMapper.insert(user);
         if (rows != 1) {
             throw new InsertException("Unknown exception!");
@@ -49,13 +44,5 @@ public class UserServiceImpl implements IUserService {
     @Override
     public User getUser(String userId) {
         return userMapper.getUser(userId);
-    }
-
-    // md5加密
-    private String getMD5Password(String password, String salt) {
-        for (int i = 0; i < 3; i++) {
-            password = DigestUtils.md5DigestAsHex((salt + password + salt).getBytes()).toUpperCase();
-        }
-        return password;
     }
 }

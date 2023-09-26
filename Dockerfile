@@ -1,4 +1,5 @@
 FROM ubuntu:latest
-LABEL authors="mds"
+
+LABEL maintainer="jack"
 
 ENTRYPOINT ["top", "-b"]

@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.example.assignment.mapper.CoinMapper">
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="coinId">
-        INSERT INTO coin (coinName ) VALUES ( #{coinName}
-        )
+        INSERT INTO coin
+        (coinName)
+        VALUES
+        (#{coinName})
     </insert>
+
     <select id="getCoin" resultType="com.example.assignment.entity.Coin">
-        SELECT coinId, coinName FROM coin WHERE coinName = #{coinName} OR coinId = #{coinId}
+        SELECT
+        coinId, coinName
+        FROM coin
+        WHERE
+        coinName = #{coinName} OR coinId = #{coinId}
     </select>
+
 </mapper>

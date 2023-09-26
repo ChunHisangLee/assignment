@@ -1,20 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.example.assignment.mapper.HistoryMapper">
-    <insert id="insert">
-        INSERT INTO history (historyId, userId, coinId, transType, transPrice, transQuantity, beforeBalance,
+
+     <insert id="insert">
+        INSERT INTO history
+        (
+        historyId, userId, coinId, transType, transPrice, transQuantity, beforeBalance,
         afterBalance, beforeBalanceUSD, afterBalanceUSD, transTime
-        ) VALUES (
-        #{historyId}, #{userId}, #{coinId}, #{transType}, #{transPrice}, #{transQuantity}, #{beforeBalance},
-        #{afterBalance}, #{beforeBalanceUSD}, #{afterBalanceUSD}, #{transTime}
+        )
+        VALUES
+        (
+        #{historyId}, #{userId}, #{coinId}, #{transType}, #{transPrice}, #{transQuantity},
+        #{beforeBalance}, #{afterBalance}, #{beforeBalanceUSD}, #{afterBalanceUSD}, #{transTime}
         )
     </insert>
+
     <select id="findByUserId" resultType="com.example.assignment.entity.History">
-        SELECT * FROM history WHERE userId = #{userId}
+        SELECT *
+        FROM history
+        WHERE userId = #{userId}
     </select>
+
     <delete id="deleteHistory">
-        DELETE FROM history WHERE userId = #{userId}
+        DELETE FROM history
+        WHERE userId = #{userId}
     </delete>
+
 </mapper>

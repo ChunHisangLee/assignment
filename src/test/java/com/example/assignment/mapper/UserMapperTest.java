@@ -2,46 +2,65 @@ package com.example.assignment.mapper;
 
 import com.example.assignment.entity.User;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class UserMapperTest {
+
     @Autowired
     private UserMapper userMapper;
+
+    private static final String TEST_USER_ID = "******";
+    private static final String TEST_USER_NAME = "Jack01";
 
     @Test
     public void insert() {
         User user = new User();
-        user.setUserId("******");
+        user.setUserId(TEST_USER_ID);
         user.setName("Jack");
-        user.setUserName("Jack01");
+        user.setUserName(TEST_USER_NAME);
         user.setEmail("jack01@gmail.com");
         user.setPassword("Aa123456");
         user.setSalt("**********");
+
         Integer rows = userMapper.insert(user);
-        System.out.println(rows);
+
+        assertNotNull(rows);
+        assertTrue(rows > 0);
     }
 
     @Test
     public void getUser() {
         User userQuery = new User();
-        userQuery.setUserName("Jack01");
+        userQuery.setUserName(TEST_USER_NAME);
+
         User user = userMapper.getUser(userQuery);
-        System.out.println(user);
-        userQuery.setUserId("******");
+
+        assertNotNull(user);
+        assertEquals(TEST_USER_NAME, user.getUserName());
+
+        userQuery.setUserId(TEST_USER_ID);
+
         User user2 = userMapper.getUser(userQuery.getUserId());
-        System.out.println(user2);
+
+        assertNotNull(user2);
+        assertEquals(TEST_USER_ID, user2.getUserId());
     }
 
     @Test
     public void deleteUser() {
         User user = new User();
-        user.setUserId("******");
+        user.setUserId(TEST_USER_ID);
+
         Integer rows = userMapper.deleteUser(user);
-        System.out.println(rows);
+
+        assertNotNull(rows);
+        assertTrue(rows > 0);
     }
 }

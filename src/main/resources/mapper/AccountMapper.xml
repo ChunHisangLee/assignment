@@ -1,34 +1,52 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.example.assignment.mapper.AccountMapper">
+
     <insert id="insert">
-        INSERT INTO account (userId, coinId, accountStatus, createTime, updateTime
-        ) VALUES (
-        #{userId}, #{coinId}, #{accountStatus}, #{createTime}, #{updateTime}
-        )
+        INSERT INTO account
+        (userId, coinId, accountStatus, createTime, updateTime)
+        VALUES
+        (#{userId}, #{coinId}, #{accountStatus}, #{createTime}, #{updateTime})
     </insert>
+
     <update id="setUSDNetValue">
-        UPDATE account SET
+        UPDATE account
+        SET
         netValue = #{netValue},
         updateTime = #{updateTime}
-        WHERE userId = #{userId} AND coinId = #{coinId}
+        WHERE
+        userId = #{userId} AND coinId = #{coinId}
     </update>
+
     <select id="findByKey" resultType="com.example.assignment.entity.Account">
-        SELECT * FROM account WHERE userId = #{userId} AND coinId = #{coinId}
+        SELECT *
+        FROM account
+        WHERE
+        userId = #{userId} AND coinId = #{coinId}
     </select>
+
     <select id="findByUserId" resultType="com.example.assignment.entity.Account">
-        SELECT * FROM account WHERE userId = #{userId}
+        SELECT *
+        FROM account
+        WHERE
+        userId = #{userId}
     </select>
+
     <update id="updateTradingBalance">
-        UPDATE account SET
+        UPDATE account
+        SET
         carryingAmount = #{carryingAmount},
         netValue = #{netValue},
         updateTime = #{updateTime}
-        WHERE userId = #{userId} AND coinId = #{coinId}
+        WHERE
+        userId = #{userId} AND coinId = #{coinId}
     </update>
+
     <delete id="deleteAccount">
-        DELETE FROM account WHERE userId = #{userId}
+        DELETE FROM account
+        WHERE
+        userId = #{userId}
     </delete>
+
 </mapper>

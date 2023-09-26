@@ -9,45 +9,54 @@ import com.example.assignment.service.IUserService;
 import com.example.assignment.service.UserRegistrationService;
 import com.example.assignment.service.exception.ServiceException;
 import com.example.assignment.service.exception.UserNameDuplicatedException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserRegistrationServiceImpl implements UserRegistrationService {
-    @Autowired
-    private IUserService userService;
 
-    @Autowired
-    private IAccountService accountService;
+    private final IUserService userService;
+    private final IAccountService accountService;
+    private final ICoinService coinService;
 
-    @Autowired
-    private ICoinService coinService;
+    public UserRegistrationServiceImpl(IUserService userService, IAccountService accountService, ICoinService coinService) {
+        this.userService = userService;
+        this.accountService = accountService;
+        this.coinService = coinService;
+    }
+
     @Override
     public void registerUser(User user) {
+        validateUserNotRegistered(user);
+        registerNewUser(user);
+        setupInitialAccounts(user);
+    }
+
+    private void validateUserNotRegistered(User user) {
         User userQuery = userService.getUser(user);
         if (userQuery != null) {
             throw new UserNameDuplicatedException("The userName has been registered!");
         }
-        Coin coinUSD = coinService.getCoin("USD");
-        if (coinUSD == null) {
-            throw new ServiceException("The coin data doesn't exist!");
-        }
-        Coin coinBTC = coinService.getCoin("BTC");
-        if (coinBTC == null) {
-            throw new ServiceException("The coin data doesn't exist!");
-        }
+    }
+
+    private void registerNewUser(User user) {
         userService.register(user);
+    }
 
-        Account accountUSD = accountService.getAccount(user.getUserId(), coinUSD.getCoinId());
-        if (accountUSD != null) {
-            throw new UserNameDuplicatedException("The user already has a(n) " + coinUSD.getCoinName() + " account!");
-        }
-        accountService.createAccount(user, coinUSD);
+    private void setupInitialAccounts(User user) {
+        createAccountForCoin(user, "USD");
+        createAccountForCoin(user, "BTC");
+    }
 
-        Account accountBTC = accountService.getAccount(user.getUserId(), coinBTC.getCoinId());
-        if (accountBTC != null) {
-            throw new UserNameDuplicatedException("The user already has a(n) " + coinBTC.getCoinName() + " account!");
+    private void createAccountForCoin(User user, String coinName) {
+        Coin coin = coinService.getCoin(coinName);
+        if (coin == null) {
+            throw new ServiceException("The coin data doesn't exist!");
         }
-        accountService.createAccount(user, coinBTC);
+
+        Account existingAccount = accountService.getAccount(user.getUserId(), coin.getCoinId());
+        if (existingAccount != null) {
+            throw new UserNameDuplicatedException("The user already has a(n) " + coin.getCoinName() + " account!");
+        }
+        accountService.createAccount(user, coin);
     }
 }
