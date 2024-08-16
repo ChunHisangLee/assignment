@@ -1,6 +1,6 @@
 package com.example.assignment.controller;
 
-import com.example.assignment.entity.User;
+import com.example.assignment.entity.Users;
 import com.example.assignment.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +18,14 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User createdUser = userService.createUser(user);
-        return ResponseEntity.ok(createdUser);
+    public ResponseEntity<Users> createUser(@RequestBody Users users) {
+        Users createdUsers = userService.createUser(users);
+        return ResponseEntity.ok(createdUsers);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        Optional<User> updatedUser = userService.updateUser(id, user);
+    public ResponseEntity<Users> updateUser(@PathVariable Long id, @RequestBody Users users) {
+        Optional<Users> updatedUser = userService.updateUser(id, users);
         return updatedUser.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -40,8 +40,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
+    public ResponseEntity<Users> getUserById(@PathVariable Long id) {
+        Optional<Users> user = userService.getUserById(id);
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

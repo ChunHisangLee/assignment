@@ -2,7 +2,7 @@ package com.example.assignment.service.impl;
 
 import com.example.assignment.entity.Transaction;
 import com.example.assignment.entity.TransactionType;
-import com.example.assignment.entity.User;
+import com.example.assignment.entity.Users;
 import com.example.assignment.repository.TransactionRepository;
 import com.example.assignment.repository.UserRepository;
 import com.example.assignment.service.PriceService;
@@ -27,39 +27,39 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction createTransaction(Long userId, double btcAmount, TransactionType transactionType) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Users users = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Users not found"));
         double currentPrice = priceService.getPrice();
         double totalValue = currentPrice * btcAmount;
 
         if (transactionType == TransactionType.BUY) {
-            if (user.getWallet().getUsdBalance() < totalValue) {
+            if (users.getWallet().getUsdBalance() < totalValue) {
                 throw new IllegalArgumentException("Insufficient USD balance");
             }
 
-            user.getWallet().setUsdBalance(user.getWallet().getUsdBalance() - totalValue);
-            user.getWallet().setBtcBalance(user.getWallet().getBtcBalance() + btcAmount);
+            users.getWallet().setUsdBalance(users.getWallet().getUsdBalance() - totalValue);
+            users.getWallet().setBtcBalance(users.getWallet().getBtcBalance() + btcAmount);
         } else if (transactionType == TransactionType.SELL) {
-            if (user.getWallet().getBtcBalance() < btcAmount) {
+            if (users.getWallet().getBtcBalance() < btcAmount) {
                 throw new IllegalArgumentException("Insufficient BTC balance");
             }
 
-            user.getWallet().setBtcBalance(user.getWallet().getBtcBalance() - btcAmount);
-            user.getWallet().setUsdBalance(user.getWallet().getUsdBalance() + totalValue);
+            users.getWallet().setBtcBalance(users.getWallet().getBtcBalance() - btcAmount);
+            users.getWallet().setUsdBalance(users.getWallet().getUsdBalance() + totalValue);
         }
 
         Transaction transaction = new Transaction();
-        transaction.setUser(user);
+        transaction.setUsers(users);
         transaction.setBtcAmount(btcAmount);
         transaction.setPriceAtTransaction(currentPrice);
         transaction.setTransactionTime(LocalDateTime.now());
         transaction.setTransactionType(transactionType);
-        userRepository.save(user);
+        userRepository.save(users);
         return transactionRepository.save(transaction);
     }
 
     @Override
     public List<Transaction> getUserTransactionHistory(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return transactionRepository.findByUser(user);
+        Users users = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("Users not found"));
+        return transactionRepository.findByUsers(users);
     }
 }

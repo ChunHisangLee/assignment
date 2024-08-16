@@ -19,7 +19,7 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Users users;
 
     private double btcAmount;
 

@@ -1,12 +1,12 @@
 package com.example.assignment.service;
 
-import com.example.assignment.entity.User;
+import com.example.assignment.entity.Users;
 
 import java.util.Optional;
 
 public interface UserService {
-    User createUser(User user);
-    Optional<User> updateUser(Long id, User user);
+    Users createUser(Users users);
+    Optional<Users> updateUser(Long id, Users users);
     boolean deleteUser(Long id);
-    Optional<User> getUserById(Long id);
+    Optional<Users> getUserById(Long id);
 }
