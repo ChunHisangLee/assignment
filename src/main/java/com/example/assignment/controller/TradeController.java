@@ -19,13 +19,13 @@ import java.util.Date;
 @RequestMapping("trade")
 public class TradeController {
 
-    private final IUserService userService;
+    private final UserService userService;
     private final IAccountService accountService;
     private final ICoinService coinService;
     private final PriceService priceService;
     private final IHistoryService historyService;
 
-    public TradeController(IUserService userService, IAccountService accountService, ICoinService coinService, PriceService priceService, IHistoryService historyService) {
+    public TradeController(UserService userService, IAccountService accountService, ICoinService coinService, PriceService priceService, IHistoryService historyService) {
         this.userService = userService;
         this.accountService = accountService;
         this.coinService = coinService;

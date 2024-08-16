@@ -1,33 +1,47 @@
 package com.example.assignment.controller;
 
 import com.example.assignment.entity.User;
-import com.example.assignment.service.UserRegistrationService;
-import com.example.assignment.service.UserDeletionService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.assignment.service.UserService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
-@RequestMapping("users")
+@RequestMapping("/api/users")
 public class UserController {
-    private final UserRegistrationService userRegistrationService;
-    private final UserDeletionService userDeletionService;
 
-    public UserController(UserRegistrationService userRegistrationService, UserDeletionService userDeletionService) {
-        this.userRegistrationService = userRegistrationService;
-        this.userDeletionService = userDeletionService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public Integer register(@RequestBody User user) {
-        userRegistrationService.registerUser(user);
-        return 1;
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+        User createdUser = userService.createUser(user);
+        return ResponseEntity.ok(createdUser);
     }
 
-    @PostMapping("/delete")
-    public Integer deleteUser(@RequestBody User user) {
-        userDeletionService.deleteUser(user);
-        return 1;
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+        Optional<User> updatedUser = userService.updateUser(id, user);
+        return updatedUser.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        boolean deleted = userService.deleteUser(id);
+        if (deleted) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        Optional<User> user = userService.getUserById(id);
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

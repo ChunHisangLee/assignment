@@ -2,9 +2,7 @@ package com.example.assignment.service.impl;
 
 import com.example.assignment.entity.Transaction;
 import com.example.assignment.entity.User;
-import com.example.assignment.service.IAccountService;
-import com.example.assignment.service.IHistoryService;
-import com.example.assignment.service.IUserService;
+import com.example.assignment.service.UserService;
 import com.example.assignment.service.exception.InsertException;
 import com.example.assignment.service.exception.UserNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +23,7 @@ public class UserDeletionServiceImplTest {
     private UserDeletionServiceImpl userDeletionService;
 
     @Mock
-    private IUserService userService;
+    private UserService userService;
 
     @Mock
     private IAccountService accountService;

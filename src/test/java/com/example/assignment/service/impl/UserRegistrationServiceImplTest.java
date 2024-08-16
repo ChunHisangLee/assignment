@@ -2,9 +2,7 @@ package com.example.assignment.service.impl;
 
 import com.example.assignment.entity.Wallet;
 import com.example.assignment.entity.User;
-import com.example.assignment.service.IAccountService;
-import com.example.assignment.service.ICoinService;
-import com.example.assignment.service.IUserService;
+import com.example.assignment.service.UserService;
 import com.example.assignment.service.exception.ServiceException;
 import com.example.assignment.service.exception.UserNameDuplicatedException;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +21,7 @@ public class UserRegistrationServiceImplTest {
     private UserRegistrationServiceImpl userRegistrationService;
 
     @Mock
-    private IUserService userService;
+    private UserService userService;
 
     @Mock
     private IAccountService accountService;
