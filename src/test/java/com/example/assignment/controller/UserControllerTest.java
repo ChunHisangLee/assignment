@@ -44,12 +44,12 @@ public class UserControllerTest {
         sampleUser.setId(1L);
         sampleUser.setName("Jack Lee");
         sampleUser.setEmail("jacklee@example.com");
-        sampleUser.setPassword("password");
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+        sampleUser.setPassword(passwordEncoder.encode("password"));
     }
 
     @Test
     void testCreateUser() throws Exception {
-        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
         when(userService.createUser(any(Users.class))).thenReturn(sampleUser);
 
         ResultActions resultActions = mockMvc.perform(post("/api/users")
@@ -66,7 +66,6 @@ public class UserControllerTest {
 
     @Test
     void testUpdateUser() throws Exception {
-        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
         when(userService.updateUser(anyLong(), any(Users.class))).thenReturn(Optional.of(sampleUser));
 
         ResultActions resultActions = mockMvc.perform(put("/api/users/1")

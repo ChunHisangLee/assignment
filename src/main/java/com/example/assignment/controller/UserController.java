@@ -13,23 +13,19 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
     public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping
     public ResponseEntity<Users> createUser(@RequestBody Users users) {
-        users.setPassword(passwordEncoder.encode(users.getPassword()));
         Users createdUsers = userService.createUser(users);
         return ResponseEntity.ok(removePassword(createdUsers));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Users> updateUser(@PathVariable Long id, @RequestBody Users users) {
-        users.setPassword(passwordEncoder.encode(users.getPassword()));
         Optional<Users> updatedUser = userService.updateUser(id, users);
         return updatedUser.map(user -> ResponseEntity.ok(removePassword(user)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
