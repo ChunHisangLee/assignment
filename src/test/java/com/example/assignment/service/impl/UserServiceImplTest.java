@@ -4,6 +4,7 @@ import com.example.assignment.entity.Users;
 import com.example.assignment.entity.Wallet;
 import com.example.assignment.repository.UserRepository;
 import com.example.assignment.repository.WalletRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -33,15 +34,22 @@ class UserServiceImplTest {
 
     private Users sampleUser;
 
+    private AutoCloseable mocks;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        mocks = MockitoAnnotations.openMocks(this);
 
         sampleUser = new Users();
         sampleUser.setId(1L);
-        sampleUser.setName("John Doe");
-        sampleUser.setEmail("johndoe@example.com");
+        sampleUser.setName("Jack Lee");
+        sampleUser.setEmail("jacklee@example.com");
         sampleUser.setPassword("plainPassword");
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        mocks.close();  // Ensure mocks are closed after each test
     }
 
     @Test

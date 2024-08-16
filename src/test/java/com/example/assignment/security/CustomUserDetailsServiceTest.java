@@ -28,14 +28,14 @@ class CustomUserDetailsServiceTest {
     @Test
     void testLoadUserByUsername_UserExists() {
         Users user = new Users();
-        user.setEmail("test@example.com");
+        user.setEmail("jacklee@example.com");
         user.setPassword("password");
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         org.springframework.security.core.userdetails.UserDetails userDetails =
-                customUserDetailsService.loadUserByUsername("test@example.com");
+                customUserDetailsService.loadUserByUsername("jacklee@example.com");
 
-        assertEquals("test@example.com", userDetails.getUsername());
+        assertEquals("jacklee@example.com", userDetails.getUsername());
         assertEquals("password", userDetails.getPassword());
     }
 
