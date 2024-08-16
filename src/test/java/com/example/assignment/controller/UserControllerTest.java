@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
-@WithMockUser // Adds a mock user to bypass authentication for testing
+@WithMockUser
 public class UserControllerTest {
 
     @Autowired
@@ -55,13 +55,13 @@ public class UserControllerTest {
         ResultActions resultActions = mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"password\"}")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())); // Include CSRF token
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         resultActions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Jack Lee"))
                 .andExpect(jsonPath("$.email").value("jacklee@example.com"))
-                .andExpect(jsonPath("$.password").doesNotExist()); // Password should be null in the response
+                .andExpect(jsonPath("$.password").doesNotExist());
     }
 
     @Test
@@ -72,13 +72,13 @@ public class UserControllerTest {
         ResultActions resultActions = mockMvc.perform(put("/api/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"Jack Lee Updated\", \"email\": \"jacklee@example.com\", \"password\": \"newpassword\"}")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())); // Include CSRF token
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         resultActions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Jack Lee"))
                 .andExpect(jsonPath("$.email").value("jacklee@example.com"))
-                .andExpect(jsonPath("$.password").doesNotExist()); // Password should be null in the response
+                .andExpect(jsonPath("$.password").doesNotExist());
     }
 
     @Test
@@ -86,7 +86,7 @@ public class UserControllerTest {
         when(userService.deleteUser(anyLong())).thenReturn(true);
 
         ResultActions resultActions = mockMvc.perform(delete("/api/users/1")
-                .with(SecurityMockMvcRequestPostProcessors.csrf())); // Include CSRF token
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         resultActions.andExpect(status().isOk());
     }
@@ -102,6 +102,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Jack Lee"))
                 .andExpect(jsonPath("$.email").value("jacklee@example.com"))
-                .andExpect(jsonPath("$.password").doesNotExist()); // Password should be null in the response
+                .andExpect(jsonPath("$.password").doesNotExist());
     }
 }

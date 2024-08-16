@@ -17,17 +17,21 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users users;
 
+    @Column(nullable = false)
     private double btcAmount;
 
+    @Column(nullable = false)
     private double priceAtTransaction;
 
+    @Column(nullable = false)
     private LocalDateTime transactionTime;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TransactionType transactionType;
 }
 
