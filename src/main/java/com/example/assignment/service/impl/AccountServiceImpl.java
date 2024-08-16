@@ -1,7 +1,6 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.Account;
-import com.example.assignment.entity.Coin;
+import com.example.assignment.entity.Wallet;
 import com.example.assignment.entity.User;
 import com.example.assignment.mapper.AccountMapper;
 import com.example.assignment.service.IAccountService;
@@ -23,7 +22,7 @@ public class AccountServiceImpl implements IAccountService {
     }
 
     @Override
-    public void createAccount(@NotNull User user, @NotNull Coin coin) {
+    public void createAccount(@NotNull User user, @NotNull Wallet coin) {
         Account account = new Account();
         account.setUserId(user.getUserId());
         account.setCoinId(coin.getCoinId());

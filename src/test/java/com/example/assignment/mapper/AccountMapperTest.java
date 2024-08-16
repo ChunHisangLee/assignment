@@ -1,6 +1,5 @@
 package com.example.assignment.mapper;
 
-import com.example.assignment.entity.Account;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

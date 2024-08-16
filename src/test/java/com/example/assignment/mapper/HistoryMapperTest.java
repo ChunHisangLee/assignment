@@ -1,8 +1,7 @@
 package com.example.assignment.mapper;
 
-import com.example.assignment.entity.History;
+import com.example.assignment.entity.Transaction;
 import com.example.assignment.entity.TradeDirection;
-import com.example.assignment.entity.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,7 @@ public class HistoryMapperTest {
 
     @Test
     public void insert() {
-        History history = new History();
+        Transaction history = new Transaction();
         history.setHistoryId(TEST_USER_ID);
         history.setUserId("****");
         history.setCoinId(TEST_COIN_ID);
@@ -50,7 +49,7 @@ public class HistoryMapperTest {
 
     @Test
     public void findByUserId() {
-        List<History> historyList = historyMapper.findByUserId(TEST_USER_ID);
+        List<Transaction> historyList = historyMapper.findByUserId(TEST_USER_ID);
 
         assertNotNull(historyList);
         assertFalse(historyList.isEmpty());

@@ -1,7 +1,6 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.Account;
-import com.example.assignment.entity.Coin;
+import com.example.assignment.entity.Wallet;
 import com.example.assignment.entity.User;
 import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.ICoinService;
@@ -48,7 +47,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
     }
 
     private void createAccountForCoin(User user, String coinName) {
-        Coin coin = coinService.getCoin(coinName);
+        Wallet coin = coinService.getCoin(coinName);
         if (coin == null) {
             throw new ServiceException("The coin data doesn't exist!");
         }

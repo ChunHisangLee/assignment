@@ -1,7 +1,6 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.Account;
-import com.example.assignment.entity.History;
+import com.example.assignment.entity.Transaction;
 import com.example.assignment.entity.User;
 import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.IHistoryService;
@@ -47,7 +46,7 @@ public class UserDeletionServiceImplTest {
         Account account = new Account();
         account.setUserId(user.getUserId());
 
-        History history = new History();
+        Transaction history = new Transaction();
         history.setUserId(user.getUserId());
 
         when(userService.getUser(user)).thenReturn(user);

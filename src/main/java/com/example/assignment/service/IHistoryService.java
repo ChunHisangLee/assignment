@@ -1,13 +1,13 @@
 package com.example.assignment.service;
 
-import com.example.assignment.entity.History;
+import com.example.assignment.entity.Transaction;
 
 import java.util.List;
 
 public interface IHistoryService {
-    void createHistory(History history);
+    void createHistory(Transaction history);
 
-    List<History> getHistories(String userId);
+    List<Transaction> getHistories(String userId);
 
     Integer deleteHistory(String userId);
 }

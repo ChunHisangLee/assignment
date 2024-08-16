@@ -1,11 +1,14 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.service.IPriceService;
+import com.example.assignment.service.PriceService;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
-public class PriceServiceImpl implements IPriceService {
-    int price;
+public class PriceServiceImpl implements PriceService {
+
+    @Value("${initial.price:100}")
+    private int price;
 
     @Override
     public int getPrice() {
@@ -13,7 +16,7 @@ public class PriceServiceImpl implements IPriceService {
     }
 
     @Override
-    public void setPrice(int num) {
-        this.price = num;
+    public void setPrice(int price) {
+        this.price = price;
     }
 }

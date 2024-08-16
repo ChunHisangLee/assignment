@@ -1,6 +1,6 @@
 package com.example.assignment.schedule;
 
-import com.example.assignment.service.IPriceService;
+import com.example.assignment.service.PriceService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -9,32 +9,37 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class ScheduledTasks {
-    private static final int INIT_NUM = 100;
-    private static final int MAX_NUM = 460;
+    private static final int MIN_PRICE = 100;
+    private static final int MAX_PRICE = 460;
+    private static final int PRICE_INCREMENT = 10;
+    private static final int SCHEDULE_RATE_MS = 5 * 1000;
     @Getter
-    private boolean isIncreased = true;
+    private boolean isIncreasing = true;
+
     @Getter
-    private int price = INIT_NUM - 10;
+    private int currentPrice = MIN_PRICE;
 
-    private final IPriceService priceService;
+    private final PriceService priceService;
 
-    public ScheduledTasks(IPriceService priceService) {
+    public ScheduledTasks(PriceService priceService) {
         this.priceService = priceService;
     }
 
-    @Scheduled(fixedRate = 1000 * 5)
-    public void setCurrentPrice() {
-        if (isIncreased) {
-            price += 10;
+    @Scheduled(fixedRate = SCHEDULE_RATE_MS)
+    public void updateCurrentPrice() {
+        if (isIncreasing) {
+            currentPrice += PRICE_INCREMENT;
+            if (currentPrice >= MAX_PRICE) {
+                isIncreasing = false;
+            }
         } else {
-            price -= 10;
+            currentPrice -= PRICE_INCREMENT;
+            if (currentPrice <= MIN_PRICE) {
+                isIncreasing = true;
+            }
         }
-        if (price == MAX_NUM && isIncreased) {
-            isIncreased = false;
-        } else if (price == INIT_NUM && !isIncreased) {
-            isIncreased = true;
-        }
-        log.info("Current price: {}", price);
-        priceService.setPrice(price);
+
+        log.info("Updated BTC Price: {}", currentPrice);
+        priceService.setPrice(currentPrice);
     }
 }

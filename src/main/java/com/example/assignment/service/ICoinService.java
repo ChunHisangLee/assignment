@@ -1,11 +1,11 @@
 package com.example.assignment.service;
 
-import com.example.assignment.entity.Coin;
+import com.example.assignment.entity.Wallet;
 
 public interface ICoinService {
-    void createCoin(Coin coin);
+    void createCoin(Wallet coin);
 
-    Coin getCoin(String coinName);
+    Wallet getCoin(String coinName);
 
-    Coin getCoin(Integer coinId);
+    Wallet getCoin(Integer coinId);
 }

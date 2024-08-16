@@ -1,6 +1,6 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.History;
+import com.example.assignment.entity.Transaction;
 import com.example.assignment.mapper.HistoryMapper;
 import com.example.assignment.service.IHistoryService;
 import com.example.assignment.service.exception.InsertException;
@@ -19,7 +19,7 @@ public class HistoryServiceImpl implements IHistoryService {
     }
 
     @Override
-    public void createHistory(History history) {
+    public void createHistory(Transaction history) {
         String historyId = generateHistoryId();
         history.setHistoryId(historyId);
         Integer rows = historyMapper.insert(history);
@@ -29,7 +29,7 @@ public class HistoryServiceImpl implements IHistoryService {
     }
 
     @Override
-    public List<History> getHistories(String userId) {
+    public List<Transaction> getHistories(String userId) {
         return historyMapper.findByUserId(userId);
     }
 

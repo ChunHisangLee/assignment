@@ -1,6 +1,6 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.Coin;
+import com.example.assignment.entity.Wallet;
 import com.example.assignment.entity.User;
 import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.ICoinService;
@@ -41,11 +41,11 @@ public class UserRegistrationServiceImplTest {
         User user = new User();
         user.setUserId("testUser");
 
-        Coin coinUSD = new Coin();
+        Wallet coinUSD = new Wallet();
         coinUSD.setCoinName("USD");
         coinUSD.setCoinId(1);
 
-        Coin coinBTC = new Coin();
+        Wallet coinBTC = new Wallet();
         coinBTC.setCoinName("BTC");
         coinBTC.setCoinId(2);
 

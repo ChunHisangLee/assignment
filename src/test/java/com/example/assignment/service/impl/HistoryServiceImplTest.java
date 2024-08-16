@@ -1,6 +1,6 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.History;
+import com.example.assignment.entity.Transaction;
 import com.example.assignment.mapper.HistoryMapper;
 import com.example.assignment.service.exception.InsertException;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +31,7 @@ public class HistoryServiceImplTest {
 
     @Test
     public void testCreateHistory() {
-        History history = new History();
+        Transaction history = new Transaction();
         when(historyMapper.insert(history)).thenReturn(1);
 
         historyService.createHistory(history);
@@ -41,7 +41,7 @@ public class HistoryServiceImplTest {
 
     @Test
     public void testCreateHistoryInsertException() {
-        History history = new History();
+        Transaction history = new Transaction();
 
         when(historyMapper.insert(history)).thenReturn(0);
 
@@ -50,12 +50,12 @@ public class HistoryServiceImplTest {
 
     @Test
     public void testGetHistories() {
-        History history = new History();
+        Transaction history = new Transaction();
         history.setUserId("testUser");
 
         when(historyMapper.findByUserId("testUser")).thenReturn(Collections.singletonList(history));
 
-        List<History> histories = historyService.getHistories("testUser");
+        List<Transaction> histories = historyService.getHistories("testUser");
 
         assertEquals(1, histories.size());
         assertEquals(history, histories.get(0));

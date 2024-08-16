@@ -1,7 +1,6 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.Account;
-import com.example.assignment.entity.Coin;
+import com.example.assignment.entity.Wallet;
 import com.example.assignment.entity.User;
 import com.example.assignment.mapper.AccountMapper;
 import com.example.assignment.service.exception.InsertException;
@@ -35,7 +34,7 @@ public class AccountServiceImplTest {
     public void testCreateAccountForUsd() {
         User user = new User();
         user.setUserId("testUser");
-        Coin coin = new Coin();
+        Wallet coin = new Wallet();
         coin.setCoinId(1);
         coin.setCoinName("USD");
 
@@ -50,7 +49,7 @@ public class AccountServiceImplTest {
     public void testCreateAccountInsertException() {
         User user = new User();
         user.setUserId("testUser");
-        Coin coin = new Coin();
+        Wallet coin = new Wallet();
         coin.setCoinId(2);
         coin.setCoinName("BTC");
 

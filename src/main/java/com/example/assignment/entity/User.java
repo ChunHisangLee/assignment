@@ -1,18 +1,30 @@
 package com.example.assignment.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
-import java.io.Serializable;
+import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
+@Entity
 @Data
-public class User extends BaseEntity implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
 
-    private String userId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String name;
-    private String userName;
+
+    @Column(unique = true)
     private String email;
-    private String password;
-    private String salt;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Wallet wallet;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Transaction> transactions;
 }

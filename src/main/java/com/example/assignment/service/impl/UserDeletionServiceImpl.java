@@ -1,7 +1,6 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.Account;
-import com.example.assignment.entity.History;
+import com.example.assignment.entity.Transaction;
 import com.example.assignment.entity.User;
 import com.example.assignment.service.IAccountService;
 import com.example.assignment.service.IHistoryService;
@@ -60,7 +59,7 @@ public class UserDeletionServiceImpl implements UserDeletionService {
     }
 
     private void deleteAssociatedHistories(User user) {
-        List<History> historyList = historyService.getHistories(user.getUserId());
+        List<Transaction> historyList = historyService.getHistories(user.getUserId());
         if (historyList == null || historyList.isEmpty()) {
             throw new UserNotFoundException("The user doesn't have any trading record!");
         }

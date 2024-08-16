@@ -1,11 +1,11 @@
 package com.example.assignment.mapper;
 
-import com.example.assignment.entity.Coin;
+import com.example.assignment.entity.Wallet;
 
 
 public interface CoinMapper {
-    Integer insert(Coin coin);
-    Coin getCoin(Coin coin);
-    Coin getCoin(String coinName);
-    Coin getCoin(Integer coinId);
+    Integer insert(Wallet coin);
+    Wallet getCoin(Wallet coin);
+    Wallet getCoin(String coinName);
+    Wallet getCoin(Integer coinId);
 }

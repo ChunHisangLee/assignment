@@ -1,6 +1,6 @@
 package com.example.assignment.mapper;
 
-import com.example.assignment.entity.Coin;
+import com.example.assignment.entity.Wallet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class CoinMapperTest {
 
     @Test
     public void insert() {
-        Coin coin = new Coin();
+        Wallet coin = new Wallet();
         coin.setCoinName(TEST_COIN_NAME);
 
         Integer rows = coinMapper.insert(coin);
@@ -31,7 +31,7 @@ public class CoinMapperTest {
 
     @Test
     public void getCoin() {
-        Coin coin = coinMapper.getCoin(TEST_COIN_NAME);
+        Wallet coin = coinMapper.getCoin(TEST_COIN_NAME);
 
         assertNotNull(coin);
         assertEquals(TEST_COIN_NAME, coin.getCoinName());

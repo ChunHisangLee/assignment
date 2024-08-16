@@ -1,6 +1,6 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.Coin;
+import com.example.assignment.entity.Wallet;
 import com.example.assignment.mapper.CoinMapper;
 import com.example.assignment.service.ICoinService;
 import com.example.assignment.service.exception.InsertException;
@@ -15,7 +15,7 @@ public class CoinServiceImpl implements ICoinService {
     }
 
     @Override
-    public void createCoin(Coin coin) {
+    public void createCoin(Wallet coin) {
         Integer rows = coinMapper.insert(coin);
         if (rows != 1) {
             throw new InsertException("Error inserting coin data!");
@@ -23,12 +23,12 @@ public class CoinServiceImpl implements ICoinService {
     }
 
     @Override
-    public Coin getCoin(String coinName) {
+    public Wallet getCoin(String coinName) {
         return coinMapper.getCoin(coinName);
     }
 
     @Override
-    public Coin getCoin(Integer coinId) {
+    public Wallet getCoin(Integer coinId) {
         return coinMapper.getCoin(coinId);
     }
 }

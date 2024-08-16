@@ -1,6 +1,6 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.Coin;
+import com.example.assignment.entity.Wallet;
 import com.example.assignment.mapper.CoinMapper;
 import com.example.assignment.service.exception.InsertException;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +28,7 @@ public class CoinServiceImplTest {
 
     @Test
     public void testCreateCoin() {
-        Coin coin = new Coin();
+        Wallet coin = new Wallet();
         coin.setCoinName("BTC");
 
         when(coinMapper.insert(coin)).thenReturn(1);
@@ -40,7 +40,7 @@ public class CoinServiceImplTest {
 
     @Test
     public void testCreateCoinInsertException() {
-        Coin coin = new Coin();
+        Wallet coin = new Wallet();
         coin.setCoinName("BTC");
 
         when(coinMapper.insert(coin)).thenReturn(0);
@@ -50,24 +50,24 @@ public class CoinServiceImplTest {
 
     @Test
     public void testGetCoinByName() {
-        Coin expectedCoin = new Coin();
+        Wallet expectedCoin = new Wallet();
         expectedCoin.setCoinName("BTC");
 
         when(coinMapper.getCoin("BTC")).thenReturn(expectedCoin);
 
-        Coin result = coinService.getCoin("BTC");
+        Wallet result = coinService.getCoin("BTC");
 
         assertEquals(expectedCoin, result);
     }
 
     @Test
     public void testGetCoinById() {
-        Coin expectedCoin = new Coin();
+        Wallet expectedCoin = new Wallet();
         expectedCoin.setCoinId(1);
 
         when(coinMapper.getCoin(1)).thenReturn(expectedCoin);
 
-        Coin result = coinService.getCoin(1);
+        Wallet result = coinService.getCoin(1);
 
         assertEquals(expectedCoin, result);
     }

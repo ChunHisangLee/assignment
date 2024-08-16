@@ -1,6 +1,6 @@
 package com.example.assignment.service;
 
-public interface IPriceService {
+public interface PriceService {
     int getPrice();
 
     void setPrice(int price);
