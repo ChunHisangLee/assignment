@@ -10,6 +10,7 @@ import com.example.assignment.service.TransactionService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -28,19 +29,20 @@ public class TransactionServiceImpl implements TransactionService {
     public Transaction createTransaction(Long userId, double btcAmount, TransactionType transactionType) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
         double currentPrice = priceService.getPrice();
-
         double totalValue = currentPrice * btcAmount;
 
         if (transactionType == TransactionType.BUY) {
             if (user.getWallet().getUsdBalance() < totalValue) {
                 throw new IllegalArgumentException("Insufficient USD balance");
             }
+
             user.getWallet().setUsdBalance(user.getWallet().getUsdBalance() - totalValue);
             user.getWallet().setBtcBalance(user.getWallet().getBtcBalance() + btcAmount);
         } else if (transactionType == TransactionType.SELL) {
             if (user.getWallet().getBtcBalance() < btcAmount) {
                 throw new IllegalArgumentException("Insufficient BTC balance");
             }
+
             user.getWallet().setBtcBalance(user.getWallet().getBtcBalance() - btcAmount);
             user.getWallet().setUsdBalance(user.getWallet().getUsdBalance() + totalValue);
         }
@@ -51,8 +53,13 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setPriceAtTransaction(currentPrice);
         transaction.setTransactionTime(LocalDateTime.now());
         transaction.setTransactionType(transactionType);
-
         userRepository.save(user);
         return transactionRepository.save(transaction);
+    }
+
+    @Override
+    public List<Transaction> getUserTransactionHistory(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return transactionRepository.findByUser(user);
     }
 }
