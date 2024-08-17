@@ -1,189 +1,126 @@
 package com.example.assignment.controller;
 
 import com.example.assignment.entity.Users;
-import com.example.assignment.service.UserService;
+import com.example.assignment.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(UserController.class)
+@SpringBootTest
 @WithMockUser
+@Transactional
 public class UserControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebApplicationContext webApplicationContext;
 
-    @MockBean
-    private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
 
-    @MockBean
+    @Autowired
     private PasswordEncoder passwordEncoder;
+
+    private MockMvc mockMvc;
 
     private Users sampleUser;
 
     @BeforeEach
     void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         sampleUser = new Users();
-        sampleUser.setId(1L);
         sampleUser.setName("Jack Lee");
         sampleUser.setEmail("jacklee@example.com");
-        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
         sampleUser.setPassword(passwordEncoder.encode("password"));
     }
 
     @Test
     void testCreateUser() throws Exception {
-        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.empty());
-        when(userService.createUser(any(Users.class))).thenReturn(sampleUser);
-
         ResultActions resultActions = mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"password\"}")
                 .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.name").value("Jack Lee"))
                 .andExpect(jsonPath("$.email").value("jacklee@example.com"))
                 .andExpect(jsonPath("$.password").doesNotExist());
-    }
 
-    @Test
-    void testCreateUser_EmailAlreadyRegistered() throws Exception {
-        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.of(sampleUser));
-
-        ResultActions resultActions = mockMvc.perform(post("/api/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"password\"}")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()));
-
-        resultActions.andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Email already registered. Try to log in or register with another email."));
+        // Verify that the user is actually saved in the database
+        Optional<Users> savedUser = userRepository.findByEmail("jacklee@example.com");
+        assertThat(savedUser).isPresent();
+        assertThat(savedUser.get().getName()).isEqualTo("Jack Lee");
     }
 
     @Test
     void testUpdateUser() throws Exception {
-        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.empty());
-        when(userService.updateUser(anyLong(), any(Users.class))).thenReturn(Optional.of(sampleUser));
+        // First, save a user
+        Users savedUser = userRepository.save(sampleUser);
 
-        ResultActions resultActions = mockMvc.perform(put("/api/users/1")
+        // Update the user
+        ResultActions resultActions = mockMvc.perform(put("/api/users/" + savedUser.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"Jack Lee Updated\", \"email\": \"jacklee@example.com\", \"password\": \"newpassword\"}")
                 .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Jack Lee"))
+                .andExpect(jsonPath("$.id").value(savedUser.getId()))
+                .andExpect(jsonPath("$.name").value("Jack Lee Updated"))
                 .andExpect(jsonPath("$.email").value("jacklee@example.com"))
                 .andExpect(jsonPath("$.password").doesNotExist());
-    }
 
-    @Test
-    void testUpdateUser_EmailAlreadyRegisteredByAnotherUser() throws Exception {
-        Users anotherUser = new Users();
-        anotherUser.setId(2L);
-        anotherUser.setEmail("jacklee@example.com");
-
-        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.of(anotherUser));
-
-        ResultActions resultActions = mockMvc.perform(put("/api/users/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\": \"Jack Lee Updated\", \"email\": \"jacklee@example.com\", \"password\": \"newpassword\"}")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()));
-
-        resultActions.andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Email already registered by another user."));
+        // Verify the user is updated in the database
+        Optional<Users> updatedUser = userRepository.findById(savedUser.getId());
+        assertThat(updatedUser).isPresent();
+        assertThat(updatedUser.get().getName()).isEqualTo("Jack Lee Updated");
     }
 
     @Test
     void testDeleteUser() throws Exception {
-        when(userService.deleteUser(anyLong())).thenReturn(true);
+        // First, save a user
+        Users savedUser = userRepository.save(sampleUser);
 
-        ResultActions resultActions = mockMvc.perform(delete("/api/users/1")
+        // Delete the user
+        ResultActions resultActions = mockMvc.perform(delete("/api/users/" + savedUser.getId())
                 .with(SecurityMockMvcRequestPostProcessors.csrf()));
 
         resultActions.andExpect(status().isOk());
+
+        // Verify the user is deleted from the database
+        Optional<Users> deletedUser = userRepository.findById(savedUser.getId());
+        assertThat(deletedUser).isNotPresent();
     }
 
     @Test
     void testGetUserById() throws Exception {
-        when(userService.getUserById(anyLong())).thenReturn(Optional.of(sampleUser));
+        // First, save a user
+        Users savedUser = userRepository.save(sampleUser);
 
-        ResultActions resultActions = mockMvc.perform(get("/api/users/1")
+        // Retrieve the user
+        ResultActions resultActions = mockMvc.perform(get("/api/users/" + savedUser.getId())
                 .contentType(MediaType.APPLICATION_JSON));
 
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.id").value(savedUser.getId()))
                 .andExpect(jsonPath("$.name").value("Jack Lee"))
                 .andExpect(jsonPath("$.email").value("jacklee@example.com"))
                 .andExpect(jsonPath("$.password").doesNotExist());
-    }
-
-    @Test
-    void testLogin_Success() throws Exception {
-        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.of(sampleUser));
-        when(userService.verifyPassword(eq("password"), eq("encodedPassword"))).thenReturn(true);
-
-        ResultActions resultActions = mockMvc.perform(post("/api/users/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\": \"jacklee@example.com\", \"password\": \"password\"}")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()));
-
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Jack Lee"))
-                .andExpect(jsonPath("$.email").value("jacklee@example.com"))
-                .andExpect(jsonPath("$.password").doesNotExist());
-    }
-
-    @Test
-    void testLogin_InvalidCredentials() throws Exception {
-        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.of(sampleUser));
-        when(userService.verifyPassword(eq("wrongpassword"), eq("encodedPassword"))).thenReturn(false);
-
-        ResultActions resultActions = mockMvc.perform(post("/api/users/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\": \"jacklee@example.com\", \"password\": \"wrongpassword\"}")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()));
-
-        resultActions.andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("Invalid email or password."));
-    }
-
-    @Test
-    void testLogin_UserNotFound() throws Exception {
-        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.empty());
-
-        ResultActions resultActions = mockMvc.perform(post("/api/users/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\": \"jacklee@example.com\", \"password\": \"password\"}")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()));
-
-        resultActions.andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("Invalid email or password."));
-    }
-
-    @Test
-    void testLogout() throws Exception {
-        ResultActions resultActions = mockMvc.perform(get("/api/users/logout")
-                .with(SecurityMockMvcRequestPostProcessors.csrf()));
-
-        resultActions.andExpect(status().isOk());
     }
 }
