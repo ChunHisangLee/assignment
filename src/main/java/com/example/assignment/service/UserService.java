@@ -9,4 +9,5 @@ public interface UserService {
     Optional<Users> updateUser(Long id, Users users);
     boolean deleteUser(Long id);
     Optional<Users> getUserById(Long id);
+    Optional<Users> findByEmail(String email);
 }

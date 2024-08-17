@@ -49,7 +49,7 @@ class UserServiceImplTest {
 
     @AfterEach
     void tearDown() throws Exception {
-        mocks.close();  // Ensure mocks are closed after each test
+        mocks.close();
     }
 
     @Test

@@ -8,16 +8,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -50,6 +49,7 @@ public class UserControllerTest {
 
     @Test
     void testCreateUser() throws Exception {
+        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.empty());
         when(userService.createUser(any(Users.class))).thenReturn(sampleUser);
 
         ResultActions resultActions = mockMvc.perform(post("/api/users")
@@ -65,7 +65,21 @@ public class UserControllerTest {
     }
 
     @Test
+    void testCreateUser_EmailAlreadyRegistered() throws Exception {
+        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.of(sampleUser));
+
+        ResultActions resultActions = mockMvc.perform(post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"password\"}")
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
+
+        resultActions.andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Email already registered. Try to log in or register with another email."));
+    }
+
+    @Test
     void testUpdateUser() throws Exception {
+        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.empty());
         when(userService.updateUser(anyLong(), any(Users.class))).thenReturn(Optional.of(sampleUser));
 
         ResultActions resultActions = mockMvc.perform(put("/api/users/1")
@@ -78,6 +92,23 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.name").value("Jack Lee"))
                 .andExpect(jsonPath("$.email").value("jacklee@example.com"))
                 .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    void testUpdateUser_EmailAlreadyRegisteredByAnotherUser() throws Exception {
+        Users anotherUser = new Users();
+        anotherUser.setId(2L);
+        anotherUser.setEmail("jacklee@example.com");
+
+        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.of(anotherUser));
+
+        ResultActions resultActions = mockMvc.perform(put("/api/users/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Jack Lee Updated\", \"email\": \"jacklee@example.com\", \"password\": \"newpassword\"}")
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
+
+        resultActions.andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Email already registered by another user."));
     }
 
     @Test
