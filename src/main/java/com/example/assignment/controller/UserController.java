@@ -3,8 +3,13 @@ package com.example.assignment.controller;
 import com.example.assignment.entity.Users;
 import com.example.assignment.error.CustomErrorResponse;
 import com.example.assignment.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -58,6 +63,29 @@ public class UserController {
         Optional<Users> user = userService.getUserById(id);
         return user.map(u -> ResponseEntity.ok(removePassword(u)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Users loginRequest) {
+        Optional<Users> user = userService.findByEmail(loginRequest.getEmail());
+
+        if (user.isPresent() && userService.verifyPassword(loginRequest.getPassword(), user.get().getPassword())) {
+            return ResponseEntity.ok(removePassword(user.get()));
+        } else {
+            CustomErrorResponse errorResponse = new CustomErrorResponse("Invalid email or password.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+        }
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null) {
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     private Users removePassword(Users user) {

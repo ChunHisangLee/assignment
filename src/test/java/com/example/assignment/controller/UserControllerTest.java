@@ -134,4 +134,56 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.email").value("jacklee@example.com"))
                 .andExpect(jsonPath("$.password").doesNotExist());
     }
+
+    @Test
+    void testLogin_Success() throws Exception {
+        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.of(sampleUser));
+        when(userService.verifyPassword(eq("password"), eq("encodedPassword"))).thenReturn(true);
+
+        ResultActions resultActions = mockMvc.perform(post("/api/users/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\": \"jacklee@example.com\", \"password\": \"password\"}")
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
+
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("Jack Lee"))
+                .andExpect(jsonPath("$.email").value("jacklee@example.com"))
+                .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    void testLogin_InvalidCredentials() throws Exception {
+        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.of(sampleUser));
+        when(userService.verifyPassword(eq("wrongpassword"), eq("encodedPassword"))).thenReturn(false);
+
+        ResultActions resultActions = mockMvc.perform(post("/api/users/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\": \"jacklee@example.com\", \"password\": \"wrongpassword\"}")
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
+
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Invalid email or password."));
+    }
+
+    @Test
+    void testLogin_UserNotFound() throws Exception {
+        when(userService.findByEmail(eq("jacklee@example.com"))).thenReturn(Optional.empty());
+
+        ResultActions resultActions = mockMvc.perform(post("/api/users/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\": \"jacklee@example.com\", \"password\": \"password\"}")
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
+
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Invalid email or password."));
+    }
+
+    @Test
+    void testLogout() throws Exception {
+        ResultActions resultActions = mockMvc.perform(get("/api/users/logout")
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
+
+        resultActions.andExpect(status().isOk());
+    }
 }

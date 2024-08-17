@@ -10,4 +10,5 @@ public interface UserService {
     boolean deleteUser(Long id);
     Optional<Users> getUserById(Long id);
     Optional<Users> findByEmail(String email);
+    boolean verifyPassword(String rawPassword, String encodedPassword);
 }
