@@ -5,6 +5,7 @@ import com.example.assignment.error.CustomErrorResponse;
 import com.example.assignment.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody Users users) {
+    public ResponseEntity<?> createUser(@Valid @RequestBody Users users) {
         if (isEmailRegistered(users.getEmail())) {
             CustomErrorResponse errorResponse = new CustomErrorResponse("Email already registered. Try to log in or register with another email.");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
@@ -36,7 +37,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Users users) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody Users users) {
         if (isEmailRegisteredForAnotherUser(users.getEmail(), id)) {
             CustomErrorResponse errorResponse = new CustomErrorResponse("Email already registered by another user.");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
