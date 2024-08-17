@@ -1,5 +1,7 @@
 package com.example.assignment.schedule;
 
+import com.example.assignment.entity.BTCPriceHistory;
+import com.example.assignment.repository.BTCPriceHistoryRepository;
 import com.example.assignment.service.PriceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,12 +15,14 @@ import static org.mockito.Mockito.*;
 class ScheduledTasksTest {
 
     private PriceService priceService;
+    private BTCPriceHistoryRepository btcPriceHistoryRepository;
     private ScheduledTasks scheduledTasks;
 
     @BeforeEach
     void setUp() {
         priceService = mock(PriceService.class);
-        scheduledTasks = new ScheduledTasks(priceService);
+        btcPriceHistoryRepository = mock(BTCPriceHistoryRepository.class);
+        scheduledTasks = new ScheduledTasks(priceService, btcPriceHistoryRepository);
     }
 
     @Test
@@ -30,10 +34,11 @@ class ScheduledTasksTest {
             scheduledTasks.updateCurrentPrice();
         }
 
-        ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
-        verify(priceService, times(36)).setPrice(captor.capture());
+        ArgumentCaptor<Integer> priceCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(priceService, times(36)).setPrice(priceCaptor.capture());
+        verify(btcPriceHistoryRepository, times(36)).save(any(BTCPriceHistory.class));
 
-        assertEquals(460, captor.getAllValues().get(35));
+        assertEquals(460, priceCaptor.getAllValues().get(35));
         assertEquals(460, scheduledTasks.getCurrentPrice());
         assertFalse(scheduledTasks.isIncreasing());
     }
@@ -47,10 +52,11 @@ class ScheduledTasksTest {
             scheduledTasks.updateCurrentPrice();
         }
 
-        ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
-        verify(priceService, times(36)).setPrice(captor.capture());
+        ArgumentCaptor<Integer> priceCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(priceService, times(36)).setPrice(priceCaptor.capture());
+        verify(btcPriceHistoryRepository, times(36)).save(any(BTCPriceHistory.class));
 
-        assertEquals(100, captor.getAllValues().get(35));
+        assertEquals(100, priceCaptor.getAllValues().get(35));
         assertEquals(100, scheduledTasks.getCurrentPrice());
         assertTrue(scheduledTasks.isIncreasing());
     }
