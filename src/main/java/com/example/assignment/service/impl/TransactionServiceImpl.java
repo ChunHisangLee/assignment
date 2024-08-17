@@ -8,10 +8,11 @@ import com.example.assignment.repository.BTCPriceHistoryRepository;
 import com.example.assignment.repository.TransactionRepository;
 import com.example.assignment.repository.UserRepository;
 import com.example.assignment.service.TransactionService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -64,8 +65,10 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<Transaction> getUserTransactionHistory(Long userId) {
-        Users users = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return transactionRepository.findByUsers(users);
+    public Page<Transaction> getUserTransactionHistory(Long userId, Pageable pageable) {
+        Users users = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return transactionRepository.findByUsers(users, pageable);
     }
+
 }
