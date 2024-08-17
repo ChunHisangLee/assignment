@@ -21,11 +21,12 @@ public class Transaction {
     @JoinColumn(name = "user_id", nullable = false)
     private Users users;
 
-    @Column(nullable = false)
-    private double btcAmount;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "btc_price_history_id", nullable = false)
+    private BTCPriceHistory btcPriceHistory;
 
     @Column(nullable = false)
-    private double priceAtTransaction;
+    private double btcAmount;
 
     @Column(nullable = false)
     private LocalDateTime transactionTime;
@@ -34,4 +35,3 @@ public class Transaction {
     @Column(nullable = false)
     private TransactionType transactionType;
 }
-
