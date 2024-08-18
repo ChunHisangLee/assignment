@@ -1,7 +1,7 @@
 package com.example.assignment.security;
 
 import com.example.assignment.entity.Users;
-import com.example.assignment.repository.UserRepository;
+import com.example.assignment.repository.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,13 +16,13 @@ import static org.mockito.Mockito.when;
 
 class CustomUserDetailsServiceTest {
 
-    private UserRepository userRepository;
+    private UsersRepository usersRepository;
     private CustomUserDetailsService customUserDetailsService;
 
     @BeforeEach
     void setUp() {
-        userRepository = mock(UserRepository.class);
-        customUserDetailsService = new CustomUserDetailsService(userRepository);
+        usersRepository = mock(UsersRepository.class);
+        customUserDetailsService = new CustomUserDetailsService(usersRepository);
     }
 
     @Test
@@ -30,7 +30,7 @@ class CustomUserDetailsServiceTest {
         Users user = new Users();
         user.setEmail("jacklee@example.com");
         user.setPassword("password");
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         org.springframework.security.core.userdetails.UserDetails userDetails =
                 customUserDetailsService.loadUserByUsername("jacklee@example.com");
@@ -41,7 +41,7 @@ class CustomUserDetailsServiceTest {
 
     @Test
     void testLoadUserByUsername_UserDoesNotExist() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class, () ->
                 customUserDetailsService.loadUserByUsername("notfound@example.com"));

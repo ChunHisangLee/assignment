@@ -3,7 +3,7 @@ package com.example.assignment.service.impl;
 import com.example.assignment.entity.*;
 import com.example.assignment.repository.BTCPriceHistoryRepository;
 import com.example.assignment.repository.TransactionRepository;
-import com.example.assignment.repository.UserRepository;
+import com.example.assignment.repository.UsersRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ class TransactionServiceImplTest {
     private TransactionRepository transactionRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UsersRepository usersRepository;
 
     @Mock
     private BTCPriceHistoryRepository btcPriceHistoryRepository;
@@ -50,7 +50,7 @@ class TransactionServiceImplTest {
         Users sampleUser = createSampleUser();
         BTCPriceHistory samplePriceHistory = createSamplePriceHistory();
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
+        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
         when(btcPriceHistoryRepository.findTopByOrderByTimestampDesc()).thenReturn(Optional.of(samplePriceHistory));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -63,7 +63,7 @@ class TransactionServiceImplTest {
         assertEquals(samplePriceHistory, transaction.getBtcPriceHistory());
         assertEquals(TransactionType.BUY, transaction.getTransactionType());
 
-        verify(userRepository, times(1)).save(sampleUser);
+        verify(usersRepository, times(1)).save(sampleUser);
         verify(transactionRepository, times(1)).save(transaction);
     }
 
@@ -72,7 +72,7 @@ class TransactionServiceImplTest {
         Users sampleUser = createSampleUser();
         BTCPriceHistory samplePriceHistory = createSamplePriceHistory();
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
+        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
         when(btcPriceHistoryRepository.findTopByOrderByTimestampDesc()).thenReturn(Optional.of(samplePriceHistory));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -85,7 +85,7 @@ class TransactionServiceImplTest {
         assertEquals(samplePriceHistory, transaction.getBtcPriceHistory());
         assertEquals(TransactionType.SELL, transaction.getTransactionType());
 
-        verify(userRepository, times(1)).save(sampleUser);
+        verify(usersRepository, times(1)).save(sampleUser);
         verify(transactionRepository, times(1)).save(transaction);
     }
 
@@ -94,7 +94,7 @@ class TransactionServiceImplTest {
         Users sampleUser = createSampleUser();
         BTCPriceHistory samplePriceHistory = createSamplePriceHistory();
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
+        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
         when(btcPriceHistoryRepository.findTopByOrderByTimestampDesc()).thenReturn(Optional.of(samplePriceHistory));
 
         double btcAmount = 1.0; // This will require more USD than available
@@ -103,7 +103,7 @@ class TransactionServiceImplTest {
 
         assertEquals("Insufficient USD balance", exception.getMessage());
 
-        verify(userRepository, never()).save(any(Users.class));
+        verify(usersRepository, never()).save(any(Users.class));
         verify(transactionRepository, never()).save(any(Transaction.class));
     }
 
@@ -112,7 +112,7 @@ class TransactionServiceImplTest {
         Users sampleUser = createSampleUser();
         BTCPriceHistory samplePriceHistory = createSamplePriceHistory();
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
+        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
         when(btcPriceHistoryRepository.findTopByOrderByTimestampDesc()).thenReturn(Optional.of(samplePriceHistory));
 
         double btcAmount = 3.0; // More BTC than available
@@ -121,7 +121,7 @@ class TransactionServiceImplTest {
 
         assertEquals("Insufficient BTC balance", exception.getMessage());
 
-        verify(userRepository, never()).save(any(Users.class));
+        verify(usersRepository, never()).save(any(Users.class));
         verify(transactionRepository, never()).save(any(Transaction.class));
     }
 

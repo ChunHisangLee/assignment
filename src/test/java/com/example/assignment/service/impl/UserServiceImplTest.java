@@ -2,7 +2,7 @@ package com.example.assignment.service.impl;
 
 import com.example.assignment.entity.Users;
 import com.example.assignment.entity.Wallet;
-import com.example.assignment.repository.UserRepository;
+import com.example.assignment.repository.UsersRepository;
 import com.example.assignment.repository.WalletRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 class UserServiceImplTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UsersRepository usersRepository;
 
     @Mock
     private WalletRepository walletRepository;
@@ -63,7 +63,7 @@ class UserServiceImplTest {
     @Test
     void testCreateUser() {
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(userRepository.save(any(Users.class))).thenReturn(sampleUser);
+        when(usersRepository.save(any(Users.class))).thenReturn(sampleUser);
         when(walletRepository.save(any(Wallet.class))).thenReturn(sampleWallet);
 
         Users createdUser = userService.createUser(sampleUser);
@@ -73,14 +73,14 @@ class UserServiceImplTest {
         assertNotNull(createdUser.getWallet());
         assertEquals(1000.0, createdUser.getWallet().getUsdBalance());
 
-        verify(userRepository, times(1)).save(any(Users.class));
+        verify(usersRepository, times(1)).save(any(Users.class));
         verify(walletRepository, times(1)).save(any(Wallet.class));
     }
 
     @Test
     void testUpdateUser_Success() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
-        when(userRepository.save(any(Users.class))).thenReturn(sampleUser);
+        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
+        when(usersRepository.save(any(Users.class))).thenReturn(sampleUser);
 
         Users updatedUser = new Users();
         updatedUser.setName("Jack Lee Updated");
@@ -93,12 +93,12 @@ class UserServiceImplTest {
         assertEquals("Jack Lee Updated", result.get().getName());
         assertEquals("jacklee.updated@example.com", result.get().getEmail());
         verify(passwordEncoder, times(1)).encode(anyString());
-        verify(userRepository, times(1)).save(any(Users.class));
+        verify(usersRepository, times(1)).save(any(Users.class));
     }
 
     @Test
     void testUpdateUser_NotFound() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(usersRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         Users updatedUser = new Users();
         updatedUser.setName("Jack Lee Updated");
@@ -107,70 +107,70 @@ class UserServiceImplTest {
         Optional<Users> result = userService.updateUser(1L, updatedUser);
 
         assertFalse(result.isPresent());
-        verify(userRepository, never()).save(any(Users.class));
+        verify(usersRepository, never()).save(any(Users.class));
     }
 
     @Test
     void testDeleteUser_Success() {
-        when(userRepository.existsById(anyLong())).thenReturn(true);
-        doNothing().when(userRepository).deleteById(anyLong());
+        when(usersRepository.existsById(anyLong())).thenReturn(true);
+        doNothing().when(usersRepository).deleteById(anyLong());
 
         boolean result = userService.deleteUser(1L);
 
         assertTrue(result);
-        verify(userRepository, times(1)).deleteById(anyLong());
+        verify(usersRepository, times(1)).deleteById(anyLong());
     }
 
     @Test
     void testDeleteUser_NotFound() {
-        when(userRepository.existsById(anyLong())).thenReturn(false);
+        when(usersRepository.existsById(anyLong())).thenReturn(false);
 
         boolean result = userService.deleteUser(1L);
 
         assertFalse(result);
-        verify(userRepository, never()).deleteById(anyLong());
+        verify(usersRepository, never()).deleteById(anyLong());
     }
 
     @Test
     void testGetUserById_Found() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
+        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
 
         Optional<Users> result = userService.getUserById(1L);
 
         assertTrue(result.isPresent());
         assertEquals(sampleUser, result.get());
-        verify(userRepository, times(1)).findById(anyLong());
+        verify(usersRepository, times(1)).findById(anyLong());
     }
 
     @Test
     void testGetUserById_NotFound() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(usersRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         Optional<Users> result = userService.getUserById(1L);
 
         assertFalse(result.isPresent());
-        verify(userRepository, times(1)).findById(anyLong());
+        verify(usersRepository, times(1)).findById(anyLong());
     }
 
     @Test
     void testFindByEmail_Found() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(sampleUser));
+        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.of(sampleUser));
 
         Optional<Users> result = userService.findByEmail("jacklee@example.com");
 
         assertTrue(result.isPresent());
         assertEquals(sampleUser, result.get());
-        verify(userRepository, times(1)).findByEmail(anyString());
+        verify(usersRepository, times(1)).findByEmail(anyString());
     }
 
     @Test
     void testFindByEmail_NotFound() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
         Optional<Users> result = userService.findByEmail("jacklee@example.com");
 
         assertFalse(result.isPresent());
-        verify(userRepository, times(1)).findByEmail(anyString());
+        verify(usersRepository, times(1)).findByEmail(anyString());
     }
 
     @Test

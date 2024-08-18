@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +21,11 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;  // Inject PasswordEncoder
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;  // Initialize PasswordEncoder
     }
 
     @PostMapping
@@ -32,7 +35,10 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }
 
+        users.setPassword(passwordEncoder.encode(users.getPassword()));
+
         Users createdUsers = userService.createUser(users);
+
         return ResponseEntity.ok(removePassword(createdUsers));
     }
 

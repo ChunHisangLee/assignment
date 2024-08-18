@@ -6,7 +6,7 @@ import com.example.assignment.entity.TransactionType;
 import com.example.assignment.entity.Users;
 import com.example.assignment.repository.BTCPriceHistoryRepository;
 import com.example.assignment.repository.TransactionRepository;
-import com.example.assignment.repository.UserRepository;
+import com.example.assignment.repository.UsersRepository;
 import com.example.assignment.service.TransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,18 +18,18 @@ import java.time.LocalDateTime;
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
-    private final UserRepository userRepository;
+    private final UsersRepository usersRepository;
     private final BTCPriceHistoryRepository btcPriceHistoryRepository;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, UserRepository userRepository, BTCPriceHistoryRepository btcPriceHistoryRepository) {
+    public TransactionServiceImpl(TransactionRepository transactionRepository, UsersRepository usersRepository, BTCPriceHistoryRepository btcPriceHistoryRepository) {
         this.transactionRepository = transactionRepository;
-        this.userRepository = userRepository;
+        this.usersRepository = usersRepository;
         this.btcPriceHistoryRepository = btcPriceHistoryRepository;
     }
 
     @Override
     public Transaction createTransaction(Long userId, double btcAmount, TransactionType transactionType) {
-        Users users = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Users users = usersRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         // Get the latest BTC price from BTCPriceHistory
         BTCPriceHistory currentPriceHistory = btcPriceHistoryRepository.findTopByOrderByTimestampDesc()
@@ -60,13 +60,13 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setTransactionTime(LocalDateTime.now());
         transaction.setTransactionType(transactionType);
 
-        userRepository.save(users);
+        usersRepository.save(users);
         return transactionRepository.save(transaction);
     }
 
     @Override
     public Page<Transaction> getUserTransactionHistory(Long userId, Pageable pageable) {
-        Users users = userRepository.findById(userId)
+        Users users = usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return transactionRepository.findByUsers(users, pageable);
     }

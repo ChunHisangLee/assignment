@@ -2,7 +2,7 @@ package com.example.assignment.service.impl;
 
 import com.example.assignment.entity.Users;
 import com.example.assignment.entity.Wallet;
-import com.example.assignment.repository.UserRepository;
+import com.example.assignment.repository.UsersRepository;
 import com.example.assignment.repository.WalletRepository;
 import com.example.assignment.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,12 +13,12 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
+    private final UsersRepository usersRepository;
     private final WalletRepository walletRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, WalletRepository walletRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+    public UserServiceImpl(UsersRepository usersRepository, WalletRepository walletRepository, PasswordEncoder passwordEncoder) {
+        this.usersRepository = usersRepository;
         this.walletRepository = walletRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
         wallet.setUsers(users);
 
         users.setWallet(wallet);
-        Users savedUsers = userRepository.save(users);
+        Users savedUsers = usersRepository.save(users);
 
         walletRepository.save(wallet);
 
@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<Users> updateUser(Long id, Users updatedUsers) {
-        return userRepository.findById(id).map(user -> {
+        return usersRepository.findById(id).map(user -> {
             user.setName(updatedUsers.getName());
             user.setEmail(updatedUsers.getEmail());
 
@@ -51,14 +51,14 @@ public class UserServiceImpl implements UserService {
                 user.setPassword(encodedPassword);
             }
 
-            return userRepository.save(user);
+            return usersRepository.save(user);
         });
     }
 
     @Override
     public boolean deleteUser(Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
+        if (usersRepository.existsById(id)) {
+            usersRepository.deleteById(id);
             return true;
         }
 
@@ -67,12 +67,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<Users> getUserById(Long id) {
-        return userRepository.findById(id);
+        return usersRepository.findById(id);
     }
 
     @Override
     public Optional<Users> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return usersRepository.findByEmail(email);
     }
 
     @Override

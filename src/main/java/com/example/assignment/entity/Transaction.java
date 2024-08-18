@@ -27,14 +27,14 @@ public class Transaction {
 
     @NotNull(message = "User cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, referencedColumnName = "id")
     @ToString.Exclude
     @JsonBackReference
     private Users users;
 
     @NotNull(message = "BTC price history cannot be null")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "btc_price_history_id", nullable = false)
+    @JoinColumn(name = "btc_price_history_id", nullable = false, referencedColumnName = "id")
     @ToString.Exclude
     private BTCPriceHistory btcPriceHistory;
 

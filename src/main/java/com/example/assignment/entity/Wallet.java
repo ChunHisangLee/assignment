@@ -1,5 +1,6 @@
 package com.example.assignment.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -28,9 +29,9 @@ public class Wallet {
     @Min(value = 0, message = "BTC balance must be non-negative")
     private double btcBalance;
 
-    @NotNull(message = "User cannot be null")
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonBackReference
     private Users users;
 
     public Wallet(double usdBalance, double btcBalance, Users users) {
