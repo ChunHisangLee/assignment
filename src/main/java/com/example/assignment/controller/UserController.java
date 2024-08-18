@@ -1,5 +1,6 @@
 package com.example.assignment.controller;
 
+import com.example.assignment.dto.UsersDTO;
 import com.example.assignment.entity.Users;
 import com.example.assignment.error.CustomErrorResponse;
 import com.example.assignment.service.UserService;
@@ -21,44 +22,42 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;  // Inject PasswordEncoder
+    private final PasswordEncoder passwordEncoder;
 
     public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;  // Initialize PasswordEncoder
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@Valid @RequestBody Users users) {
-        if (isEmailRegistered(users.getEmail())) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody Users users) {
+        if (emailExists(users.getEmail())) {
             CustomErrorResponse errorResponse = new CustomErrorResponse("Email already registered. Try to log in or register with another email.");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
         }
 
         users.setPassword(passwordEncoder.encode(users.getPassword()));
+        Users createdUser = userService.createUser(users);
 
-        Users createdUsers = userService.createUser(users);
-
-        return ResponseEntity.ok(removePassword(createdUsers));
+        return ResponseEntity.ok(toDTO(createdUser));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @Valid @RequestBody Users users) {
+    public ResponseEntity<UsersDTO> updateUser(@PathVariable Long id, @Valid @RequestBody Users users) {
         if (isEmailRegisteredForAnotherUser(users.getEmail(), id)) {
             CustomErrorResponse errorResponse = new CustomErrorResponse("Email already registered by another user.");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
 
         Optional<Users> updatedUser = userService.updateUser(id, users);
-        return updatedUser.map(user -> ResponseEntity.ok(removePassword(user)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return updatedUser
+                .map(user -> ResponseEntity.ok(toDTO(user)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        boolean deleted = userService.deleteUser(id);
-
-        if (deleted) {
+        if (userService.deleteUser(id)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
@@ -66,10 +65,10 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Users> getUserById(@PathVariable Long id) {
-        Optional<Users> user = userService.getUserById(id);
-        return user.map(u -> ResponseEntity.ok(removePassword(u)))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<UsersDTO> getUserById(@PathVariable Long id) {
+        return userService.getUserById(id)
+                .map(user -> ResponseEntity.ok(toDTO(user)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
     }
 
     @PostMapping("/login")
@@ -77,7 +76,7 @@ public class UserController {
         Optional<Users> user = userService.findByEmail(loginRequest.getEmail());
 
         if (user.isPresent() && userService.verifyPassword(loginRequest.getPassword(), user.get().getPassword())) {
-            return ResponseEntity.ok(removePassword(user.get()));
+            return ResponseEntity.ok(toDTO(user.get()));
         } else {
             CustomErrorResponse errorResponse = new CustomErrorResponse("Invalid email or password.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
@@ -95,18 +94,16 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    private Users removePassword(Users user) {
-        user.setPassword(null);
-        return user;
-    }
-
-    private boolean isEmailRegistered(String email) {
-        Optional<Users> optionalUsers = userService.findByEmail(email);
-        return optionalUsers.isPresent();
+    private boolean emailExists(String email) {
+        return userService.findByEmail(email).isPresent();
     }
 
     private boolean isEmailRegisteredForAnotherUser(String email, Long userId) {
         Optional<Users> existingUser = userService.findByEmail(email);
         return existingUser.isPresent() && !existingUser.get().getId().equals(userId);
+    }
+
+    private UsersDTO toDTO(Users user) {
+        return new UsersDTO(user.getId(), user.getName(), user.getEmail());
     }
 }

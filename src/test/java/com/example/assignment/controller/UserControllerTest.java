@@ -45,11 +45,11 @@ class UserControllerTest {
         sampleUser.setId(1L);
         sampleUser.setName("Jack Lee");
         sampleUser.setEmail("jacklee@example.com");
-        sampleUser.setPassword("encodedPassword"); // Assume the password is already encoded
+        sampleUser.setPassword("encodedPassword");
     }
 
     @Test
-    void testCreateUser_Success() throws Exception {
+    void testRegisterUser_Success() throws Exception {
         when(userService.createUser(any(Users.class))).thenReturn(sampleUser);
         when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
         when(userService.findByEmail(eq(sampleUser.getEmail()))).thenReturn(Optional.empty());
@@ -67,7 +67,7 @@ class UserControllerTest {
     }
 
     @Test
-    void testCreateUser_EmailAlreadyRegistered() throws Exception {
+    void testRegisterUser_EmailAlreadyRegistered() throws Exception {
         when(userService.findByEmail(eq(sampleUser.getEmail()))).thenReturn(Optional.of(sampleUser));
 
         String jsonRequest = "{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"password\"}";
