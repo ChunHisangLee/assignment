@@ -10,6 +10,8 @@ import com.example.assignment.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +26,8 @@ import static com.example.assignment.constants.ErrorMessages.*;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private final UserService userService;
     private final UsersMapper usersMapper;
@@ -40,46 +44,61 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UsersDTO> registerUser(@Valid @RequestBody UsersDTO usersDTO) {
+        logger.info("Registering new user with email: {}", usersDTO.getEmail());
         Users users = usersMapper.convertToEntity(usersDTO);
         users.setPassword(usersDTO.getPassword()); // Set password separately
         Users createdUser = userService.registerUser(users);
+        logger.info("User registered successfully with ID: {}", createdUser.getId());
         return ResponseEntity.ok(usersMapper.convertToDto(createdUser));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UsersDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UsersDTO usersDTO) {
+        logger.info("Updating user with ID: {}", id);
         Users users = usersMapper.convertToEntity(usersDTO);
         users.setPassword(usersDTO.getPassword()); // Set password separately
         Users updatedUser = userService.updateUser(id, users)
-                .orElseThrow(() -> new CustomErrorException(
-                        HttpStatus.NOT_FOUND.value(),
-                        NOT_FOUND_STATUS,
-                        USER_NOT_FOUND,
-                        GET_USER_API_PATH + id
-                ));
+                .orElseThrow(() -> {
+                    logger.error("User with ID: {} not found for update.", id);
+                    return new CustomErrorException(
+                            HttpStatus.NOT_FOUND.value(),
+                            NOT_FOUND_STATUS,
+                            USER_NOT_FOUND,
+                            GET_USER_API_PATH + id
+                    );
+                });
+        logger.info("User with ID: {} updated successfully.", id);
         return ResponseEntity.ok(usersMapper.convertToDto(updatedUser));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        logger.info("Deleting user with ID: {}", id);
         userService.deleteUser(id);
+        logger.info("User with ID: {} deleted successfully.", id);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UsersDTO> getUserById(@PathVariable Long id) {
+        logger.info("Fetching user with ID: {}", id);
         Users user = userService.getUserById(id)
-                .orElseThrow(() -> new CustomErrorException(
-                        HttpStatus.NOT_FOUND.value(),
-                        NOT_FOUND_STATUS,
-                        USER_NOT_FOUND,
-                        GET_USER_API_PATH + id
-                ));
+                .orElseThrow(() -> {
+                    logger.error("User with ID: {} not found.", id);
+                    return new CustomErrorException(
+                            HttpStatus.NOT_FOUND.value(),
+                            NOT_FOUND_STATUS,
+                            USER_NOT_FOUND,
+                            GET_USER_API_PATH + id
+                    );
+                });
+        logger.info("User with ID: {} found.", id);
         return ResponseEntity.ok(usersMapper.convertToDto(user));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UsersDTO loginRequest) {
+        logger.info("User login attempt with email: {}", loginRequest.getEmail());
         // Authenticate the user using the AuthenticationManager
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
@@ -90,6 +109,7 @@ public class UserController {
         // Generate JWT token
         String token = jwtTokenProvider.generateToken(authentication);
 
+        logger.info("User with email: {} logged in successfully.", loginRequest.getEmail());
         return ResponseEntity.ok(new JwtAuthenticationResponse(token));
     }
 
@@ -98,6 +118,7 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null) {
+            logger.info("User with principal: {} logging out.", authentication.getName());
             new SecurityContextLogoutHandler().logout(request, response, authentication);
         }
         return ResponseEntity.ok().build();

@@ -2,7 +2,8 @@ package com.example.assignment.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,25 +16,23 @@ import java.util.Objects;
 @Table(name = "btc_price_history")
 @Getter
 @Setter
+@Builder
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class BTCPriceHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Price cannot be null")
     @Min(value = 0, message = "Price must be greater than or equal to 0")
+    @Column(nullable = false)
     private double price;
 
-    @NotNull(message = "Timestamp cannot be null")
-    private LocalDateTime timestamp;
-
-    public BTCPriceHistory(@NotNull double price, @NotNull LocalDateTime timestamp) {
-        this.price = price;
-        this.timestamp = timestamp;
-    }
+    @Builder.Default
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime timestamp = LocalDateTime.now(); // Initialize with current time
 
     @Override
     public boolean equals(Object o) {

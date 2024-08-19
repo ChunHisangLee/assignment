@@ -4,10 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +14,7 @@ import java.util.Objects;
 @Table(name = "users")
 @Getter
 @Setter
+@Builder
 @ToString
 @NoArgsConstructor
 public class Users {
@@ -27,6 +25,7 @@ public class Users {
 
     @NotBlank(message = "Name cannot be blank")
     @Size(max = 100, message = "Name must be less than or equal to 100 characters")
+    @Column(nullable = false)
     private String name;
 
     @Email(message = "Email should be valid")
@@ -42,6 +41,7 @@ public class Users {
     @OneToOne(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
     private Wallet wallet;
 
+    @Builder.Default
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @ToString.Exclude
     private List<Transaction> transactions = new ArrayList<>();
@@ -50,7 +50,7 @@ public class Users {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.wallet = new Wallet(1000.0, 0.0, this); // Initialize with 1000 USD balance
+        this.wallet = new Wallet(1000.0, 0.0, this); // Initialize wallet with 1000 USD balance
     }
 
     public void addTransaction(Transaction transaction) {

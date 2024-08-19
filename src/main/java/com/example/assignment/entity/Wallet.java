@@ -2,11 +2,7 @@ package com.example.assignment.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Objects;
 
@@ -14,6 +10,7 @@ import java.util.Objects;
 @Table(name = "wallet")
 @Getter
 @Setter
+@Builder
 @ToString
 @NoArgsConstructor
 public class Wallet {
@@ -30,9 +27,9 @@ public class Wallet {
     @Column(nullable = false)
     private double btcBalance;
 
-    @NotNull(message = "User cannot be null")
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
+    @ToString.Exclude
     private Users users;
 
     public Wallet(double usdBalance, double btcBalance, Users users) {

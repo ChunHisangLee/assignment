@@ -1,7 +1,6 @@
 package com.example.assignment.service.impl;
 
 import com.example.assignment.entity.Users;
-import com.example.assignment.entity.Wallet;
 import com.example.assignment.exception.CustomErrorException;
 import com.example.assignment.repository.UsersRepository;
 import com.example.assignment.service.UserService;
@@ -37,13 +36,6 @@ public class UserServiceImpl implements UserService {
 
         // Encode the user's password
         users.setPassword(passwordEncoder.encode(users.getPassword()));
-
-        // Initialize and link the wallet to the user
-        Wallet wallet = new Wallet();
-        wallet.setUsdBalance(1000.0);
-        wallet.setUsers(users);
-
-        users.setWallet(wallet);
 
         // Save the user and cascade save the wallet
         return usersRepository.save(users);

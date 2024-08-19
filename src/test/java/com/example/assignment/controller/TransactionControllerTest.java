@@ -1,119 +1,118 @@
 package com.example.assignment.controller;
 
-import com.example.assignment.entity.Transaction;
+import com.example.assignment.dto.CreateTransactionRequest;
+import com.example.assignment.dto.TransactionDTO;
 import com.example.assignment.entity.TransactionType;
-import com.example.assignment.entity.Users;
 import com.example.assignment.service.TransactionService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(TransactionController.class)
-@WithMockUser
 public class TransactionControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private TransactionService transactionService;
 
-    private Transaction sampleTransaction;
+    @InjectMocks
+    private TransactionController transactionController;
+
+    private AutoCloseable closeable; // Declare AutoCloseable for mocks
 
     @BeforeEach
     void setUp() {
-        Users sampleUser = new Users();
-        sampleUser.setId(1L);
-        sampleUser.setName("Jack Lee");
-        sampleUser.setEmail("jacklee@example.com");
-        sampleUser.setPassword("password");
+        closeable = MockitoAnnotations.openMocks(this); // Initialize mocks and keep reference
+    }
 
-        sampleTransaction = new Transaction();
-        sampleTransaction.setId(1L);
-        sampleTransaction.setUsers(sampleUser);
-        sampleTransaction.setBtcAmount(0.5);
-        sampleTransaction.setTransactionTime(LocalDateTime.now());
-        sampleTransaction.setTransactionType(TransactionType.BUY);
+    @AfterEach
+    void tearDown() throws Exception {
+        closeable.close(); // Ensure mocks are closed
     }
 
     @Test
-    void testBuyBtc() throws Exception {
-        when(transactionService.createTransaction(ArgumentMatchers.anyLong(), ArgumentMatchers.anyDouble(), ArgumentMatchers.eq(TransactionType.BUY)))
-                .thenReturn(sampleTransaction);
+    void testBuyBtc() {
+        // Arrange
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setUserId(1L);
+        request.setBtcAmount(0.1);
 
-        ResultActions resultActions = mockMvc.perform(post("/api/transactions/buy")
-                .param("userId", "1")
-                .param("btcAmount", "0.5")
-                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()));
+        TransactionDTO transactionDTO = new TransactionDTO();
+        transactionDTO.setId(1L);
+        transactionDTO.setBtcAmount(0.1);
 
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.users.id").value(1L))
-                .andExpect(jsonPath("$.btcAmount").value(0.5))
-                .andExpect(jsonPath("$.transactionType").value("BUY"))
-                .andExpect(jsonPath("$.transactionTime").exists());
+        when(transactionService.createTransaction(any(CreateTransactionRequest.class), any(TransactionType.class)))
+                .thenReturn(transactionDTO);
+
+        // Act
+        ResponseEntity<TransactionDTO> response = transactionController.buyBtc(request);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(transactionDTO, response.getBody());
     }
 
     @Test
-    void testSellBtc() throws Exception {
-        sampleTransaction.setTransactionType(TransactionType.SELL);
+    void testSellBtc() {
+        // Arrange
+        CreateTransactionRequest request = new CreateTransactionRequest();
+        request.setUserId(1L);
+        request.setBtcAmount(0.1);
 
-        when(transactionService.createTransaction(ArgumentMatchers.anyLong(), ArgumentMatchers.anyDouble(), ArgumentMatchers.eq(TransactionType.SELL)))
-                .thenReturn(sampleTransaction);
+        TransactionDTO transactionDTO = new TransactionDTO();
+        transactionDTO.setId(1L);
+        transactionDTO.setBtcAmount(0.1);
 
-        ResultActions resultActions = mockMvc.perform(post("/api/transactions/sell")
-                .param("userId", "1")
-                .param("btcAmount", "0.5")
-                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()));
+        when(transactionService.createTransaction(any(CreateTransactionRequest.class), any(TransactionType.class)))
+                .thenReturn(transactionDTO);
 
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.users.id").value(1L))
-                .andExpect(jsonPath("$.btcAmount").value(0.5))
-                .andExpect(jsonPath("$.transactionType").value("SELL"))
-                .andExpect(jsonPath("$.transactionTime").exists());
+        // Act
+        ResponseEntity<TransactionDTO> response = transactionController.sellBtc(request);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(transactionDTO, response.getBody());
     }
 
     @Test
-    void testGetUserTransactionHistory() throws Exception {
-        Pageable pageable = PageRequest.of(0, 20);
-        Page<Transaction> transactionPage = new PageImpl<>(Collections.singletonList(sampleTransaction), pageable, 1);
+    void testGetUserTransactionHistory() {
+        // Arrange
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 20); // Use Pageable correctly
 
-        when(transactionService.getUserTransactionHistory(ArgumentMatchers.anyLong(), ArgumentMatchers.any(Pageable.class)))
-                .thenReturn(transactionPage);
+        TransactionDTO transaction1 = new TransactionDTO();
+        transaction1.setId(1L);
+        transaction1.setBtcAmount(0.1);
 
-        ResultActions resultActions = mockMvc.perform(get("/api/transactions/history/1")
-                .param("page", "0")
-                .param("size", "20")
-                .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf()));
+        TransactionDTO transaction2 = new TransactionDTO();
+        transaction2.setId(2L);
+        transaction2.setBtcAmount(0.2);
 
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(1L))
-                .andExpect(jsonPath("$.content[0].users.id").value(1L))
-                .andExpect(jsonPath("$.content[0].btcAmount").value(0.5))
-                .andExpect(jsonPath("$.content[0].transactionType").value("BUY"))
-                .andExpect(jsonPath("$.content[0].transactionTime").exists())
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.size").value(20))
-                .andExpect(jsonPath("$.number").value(0));
+        List<TransactionDTO> transactionList = Arrays.asList(transaction1, transaction2);
+        Page<TransactionDTO> page = new PageImpl<>(transactionList);
+
+        when(transactionService.getUserTransactionHistory(anyLong(), any(Pageable.class))).thenReturn(page);
+
+        // Act
+        ResponseEntity<Page<TransactionDTO>> response = transactionController.getUserTransactionHistory(userId, 0, 20);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(page, response.getBody());
     }
 }

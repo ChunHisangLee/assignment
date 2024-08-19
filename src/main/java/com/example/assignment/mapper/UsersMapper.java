@@ -7,26 +7,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class UsersMapper {
 
-    private final WalletMapper walletMapper;
-
-    public UsersMapper(WalletMapper walletMapper) {
-        this.walletMapper = walletMapper;
+    public UsersDTO toDto(Users users) {
+        return UsersDTO.builder()
+                .id(users.getId())
+                .name(users.getName())
+                .email(users.getEmail())
+                .build();
     }
 
-    public UsersDTO convertToDto(Users users) {
-        return new UsersDTO(
-                users.getId(),
-                users.getName(),
-                users.getEmail()
-        );
-    }
-
-    public Users convertToEntity(UsersDTO usersDTO) {
-        Users users = new Users();
-        users.setId(usersDTO.getId());
-        users.setName(usersDTO.getName());
-        users.setEmail(usersDTO.getEmail());
-        users.setPassword(usersDTO.getPassword()); // Map password from DTO to entity
-        return users;
+    public Users toEntity(UsersDTO usersDTO) {
+        return Users.builder()
+                .name(usersDTO.getName())
+                .email(usersDTO.getEmail())
+                .build();
     }
 }

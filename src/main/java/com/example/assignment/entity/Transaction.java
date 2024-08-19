@@ -2,12 +2,8 @@ package com.example.assignment.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -16,23 +12,23 @@ import java.util.Objects;
 @Table(name = "transactions")
 @Getter
 @Setter
+@Builder
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "User cannot be null")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false, updatable = false)
     @ToString.Exclude
     private Users users;
 
-    @NotNull(message = "BTC price history cannot be null")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "btc_price_history_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "btc_price_history_id", nullable = false, updatable = false)
     @ToString.Exclude
     private BTCPriceHistory btcPriceHistory;
 
@@ -40,23 +36,14 @@ public class Transaction {
     @Column(nullable = false)
     private double btcAmount;
 
-    @NotNull(message = "Transaction time cannot be null")
     @PastOrPresent(message = "Transaction time must be in the past or present")
-    @Column(nullable = false)
-    private LocalDateTime transactionTime;
+    @Column(nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime transactionTime = LocalDateTime.now(); // Initialize with the current time
 
-    @NotNull(message = "Transaction type cannot be null")
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private TransactionType transactionType;
-
-    public Transaction(Users users, BTCPriceHistory btcPriceHistory, double btcAmount, LocalDateTime transactionTime, TransactionType transactionType) {
-        this.users = users;
-        this.btcPriceHistory = btcPriceHistory;
-        this.btcAmount = btcAmount;
-        this.transactionTime = transactionTime;
-        this.transactionType = transactionType;
-    }
 
     @Override
     public boolean equals(Object o) {
