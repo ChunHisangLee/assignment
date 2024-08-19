@@ -1,22 +1,30 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.entity.*;
-import com.example.assignment.repository.BTCPriceHistoryRepository;
+import com.example.assignment.dto.CreateTransactionRequest;
+import com.example.assignment.dto.TransactionDTO;
+import com.example.assignment.entity.Transaction;
+import com.example.assignment.entity.TransactionType;
+import com.example.assignment.entity.Users;
+import com.example.assignment.entity.Wallet;
+import com.example.assignment.mapper.TransactionMapper;
 import com.example.assignment.repository.TransactionRepository;
 import com.example.assignment.repository.UsersRepository;
-import org.junit.jupiter.api.AfterEach;
+import com.example.assignment.service.PriceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 class TransactionServiceImplTest {
@@ -28,125 +36,85 @@ class TransactionServiceImplTest {
     private UsersRepository usersRepository;
 
     @Mock
-    private BTCPriceHistoryRepository btcPriceHistoryRepository;
+    private TransactionMapper transactionMapper;
+
+    @Mock
+    private PriceService priceService;
 
     @InjectMocks
     private TransactionServiceImpl transactionService;
 
-    private AutoCloseable mocks;
-
     @BeforeEach
     void setUp() {
-        mocks = MockitoAnnotations.openMocks(this);
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        mocks.close();
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testCreateTransaction_Buy_Success() {
-        Users sampleUser = createSampleUser();
-        BTCPriceHistory samplePriceHistory = createSamplePriceHistory();
+    void createTransaction_BuySuccess() {
+        // Arrange
+        Long userId = 1L;
+        double btcAmount = 0.5;
+        int currentPrice = 100;
 
-        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
-        when(btcPriceHistoryRepository.findTopByOrderByTimestampDesc()).thenReturn(Optional.of(samplePriceHistory));
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Users user = new Users();
+        user.setId(userId);
+        Wallet wallet = new Wallet(userId, 100, 0, user);
+        user.setWallet(wallet);
 
-        double btcAmount = 0.01;
-        Transaction transaction = transactionService.createTransaction(1L, btcAmount, TransactionType.BUY);
+        CreateTransactionRequest request = new CreateTransactionRequest(userId, btcAmount);
+        TransactionDTO transactionDTO = new TransactionDTO();
 
-        assertNotNull(transaction);
-        assertEquals(sampleUser, transaction.getUsers());
-        assertEquals(btcAmount, transaction.getBtcAmount());
-        assertEquals(samplePriceHistory, transaction.getBtcPriceHistory());
-        assertEquals(TransactionType.BUY, transaction.getTransactionType());
+        when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(priceService.getPrice()).thenReturn(currentPrice);
+        when(transactionMapper.toDto(any(Transaction.class), anyDouble(), anyDouble())).thenReturn(transactionDTO);
 
-        verify(usersRepository, times(1)).save(sampleUser);
-        verify(transactionRepository, times(1)).save(transaction);
+        // Act
+        TransactionDTO result = transactionService.createTransaction(request, TransactionType.BUY);
+
+        // Assert
+        assertNotNull(result);
+        verify(usersRepository, times(1)).findById(userId);
+        verify(priceService, times(1)).getPrice();
+        verify(transactionRepository, times(1)).save(any(Transaction.class));
+        verify(transactionMapper, times(1)).toDto(any(Transaction.class), anyDouble(), anyDouble());
     }
 
     @Test
-    void testCreateTransaction_Sell_Success() {
-        Users sampleUser = createSampleUser();
-        BTCPriceHistory samplePriceHistory = createSamplePriceHistory();
+    void createTransaction_UserNotFound() {
+        // Arrange
+        Long userId = 1L;
+        CreateTransactionRequest request = new CreateTransactionRequest(userId, 0.5);
 
-        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
-        when(btcPriceHistoryRepository.findTopByOrderByTimestampDesc()).thenReturn(Optional.of(samplePriceHistory));
-        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(usersRepository.findById(userId)).thenReturn(Optional.empty());
 
-        double btcAmount = 1.0;
-        Transaction transaction = transactionService.createTransaction(1L, btcAmount, TransactionType.SELL);
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transactionService.createTransaction(request, TransactionType.BUY));
 
-        assertNotNull(transaction);
-        assertEquals(sampleUser, transaction.getUsers());
-        assertEquals(btcAmount, transaction.getBtcAmount());
-        assertEquals(samplePriceHistory, transaction.getBtcPriceHistory());
-        assertEquals(TransactionType.SELL, transaction.getTransactionType());
-
-        verify(usersRepository, times(1)).save(sampleUser);
-        verify(transactionRepository, times(1)).save(transaction);
+        assertEquals("User not found", exception.getMessage());
+        verify(usersRepository, times(1)).findById(userId);
+        verify(priceService, times(0)).getPrice();
+        verify(transactionRepository, times(0)).save(any(Transaction.class));
     }
 
     @Test
-    void testCreateTransaction_Buy_InsufficientFunds() {
-        Users sampleUser = createSampleUser();
-        BTCPriceHistory samplePriceHistory = createSamplePriceHistory();
+    void getUserTransactionHistory_Success() {
+        // Arrange
+        Long userId = 1L;
+        Users user = new Users();
+        user.setId(userId);
 
-        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
-        when(btcPriceHistoryRepository.findTopByOrderByTimestampDesc()).thenReturn(Optional.of(samplePriceHistory));
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Transaction> transactionPage = new PageImpl<>(List.of(new Transaction()));
 
-        double btcAmount = 1.0; // This will require more USD than available
+        when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(transactionRepository.findByUsers(user, pageable)).thenReturn(transactionPage);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> transactionService.createTransaction(1L, btcAmount, TransactionType.BUY));
+        // Act
+        Page<TransactionDTO> result = transactionService.getUserTransactionHistory(userId, pageable);
 
-        assertEquals("Insufficient USD balance", exception.getMessage());
-
-        verify(usersRepository, never()).save(any(Users.class));
-        verify(transactionRepository, never()).save(any(Transaction.class));
-    }
-
-    @Test
-    void testCreateTransaction_Sell_InsufficientBTC() {
-        Users sampleUser = createSampleUser();
-        BTCPriceHistory samplePriceHistory = createSamplePriceHistory();
-
-        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(sampleUser));
-        when(btcPriceHistoryRepository.findTopByOrderByTimestampDesc()).thenReturn(Optional.of(samplePriceHistory));
-
-        double btcAmount = 3.0; // More BTC than available
-
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> transactionService.createTransaction(1L, btcAmount, TransactionType.SELL));
-
-        assertEquals("Insufficient BTC balance", exception.getMessage());
-
-        verify(usersRepository, never()).save(any(Users.class));
-        verify(transactionRepository, never()).save(any(Transaction.class));
-    }
-
-    private Users createSampleUser() {
-        Users sampleUser = new Users();
-        sampleUser.setId(1L);
-        sampleUser.setName("Jack Lee");
-        sampleUser.setEmail("jacklee@example.com");
-        sampleUser.setPassword("plainPassword");
-
-        Wallet sampleWallet = new Wallet();
-        sampleWallet.setId(1L);
-        sampleWallet.setUsdBalance(1000.0);
-        sampleWallet.setUsers(sampleUser);
-
-        sampleUser.setWallet(sampleWallet);
-
-        return sampleUser;
-    }
-
-    private BTCPriceHistory createSamplePriceHistory() {
-        BTCPriceHistory samplePriceHistory = new BTCPriceHistory();
-        samplePriceHistory.setId(1L);
-        samplePriceHistory.setPrice(50000.0);
-        samplePriceHistory.setTimestamp(LocalDateTime.now());
-        return samplePriceHistory;
+        // Assert
+        assertNotNull(result);
+        verify(usersRepository, times(1)).findById(userId);
+        verify(transactionRepository, times(1)).findByUsers(user, pageable);
     }
 }

@@ -3,32 +3,45 @@ package com.example.assignment.service.impl;
 import com.example.assignment.service.PriceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
+@SpringBootTest
+@TestPropertySource(properties = "initial.price=100")
 class PriceServiceImplTest {
 
+    @MockBean
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
     private PriceService priceService;
 
-    @BeforeEach
-    void setUp() {
-        priceService = new PriceServiceImpl();
-        // Setting the initial price using ReflectionTestUtils since @Value is not processed in unit tests
-        ReflectionTestUtils.setField(priceService, "price", 100);
+    @Test
+    void getPrice_PriceNotInRedis() {
+        when(redisTemplate.opsForValue().get("BTC_CURRENT_PRICE")).thenReturn(null);
+        int price = priceService.getPrice();
+        assertEquals(100, price, "The initial price should be 100 if not found in Redis.");
     }
 
     @Test
-    void testGetPrice() {
-        int expectedPrice = 100;
-        int actualPrice = priceService.getPrice();
-        assertEquals(expectedPrice, actualPrice, "The price should be 100");
+    void getPrice_PriceInRedis() {
+        when(redisTemplate.opsForValue().get("BTC_CURRENT_PRICE")).thenReturn(200);
+        int price = priceService.getPrice();
+        assertEquals(200, price, "The price from Redis should be 200.");
     }
 
     @Test
-    void testSetPrice() {
-        int newPrice = 200;
-        priceService.setPrice(newPrice);
-        assertEquals(newPrice, priceService.getPrice(), "The price should be 200 after setting it");
+    void setPrice() {
+        priceService.setPrice(300);
+        when(redisTemplate.opsForValue().get("BTC_CURRENT_PRICE")).thenReturn(300);
+        int price = priceService.getPrice();
+        assertEquals(300, price, "The price in Redis should be 300.");
     }
 }

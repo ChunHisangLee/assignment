@@ -7,18 +7,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Getter
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class CustomErrorException extends RuntimeException {
-
-    private final int status;
-    private final String error;
+    private final int statusCode;
+    private final String status;
     private final String message;
-    private final String details;
+    private final String path;
 
-    public CustomErrorException(int status, String error, String message, String details) {
+    public CustomErrorException(int statusCode, String status, String message, String path) {
         super(message);
+        this.statusCode = statusCode;
         this.status = status;
-        this.error = error;
         this.message = message;
-        this.details = details;
+        this.path = path;
     }
-
 }

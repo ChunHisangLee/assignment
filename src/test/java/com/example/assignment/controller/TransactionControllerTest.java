@@ -4,7 +4,6 @@ import com.example.assignment.dto.CreateTransactionRequest;
 import com.example.assignment.dto.TransactionDTO;
 import com.example.assignment.entity.TransactionType;
 import com.example.assignment.service.TransactionService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,18 +13,23 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class TransactionControllerTest {
+class TransactionControllerTest {
+
+    private MockMvc mockMvc;
 
     @Mock
     private TransactionService transactionService;
@@ -33,86 +37,70 @@ public class TransactionControllerTest {
     @InjectMocks
     private TransactionController transactionController;
 
-    private AutoCloseable closeable; // Declare AutoCloseable for mocks
-
     @BeforeEach
     void setUp() {
-        closeable = MockitoAnnotations.openMocks(this); // Initialize mocks and keep reference
-    }
-
-    @AfterEach
-    void tearDown() throws Exception {
-        closeable.close(); // Ensure mocks are closed
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(transactionController).build();
     }
 
     @Test
-    void testBuyBtc() {
+    void testBuyBtc() throws Exception {
         // Arrange
-        CreateTransactionRequest request = new CreateTransactionRequest();
-        request.setUserId(1L);
-        request.setBtcAmount(0.1);
-
+        CreateTransactionRequest request = new CreateTransactionRequest(1L, 0.5);
         TransactionDTO transactionDTO = new TransactionDTO();
         transactionDTO.setId(1L);
-        transactionDTO.setBtcAmount(0.1);
+        when(transactionService.createTransaction(eq(request), eq(TransactionType.BUY))).thenReturn(transactionDTO);
 
-        when(transactionService.createTransaction(any(CreateTransactionRequest.class), any(TransactionType.class)))
-                .thenReturn(transactionDTO);
+        // Act & Assert
+        mockMvc.perform(post("/api/transactions/buy")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"userId\": 1, \"btcAmount\": 0.5}"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"id\":1}"));
 
-        // Act
-        ResponseEntity<TransactionDTO> response = transactionController.buyBtc(request);
-
-        // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(transactionDTO, response.getBody());
+        verify(transactionService, times(1)).createTransaction(eq(request), eq(TransactionType.BUY));
     }
 
     @Test
-    void testSellBtc() {
+    void testSellBtc() throws Exception {
         // Arrange
-        CreateTransactionRequest request = new CreateTransactionRequest();
-        request.setUserId(1L);
-        request.setBtcAmount(0.1);
-
+        CreateTransactionRequest request = new CreateTransactionRequest(1L, 0.5);
         TransactionDTO transactionDTO = new TransactionDTO();
         transactionDTO.setId(1L);
-        transactionDTO.setBtcAmount(0.1);
+        when(transactionService.createTransaction(eq(request), eq(TransactionType.SELL))).thenReturn(transactionDTO);
 
-        when(transactionService.createTransaction(any(CreateTransactionRequest.class), any(TransactionType.class)))
-                .thenReturn(transactionDTO);
+        // Act & Assert
+        mockMvc.perform(post("/api/transactions/sell")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"userId\": 1, \"btcAmount\": 0.5}"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"id\":1}"));
 
-        // Act
-        ResponseEntity<TransactionDTO> response = transactionController.sellBtc(request);
-
-        // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(transactionDTO, response.getBody());
+        verify(transactionService, times(1)).createTransaction(eq(request), eq(TransactionType.SELL));
     }
 
     @Test
-    void testGetUserTransactionHistory() {
+    void testGetUserTransactionHistory() throws Exception {
         // Arrange
         Long userId = 1L;
-        Pageable pageable = PageRequest.of(0, 20); // Use Pageable correctly
+        TransactionDTO transactionDTO1 = new TransactionDTO();
+        transactionDTO1.setId(1L);
+        TransactionDTO transactionDTO2 = new TransactionDTO();
+        transactionDTO2.setId(2L);
 
-        TransactionDTO transaction1 = new TransactionDTO();
-        transaction1.setId(1L);
-        transaction1.setBtcAmount(0.1);
+        List<TransactionDTO> transactionDTOList = Arrays.asList(transactionDTO1, transactionDTO2);
+        Page<TransactionDTO> page = new PageImpl<>(transactionDTOList);
+        Pageable pageable = PageRequest.of(0, 10);
 
-        TransactionDTO transaction2 = new TransactionDTO();
-        transaction2.setId(2L);
-        transaction2.setBtcAmount(0.2);
+        when(transactionService.getUserTransactionHistory(eq(userId), eq(pageable))).thenReturn(page);
 
-        List<TransactionDTO> transactionList = Arrays.asList(transaction1, transaction2);
-        Page<TransactionDTO> page = new PageImpl<>(transactionList);
+        // Act & Assert
+        mockMvc.perform(get("/api/transactions/history/{userId}", userId)
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{\"content\":[{\"id\":1},{\"id\":2}]}"));
 
-        when(transactionService.getUserTransactionHistory(anyLong(), any(Pageable.class))).thenReturn(page);
-
-        // Act
-        ResponseEntity<Page<TransactionDTO>> response = transactionController.getUserTransactionHistory(userId, 0, 20);
-
-        // Assert
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(page, response.getBody());
+        verify(transactionService, times(1)).getUserTransactionHistory(eq(userId), eq(pageable));
     }
 }

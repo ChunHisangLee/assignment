@@ -15,7 +15,7 @@ public class PriceServiceImpl implements PriceService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    @Value("${initial.price}")
+    @Value("${initial.price:100}")
     private int initialPrice;
 
     public PriceServiceImpl(RedisTemplate<String, Object> redisTemplate) {
