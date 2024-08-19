@@ -59,6 +59,31 @@ public class Transaction {
         this.transactionType = transactionType;
     }
 
+    /**
+     * Perform the transaction and update user balances.
+     */
+    public void performTransaction() {
+        Wallet wallet = users.getWallet();
+
+        if (transactionType == TransactionType.BUY) {
+            double cost = btcAmount * btcPriceHistory.getPrice();
+
+            if (wallet.getUsdBalance() >= cost) {
+                wallet.setUsdBalance(wallet.getUsdBalance() - cost);
+                wallet.setBtcBalance(wallet.getBtcBalance() + btcAmount);
+            } else {
+                throw new IllegalArgumentException("Insufficient USD balance.");
+            }
+        } else if (transactionType == TransactionType.SELL) {
+            if (wallet.getBtcBalance() >= btcAmount) {
+                wallet.setBtcBalance(wallet.getBtcBalance() - btcAmount);
+                wallet.setUsdBalance(wallet.getUsdBalance() + btcAmount * btcPriceHistory.getPrice());
+            } else {
+                throw new IllegalArgumentException("Insufficient BTC balance.");
+            }
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

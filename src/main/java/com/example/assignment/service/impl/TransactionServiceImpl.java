@@ -29,37 +29,19 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction createTransaction(Long userId, double btcAmount, TransactionType transactionType) {
-        Users users = usersRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Users users = usersRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         // Get the latest BTC price from BTCPriceHistory
         BTCPriceHistory currentPriceHistory = btcPriceHistoryRepository.findTopByOrderByTimestampDesc()
                 .orElseThrow(() -> new IllegalArgumentException("No BTC price history found"));
 
-        double totalValue = currentPriceHistory.getPrice() * btcAmount;
+        Transaction transaction = new Transaction(users, currentPriceHistory, btcAmount, LocalDateTime.now(), transactionType);
 
-        if (transactionType == TransactionType.BUY) {
-            if (users.getWallet().getUsdBalance() < totalValue) {
-                throw new IllegalArgumentException("Insufficient USD balance");
-            }
+        // Perform the transaction (this will update the user's wallet balance)
+        transaction.performTransaction();
 
-            users.getWallet().setUsdBalance(users.getWallet().getUsdBalance() - totalValue);
-            users.getWallet().setBtcBalance(users.getWallet().getBtcBalance() + btcAmount);
-        } else if (transactionType == TransactionType.SELL) {
-            if (users.getWallet().getBtcBalance() < btcAmount) {
-                throw new IllegalArgumentException("Insufficient BTC balance");
-            }
-
-            users.getWallet().setBtcBalance(users.getWallet().getBtcBalance() - btcAmount);
-            users.getWallet().setUsdBalance(users.getWallet().getUsdBalance() + totalValue);
-        }
-
-        Transaction transaction = new Transaction();
-        transaction.setUsers(users);
-        transaction.setBtcAmount(btcAmount);
-        transaction.setBtcPriceHistory(currentPriceHistory); // Associate the transaction with the current BTC price history
-        transaction.setTransactionTime(LocalDateTime.now());
-        transaction.setTransactionType(transactionType);
-
+        // Save the updated user and the new transaction
         usersRepository.save(users);
         return transactionRepository.save(transaction);
     }

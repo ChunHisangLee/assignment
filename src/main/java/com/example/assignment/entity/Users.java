@@ -48,6 +48,7 @@ public class Users {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.wallet = new Wallet(1000.0, 0.0, this); // Initialize with 1000 USD balance
     }
 
     @Override
