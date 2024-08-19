@@ -3,11 +3,12 @@ server:
 
 spring:
   datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: Ab123456
-    url: jdbc:postgresql://localhost:5432/postgres
     driver-class-name: org.postgresql.Driver
-    default-auto-commit: true
+    hikari:
+      auto-commit: true
   jpa:
     hibernate:
       ddl-auto: update
@@ -15,6 +16,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 logging:
   level:
@@ -23,7 +28,6 @@ logging:
 springdoc:
   api-docs:
     path: /api-docs
-
   swagger-ui:
     path: /swagger-ui-custom.html
 
