@@ -1,6 +1,5 @@
 package com.example.assignment.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -14,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "transaction")
+@Table(name = "transactions")
 @Getter
 @Setter
 @ToString
@@ -29,7 +28,6 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
-    @JsonBackReference
     private Users users;
 
     @NotNull(message = "BTC price history cannot be null")
@@ -58,31 +56,6 @@ public class Transaction {
         this.btcAmount = btcAmount;
         this.transactionTime = transactionTime;
         this.transactionType = transactionType;
-    }
-
-    /**
-     * Perform the transaction and update user balances.
-     */
-    public void performTransaction() {
-        Wallet wallet = users.getWallet();
-
-        if (transactionType == TransactionType.BUY) {
-            double cost = btcAmount * btcPriceHistory.getPrice();
-
-            if (wallet.getUsdBalance() >= cost) {
-                wallet.setUsdBalance(wallet.getUsdBalance() - cost);
-                wallet.setBtcBalance(wallet.getBtcBalance() + btcAmount);
-            } else {
-                throw new IllegalArgumentException("Insufficient USD balance.");
-            }
-        } else if (transactionType == TransactionType.SELL) {
-            if (wallet.getBtcBalance() >= btcAmount) {
-                wallet.setBtcBalance(wallet.getBtcBalance() - btcAmount);
-                wallet.setUsdBalance(wallet.getUsdBalance() + btcAmount * btcPriceHistory.getPrice());
-            } else {
-                throw new IllegalArgumentException("Insufficient BTC balance.");
-            }
-        }
     }
 
     @Override
