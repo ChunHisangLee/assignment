@@ -50,7 +50,6 @@ class UserControllerTest {
 
     @Test
     void testRegisterUser_Success() throws Exception {
-        when(userService.createUser(any(Users.class))).thenReturn(sampleUser);
         when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
         when(userService.findByEmail(eq(sampleUser.getEmail()))).thenReturn(Optional.empty());
 
@@ -98,7 +97,6 @@ class UserControllerTest {
 
     @Test
     void testDeleteUser_Success() throws Exception {
-        when(userService.deleteUser(eq(1L))).thenReturn(true);
 
         mockMvc.perform(delete("/api/users/1"))
                 .andExpect(status().isOk());

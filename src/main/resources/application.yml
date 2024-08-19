@@ -27,3 +27,7 @@ springdoc:
 
 initial:
   price: 100
+
+app:
+  jwtSecret: 8HaCkmEifyOucan!@#7
+  jwtExpirationMs: 3600000

@@ -1,7 +1,6 @@
 package com.example.assignment.mapper;
 
 import com.example.assignment.dto.UsersDTO;
-import com.example.assignment.dto.WalletDTO;
 import com.example.assignment.entity.Users;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +14,19 @@ public class UsersMapper {
     }
 
     public UsersDTO convertToDto(Users users) {
-        WalletDTO walletDTO = walletMapper.convertToDto(users.getWallet());
-        return new UsersDTO(users.getId(), users.getName(), users.getEmail(), walletDTO);
+        return new UsersDTO(
+                users.getId(),
+                users.getName(),
+                users.getEmail()
+        );
+    }
+
+    public Users convertToEntity(UsersDTO usersDTO) {
+        Users users = new Users();
+        users.setId(usersDTO.getId());
+        users.setName(usersDTO.getName());
+        users.setEmail(usersDTO.getEmail());
+        users.setPassword(usersDTO.getPassword()); // Map password from DTO to entity
+        return users;
     }
 }
