@@ -34,7 +34,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionDTO createTransaction(CreateTransactionRequest request, String transactionType) {
+    public TransactionDTO createTransaction(CreateTransactionRequest request, TransactionType transactionType) {
         Users user = usersRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -43,7 +43,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new IllegalArgumentException("No BTC price history found"));
 
         Transaction transaction = new Transaction(user, currentPriceHistory, request.getBtcAmount(),
-                LocalDateTime.now(), TransactionType.valueOf(transactionType));
+                LocalDateTime.now(), transactionType);
 
         // Perform the transaction (this will update the user's wallet balance)
         transaction.performTransaction();

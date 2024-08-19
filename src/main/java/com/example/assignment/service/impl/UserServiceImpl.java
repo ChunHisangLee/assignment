@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static com.example.assignment.constants.ErrorMessages.*;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -27,9 +29,9 @@ public class UserServiceImpl implements UserService {
         if (usersRepository.findByEmail(users.getEmail()).isPresent()) {
             throw new CustomErrorException(
                     HttpStatus.CONFLICT.value(),
-                    "Conflict",
-                    "Email already registered. Try to log in or register with another email.",
-                    "POST /api/users"
+                    CONFLICT_STATUS,
+                    EMAIL_ALREADY_REGISTERED,
+                    POST_USER_API_PATH
             );
         }
 
@@ -51,17 +53,17 @@ public class UserServiceImpl implements UserService {
     public Optional<Users> updateUser(Long id, Users users) {
         Users existingUser = usersRepository.findById(id).orElseThrow(() -> new CustomErrorException(
                 HttpStatus.NOT_FOUND.value(),
-                "Not Found",
-                "User not found.",
-                "PUT /api/users/" + id
+                NOT_FOUND_STATUS,
+                USER_NOT_FOUND,
+                PUT_USER_API_PATH + id
         ));
 
         if (usersRepository.findByEmail(users.getEmail()).filter(user -> !user.getId().equals(id)).isPresent()) {
             throw new CustomErrorException(
                     HttpStatus.CONFLICT.value(),
-                    "Conflict",
-                    "Email already registered by another user.",
-                    "PUT /api/users/" + id
+                    CONFLICT_STATUS,
+                    EMAIL_ALREADY_REGISTERED_BY_ANOTHER_USER,
+                    PUT_USER_API_PATH + id
             );
         }
 
@@ -79,9 +81,9 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
         Users user = usersRepository.findById(id).orElseThrow(() -> new CustomErrorException(
                 HttpStatus.NOT_FOUND.value(),
-                "Not Found",
-                "User not found.",
-                "DELETE /api/users/" + id
+                NOT_FOUND_STATUS,
+                USER_NOT_FOUND,
+                DELETE_USER_API_PATH + id
         ));
         usersRepository.delete(user);
     }
@@ -90,17 +92,17 @@ public class UserServiceImpl implements UserService {
     public Users login(String email, String password) {
         Users user = usersRepository.findByEmail(email).orElseThrow(() -> new CustomErrorException(
                 HttpStatus.UNAUTHORIZED.value(),
-                "Unauthorized",
-                "Invalid email or password.",
-                "POST /api/users/login"
+                UNAUTHORIZED_STATUS,
+                INVALID_EMAIL_OR_PASSWORD,
+                POST_LOGIN_API_PATH
         ));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new CustomErrorException(
                     HttpStatus.UNAUTHORIZED.value(),
-                    "Unauthorized",
-                    "Invalid email or password.",
-                    "POST /api/users/login"
+                    UNAUTHORIZED_STATUS,
+                    INVALID_EMAIL_OR_PASSWORD,
+                    POST_LOGIN_API_PATH
             );
         }
 
@@ -111,12 +113,11 @@ public class UserServiceImpl implements UserService {
     public Optional<Users> getUserById(Long id) {
         return Optional.ofNullable(usersRepository.findById(id).orElseThrow(() -> new CustomErrorException(
                 HttpStatus.NOT_FOUND.value(),
-                "Not Found",
-                "User not found.",
-                "GET /api/users/" + id
+                NOT_FOUND_STATUS,
+                USER_NOT_FOUND,
+                GET_USER_API_PATH + id
         )));
     }
-
 
     @Override
     public Optional<Users> findByEmail(String email) {

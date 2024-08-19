@@ -19,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
+import static com.example.assignment.constants.ErrorMessages.*;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -51,9 +53,9 @@ public class UserController {
         Users updatedUser = userService.updateUser(id, users)
                 .orElseThrow(() -> new CustomErrorException(
                         HttpStatus.NOT_FOUND.value(),
-                        "Not Found",
-                        "User not found.",
-                        "PUT /api/users/" + id
+                        NOT_FOUND_STATUS,
+                        USER_NOT_FOUND,
+                        GET_USER_API_PATH + id
                 ));
         return ResponseEntity.ok(usersMapper.convertToDto(updatedUser));
     }
@@ -69,9 +71,9 @@ public class UserController {
         Users user = userService.getUserById(id)
                 .orElseThrow(() -> new CustomErrorException(
                         HttpStatus.NOT_FOUND.value(),
-                        "Not Found",
-                        "User not found.",
-                        "GET /api/users/" + id
+                        NOT_FOUND_STATUS,
+                        USER_NOT_FOUND,
+                        GET_USER_API_PATH + id
                 ));
         return ResponseEntity.ok(usersMapper.convertToDto(user));
     }
