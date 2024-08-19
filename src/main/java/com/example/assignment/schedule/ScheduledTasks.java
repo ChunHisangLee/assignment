@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Component
 @Slf4j
 public class ScheduledTasks {
+
     private static final int MIN_PRICE = 100;
     private static final int MAX_PRICE = 460;
     private static final int PRICE_INCREMENT = 10;
@@ -31,15 +32,19 @@ public class ScheduledTasks {
     public ScheduledTasks(PriceService priceService, BTCPriceHistoryRepository btcPriceHistoryRepository) {
         this.priceService = priceService;
         this.btcPriceHistoryRepository = btcPriceHistoryRepository;
-        insertInitialPrice();
+        saveInitialPrice();
     }
 
-    private void insertInitialPrice() {
+    private void saveInitialPrice() {
+        // Save the initial price to Redis and database
+        priceService.setPrice(currentPrice);
+
         BTCPriceHistory initialPriceHistory = new BTCPriceHistory();
-        initialPriceHistory.setPrice(MIN_PRICE);
+        initialPriceHistory.setPrice(currentPrice);
         initialPriceHistory.setTimestamp(LocalDateTime.now());
         btcPriceHistoryRepository.save(initialPriceHistory);
-        log.info("Inserted initial BTC Price: {}", MIN_PRICE);
+
+        log.info("Saved initial BTC Price to Redis and database: {}", currentPrice);
     }
 
     @Scheduled(fixedRate = SCHEDULE_RATE_MS)
@@ -58,12 +63,16 @@ public class ScheduledTasks {
         }
 
         log.info("Updated BTC Price: {}", currentPrice);
+
+        // Save the updated price to Redis
         priceService.setPrice(currentPrice);
 
+        // Save the updated price to the database
         BTCPriceHistory priceHistory = new BTCPriceHistory();
         priceHistory.setPrice(currentPrice);
         priceHistory.setTimestamp(LocalDateTime.now());
         btcPriceHistoryRepository.save(priceHistory);
-        log.info("Saved BTC Price to database: {}", priceHistory);
+
+        log.info("Saved updated BTC Price to Redis and database: {}", currentPrice);
     }
 }

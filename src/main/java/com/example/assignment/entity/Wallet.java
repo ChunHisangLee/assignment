@@ -13,6 +13,7 @@ import java.util.Objects;
 @Builder
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class Wallet {
 
     @Id
@@ -31,12 +32,6 @@ public class Wallet {
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     @ToString.Exclude
     private Users users;
-
-    public Wallet(double usdBalance, double btcBalance, Users users) {
-        this.usdBalance = usdBalance;
-        this.btcBalance = btcBalance;
-        this.users = users;
-    }
 
     @Override
     public boolean equals(Object o) {

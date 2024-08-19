@@ -17,6 +17,7 @@ import java.util.Objects;
 @Builder
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class Users {
 
     @Id
@@ -45,13 +46,6 @@ public class Users {
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @ToString.Exclude
     private List<Transaction> transactions = new ArrayList<>();
-
-    public Users(String name, String email, String password) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.wallet = new Wallet(1000.0, 0.0, this); // Initialize wallet with 1000 USD balance
-    }
 
     public void addTransaction(Transaction transaction) {
         transactions.add(transaction);

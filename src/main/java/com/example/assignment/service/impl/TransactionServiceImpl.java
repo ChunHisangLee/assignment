@@ -4,9 +4,9 @@ import com.example.assignment.dto.CreateTransactionRequest;
 import com.example.assignment.dto.TransactionDTO;
 import com.example.assignment.entity.*;
 import com.example.assignment.mapper.TransactionMapper;
-import com.example.assignment.repository.BTCPriceHistoryRepository;
 import com.example.assignment.repository.TransactionRepository;
 import com.example.assignment.repository.UsersRepository;
+import com.example.assignment.service.PriceService;
 import com.example.assignment.service.TransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,15 +18,15 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final UsersRepository usersRepository;
-    private final BTCPriceHistoryRepository btcPriceHistoryRepository;
     private final TransactionMapper transactionMapper;
+    private final PriceService priceService;
 
     public TransactionServiceImpl(TransactionRepository transactionRepository, UsersRepository usersRepository,
-                                  BTCPriceHistoryRepository btcPriceHistoryRepository, TransactionMapper transactionMapper) {
+                                  TransactionMapper transactionMapper, PriceService priceService) {
         this.transactionRepository = transactionRepository;
         this.usersRepository = usersRepository;
-        this.btcPriceHistoryRepository = btcPriceHistoryRepository;
         this.transactionMapper = transactionMapper;
+        this.priceService = priceService;
     }
 
     @Override
@@ -35,12 +35,21 @@ public class TransactionServiceImpl implements TransactionService {
         Users user = usersRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        BTCPriceHistory currentPriceHistory = btcPriceHistoryRepository.findTopByOrderByTimestampDesc()
-                .orElseThrow(() -> new IllegalArgumentException("No BTC price history found"));
+        // Fetch the current price from Redis
+        int currentPrice = priceService.getPrice();
+
+        // No need to check for null if we are sure currentPrice will never be null
+        BTCPriceHistory currentPriceHistory = BTCPriceHistory.builder()
+                .price(currentPrice)
+                .build();
 
         Wallet wallet = user.getWallet();
-        Transaction transaction = new Transaction(user, currentPriceHistory, request.getBtcAmount(),
-                transactionType);
+        Transaction transaction = Transaction.builder()
+                .users(user)
+                .btcPriceHistory(currentPriceHistory)
+                .btcAmount(request.getBtcAmount())
+                .transactionType(transactionType)
+                .build();
 
         // Perform the transaction and update the wallet balance
         performTransaction(transaction, wallet);
@@ -49,7 +58,7 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.save(transaction);
 
         // Convert to DTO
-        return transactionMapper.convertToDto(transaction, wallet.getUsdBalance(), wallet.getBtcBalance());
+        return transactionMapper.toDto(transaction, wallet.getUsdBalance(), wallet.getBtcBalance());
     }
 
     @Override
@@ -60,16 +69,10 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.findByUsers(user, pageable)
                 .map(transaction -> {
                     Wallet wallet = transaction.getUsers().getWallet();
-                    return transactionMapper.convertToDto(transaction, wallet.getUsdBalance(), wallet.getBtcBalance());
+                    return transactionMapper.toDto(transaction, wallet.getUsdBalance(), wallet.getBtcBalance());
                 });
     }
 
-    /**
-     * Handles the business logic for performing a transaction, updating the user's wallet balance.
-     *
-     * @param transaction the transaction to be performed.
-     * @param wallet      the wallet to update.
-     */
     private void performTransaction(Transaction transaction, Wallet wallet) {
         double totalAmount = transaction.getBtcAmount() * transaction.getBtcPriceHistory().getPrice();
 

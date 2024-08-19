@@ -4,8 +4,6 @@ import com.example.assignment.dto.WalletDTO;
 import com.example.assignment.entity.Wallet;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 public class WalletMapper {
 
@@ -16,13 +14,14 @@ public class WalletMapper {
      * @return the corresponding WalletDTO
      */
     public WalletDTO toDto(Wallet wallet) {
-        return Optional.ofNullable(wallet)
-                .map(entity -> new WalletDTO(
-                        entity.getId(),
-                        entity.getUsdBalance(),
-                        entity.getBtcBalance()
-                ))
-                .orElse(null);
+        if (wallet == null) {
+            return null;
+        }
+        return WalletDTO.builder()
+                .id(wallet.getId())
+                .usdBalance(wallet.getUsdBalance())
+                .btcBalance(wallet.getBtcBalance())
+                .build();
     }
 
     /**
@@ -32,12 +31,12 @@ public class WalletMapper {
      * @return the corresponding Wallet entity
      */
     public Wallet toEntity(WalletDTO walletDTO) {
-        return Optional.ofNullable(walletDTO)
-                .map(dto -> new Wallet(
-                        dto.getUsdBalance(),
-                        dto.getBtcBalance(),
-                        null // Assuming the Users reference is set elsewhere
-                ))
-                .orElse(null);
+        if (walletDTO == null) {
+            return null;
+        }
+        return Wallet.builder()
+                .usdBalance(walletDTO.getUsdBalance())
+                .btcBalance(walletDTO.getBtcBalance())
+                .build();
     }
 }
