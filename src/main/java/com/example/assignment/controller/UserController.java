@@ -45,18 +45,16 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<UsersDTO> registerUser(@Valid @RequestBody UsersDTO usersDTO) {
         logger.info("Registering new user with email: {}", usersDTO.getEmail());
-        Users users = usersMapper.convertToEntity(usersDTO);
-        users.setPassword(usersDTO.getPassword()); // Set password separately
+        Users users = usersMapper.toEntity(usersDTO);
         Users createdUser = userService.registerUser(users);
         logger.info("User registered successfully with ID: {}", createdUser.getId());
-        return ResponseEntity.ok(usersMapper.convertToDto(createdUser));
+        return ResponseEntity.ok(usersMapper.toDto(createdUser));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UsersDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UsersDTO usersDTO) {
         logger.info("Updating user with ID: {}", id);
-        Users users = usersMapper.convertToEntity(usersDTO);
-        users.setPassword(usersDTO.getPassword()); // Set password separately
+        Users users = usersMapper.toEntity(usersDTO);
         Users updatedUser = userService.updateUser(id, users)
                 .orElseThrow(() -> {
                     logger.error("User with ID: {} not found for update.", id);
@@ -68,7 +66,7 @@ public class UserController {
                     );
                 });
         logger.info("User with ID: {} updated successfully.", id);
-        return ResponseEntity.ok(usersMapper.convertToDto(updatedUser));
+        return ResponseEntity.ok(usersMapper.toDto(updatedUser));
     }
 
     @DeleteMapping("/{id}")
@@ -93,7 +91,7 @@ public class UserController {
                     );
                 });
         logger.info("User with ID: {} found.", id);
-        return ResponseEntity.ok(usersMapper.convertToDto(user));
+        return ResponseEntity.ok(usersMapper.toDto(user));
     }
 
     @PostMapping("/login")

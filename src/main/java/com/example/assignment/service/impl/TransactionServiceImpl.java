@@ -8,6 +8,8 @@ import com.example.assignment.repository.TransactionRepository;
 import com.example.assignment.repository.UsersRepository;
 import com.example.assignment.service.PriceService;
 import com.example.assignment.service.TransactionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
+
+    private static final Logger logger = LoggerFactory.getLogger(TransactionServiceImpl.class);
 
     private final TransactionRepository transactionRepository;
     private final UsersRepository usersRepository;
@@ -33,12 +37,14 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public TransactionDTO createTransaction(CreateTransactionRequest request, TransactionType transactionType) {
         Users user = usersRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> {
+                    logger.error("User with ID {} not found", request.getUserId());
+                    return new IllegalArgumentException("User not found");
+                });
 
-        // Fetch the current price from Redis
         int currentPrice = priceService.getPrice();
+        logger.info("Fetched current BTC price: {}", currentPrice);
 
-        // No need to check for null if we are sure currentPrice will never be null
         BTCPriceHistory currentPriceHistory = BTCPriceHistory.builder()
                 .price(currentPrice)
                 .build();
@@ -51,13 +57,13 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionType(transactionType)
                 .build();
 
-        // Perform the transaction and update the wallet balance
+        logger.info("Performing {} transaction for user with ID {}", transactionType, user.getId());
+
         performTransaction(transaction, wallet);
 
-        // Save the transaction (user is saved due to cascading)
         transactionRepository.save(transaction);
+        logger.info("Transaction saved for user with ID {}", user.getId());
 
-        // Convert to DTO
         return transactionMapper.toDto(transaction, wallet.getUsdBalance(), wallet.getBtcBalance());
     }
 
