@@ -3,6 +3,7 @@ package com.example.assignment.schedule;
 import com.example.assignment.entity.BTCPriceHistory;
 import com.example.assignment.repository.BTCPriceHistoryRepository;
 import com.example.assignment.service.PriceService;
+import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,9 +31,19 @@ public class ScheduledTasks {
     public ScheduledTasks(PriceService priceService, BTCPriceHistoryRepository btcPriceHistoryRepository) {
         this.priceService = priceService;
         this.btcPriceHistoryRepository = btcPriceHistoryRepository;
+        insertInitialPrice();
+    }
+
+    private void insertInitialPrice() {
+        BTCPriceHistory initialPriceHistory = new BTCPriceHistory();
+        initialPriceHistory.setPrice(MIN_PRICE);
+        initialPriceHistory.setTimestamp(LocalDateTime.now());
+        btcPriceHistoryRepository.save(initialPriceHistory);
+        log.info("Inserted initial BTC Price: {}", MIN_PRICE);
     }
 
     @Scheduled(fixedRate = SCHEDULE_RATE_MS)
+    @Transactional
     public void updateCurrentPrice() {
         if (isIncreasing) {
             currentPrice += PRICE_INCREMENT;
@@ -53,5 +64,6 @@ public class ScheduledTasks {
         priceHistory.setPrice(currentPrice);
         priceHistory.setTimestamp(LocalDateTime.now());
         btcPriceHistoryRepository.save(priceHistory);
+        log.info("Saved BTC Price to database: {}", priceHistory);
     }
 }

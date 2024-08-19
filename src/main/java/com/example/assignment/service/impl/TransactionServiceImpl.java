@@ -1,9 +1,12 @@
 package com.example.assignment.service.impl;
 
+import com.example.assignment.dto.CreateTransactionRequest;
+import com.example.assignment.dto.TransactionDTO;
 import com.example.assignment.entity.BTCPriceHistory;
 import com.example.assignment.entity.Transaction;
 import com.example.assignment.entity.TransactionType;
 import com.example.assignment.entity.Users;
+import com.example.assignment.mapper.TransactionMapper;
 import com.example.assignment.repository.BTCPriceHistoryRepository;
 import com.example.assignment.repository.TransactionRepository;
 import com.example.assignment.repository.UsersRepository;
@@ -20,37 +23,44 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final UsersRepository usersRepository;
     private final BTCPriceHistoryRepository btcPriceHistoryRepository;
+    private final TransactionMapper transactionMapper;
 
-    public TransactionServiceImpl(TransactionRepository transactionRepository, UsersRepository usersRepository, BTCPriceHistoryRepository btcPriceHistoryRepository) {
+    public TransactionServiceImpl(TransactionRepository transactionRepository, UsersRepository usersRepository,
+                                  BTCPriceHistoryRepository btcPriceHistoryRepository, TransactionMapper transactionMapper) {
         this.transactionRepository = transactionRepository;
         this.usersRepository = usersRepository;
         this.btcPriceHistoryRepository = btcPriceHistoryRepository;
+        this.transactionMapper = transactionMapper;
     }
 
     @Override
-    public Transaction createTransaction(Long userId, double btcAmount, TransactionType transactionType) {
-        Users users = usersRepository.findById(userId)
+    public TransactionDTO createTransaction(CreateTransactionRequest request, String transactionType) {
+        Users user = usersRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         // Get the latest BTC price from BTCPriceHistory
         BTCPriceHistory currentPriceHistory = btcPriceHistoryRepository.findTopByOrderByTimestampDesc()
                 .orElseThrow(() -> new IllegalArgumentException("No BTC price history found"));
 
-        Transaction transaction = new Transaction(users, currentPriceHistory, btcAmount, LocalDateTime.now(), transactionType);
+        Transaction transaction = new Transaction(user, currentPriceHistory, request.getBtcAmount(),
+                LocalDateTime.now(), TransactionType.valueOf(transactionType));
 
         // Perform the transaction (this will update the user's wallet balance)
         transaction.performTransaction();
 
         // Save the updated user and the new transaction
-        usersRepository.save(users);
-        return transactionRepository.save(transaction);
+        usersRepository.save(user);
+        transactionRepository.save(transaction);
+
+        return transactionMapper.convertToDto(transaction);
     }
 
     @Override
-    public Page<Transaction> getUserTransactionHistory(Long userId, Pageable pageable) {
-        Users users = usersRepository.findById(userId)
+    public Page<TransactionDTO> getUserTransactionHistory(Long userId, Pageable pageable) {
+        Users user = usersRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return transactionRepository.findByUsers(users, pageable);
-    }
 
+        return transactionRepository.findByUsers(user, pageable)
+                .map(transactionMapper::convertToDto);
+    }
 }

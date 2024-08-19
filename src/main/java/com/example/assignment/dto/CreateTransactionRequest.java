@@ -9,8 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class WalletDTO {
-    private Long id;
-    private double usdBalance;
-    private double btcBalance;
+public class CreateTransactionRequest {
+    private Long userId;
+    private double btcAmount;
 }

@@ -12,6 +12,7 @@ import lombok.ToString;
 import java.util.Objects;
 
 @Entity
+@Table(name = "wallet")
 @Getter
 @Setter
 @ToString

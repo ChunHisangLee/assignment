@@ -1,12 +1,11 @@
 package com.example.assignment.service;
 
-import com.example.assignment.entity.Transaction;
-import com.example.assignment.entity.TransactionType;
+import com.example.assignment.dto.TransactionDTO;
+import com.example.assignment.dto.CreateTransactionRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface TransactionService {
-    Transaction createTransaction(Long userId, double btcAmount, TransactionType transactionType);
-
-    Page<Transaction> getUserTransactionHistory(Long userId, Pageable pageable);
+    TransactionDTO createTransaction(CreateTransactionRequest request, String transactionType);
+    Page<TransactionDTO> getUserTransactionHistory(Long userId, Pageable pageable);
 }
