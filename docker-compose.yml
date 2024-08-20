@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    image: assignment-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Ab123456
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      INITIAL_PRICE: 100
+      APP_JWT_SECRET: Xb34fJd9kPbvmJc84mDkV9b3Xb4fJd9kPbvmJc84mDkV9b3Xb34fJd9kPbvmJc84
+      APP_JWT_EXPIRATION_MS: 3600000
+      SECURITY_AUTHENTICATION_ENABLED: false
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Ab123456
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
