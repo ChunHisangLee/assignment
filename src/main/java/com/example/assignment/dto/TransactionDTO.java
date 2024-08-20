@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class TransactionDTO {
     private Long id;
+    private Long userId;
     private double btcAmount;
     private LocalDateTime transactionTime;
     private TransactionType transactionType;
