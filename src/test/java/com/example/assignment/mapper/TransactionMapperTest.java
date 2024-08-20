@@ -39,13 +39,13 @@ class TransactionMapperTest {
 
         Users user = Users.builder()
                 .id(1L)
-                .name("Jack")
-                .email("jack@example.com")
+                .name("Jack Lee")
+                .email("jacklee@example.com")
                 .build();
 
         Wallet wallet = Wallet.builder()
-                .usdBalance(1000.0)
-                .btcBalance(0.5)
+                .usdBalance(1200.0)
+                .btcBalance(0.6)
                 .users(user)
                 .build();
 
@@ -60,21 +60,26 @@ class TransactionMapperTest {
                 .users(user)
                 .build();
 
-        when(btcPriceHistoryMapper.toDto(btcPriceHistory)).thenReturn(null); // Mock the return value for simplicity
-        when(usersMapper.toDto(user)).thenReturn(null); // Mock the return value for simplicity
+        TransactionDTO expectedTransactionDTO = TransactionDTO.builder()
+                .id(1L)
+                .userId(1L)
+                .btcAmount(0.01)
+                .transactionTime(LocalDateTime.of(2023, 1, 1, 12, 0))
+                .transactionType(TransactionType.BUY)
+                .usdBalanceBefore(1000.0)
+                .btcBalanceBefore(0.5)
+                .usdBalanceAfter(1200.0)
+                .btcBalanceAfter(0.6)
+                .build();
+
+        when(btcPriceHistoryMapper.toDto(btcPriceHistory)).thenReturn(null); // Mock return value
+        when(usersMapper.toDto(user)).thenReturn(null); // Mock return value
 
         // When
         TransactionDTO transactionDTO = transactionMapper.toDto(transaction, 1000.0, 0.5);
 
         // Then
-        assertThat(transactionDTO).isNotNull();
-        assertThat(transactionDTO.getId()).isEqualTo(1L);
-        assertThat(transactionDTO.getBtcAmount()).isEqualTo(0.01);
-        assertThat(transactionDTO.getTransactionTime()).isEqualTo(LocalDateTime.of(2023, 1, 1, 12, 0));
-        assertThat(transactionDTO.getTransactionType()).isEqualTo(TransactionType.BUY);
-        assertThat(transactionDTO.getUsdBalanceBefore()).isEqualTo(1000.0);
-        assertThat(transactionDTO.getBtcBalanceBefore()).isEqualTo(0.5);
-        assertThat(transactionDTO.getUsdBalanceAfter()).isEqualTo(1000.0);
-        assertThat(transactionDTO.getBtcBalanceAfter()).isEqualTo(0.5);
+        assertThat(transactionDTO).usingRecursiveComparison()
+                .isEqualTo(expectedTransactionDTO);
     }
 }

@@ -18,6 +18,7 @@ public class TransactionMapper {
     public TransactionDTO toDto(Transaction transaction, double usdBalanceBefore, double btcBalanceBefore) {
         return TransactionDTO.builder()
                 .id(transaction.getId())
+                .userId(transaction.getUsers().getId())
                 .btcAmount(transaction.getBtcAmount())
                 .transactionTime(transaction.getTransactionTime())
                 .transactionType(transaction.getTransactionType())
