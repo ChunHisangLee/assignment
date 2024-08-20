@@ -108,7 +108,7 @@ class TransactionRepositoryTest {
         Page<Transaction> page = transactionRepository.findByUsers(user, pageable);
 
         // Assertions
-        assertThat(page.getTotalElements()).isEqualTo(0);
+        assertThat(page.getTotalElements()).isZero();
         assertThat(page.getContent()).isEmpty();
     }
 }

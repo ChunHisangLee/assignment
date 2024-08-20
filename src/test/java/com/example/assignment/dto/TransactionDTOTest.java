@@ -2,8 +2,8 @@ package com.example.assignment.dto;
 
 import com.example.assignment.entity.TransactionType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -58,17 +58,20 @@ class TransactionDTOTest {
         String json = objectMapper.writeValueAsString(transactionDTO);
 
         // Assert
-        assertThat(json).isNotNull();
-        assertThat(json).contains("\"transactionTime\":\"2023-01-01T12:00:00\"");
-        assertThat(json).contains("\"id\":1");
-        assertThat(json).contains("\"userId\":1");
-        assertThat(json).contains("\"btcAmount\":0.01");
-        assertThat(json).contains("\"transactionType\":\"BUY\"");
-        assertThat(json).contains("\"usdBalanceBefore\":1000.0");
-        assertThat(json).contains("\"btcBalanceBefore\":0.5");
-        assertThat(json).contains("\"usdBalanceAfter\":1200.0");
-        assertThat(json).contains("\"btcBalanceAfter\":0.6");
-        assertThat(json).contains("\"btcPriceHistory\"");
-        assertThat(json).contains("\"users\"");
+        assertThat(json)
+                .isNotNull()
+                .contains(
+                        "\"transactionTime\":\"2023-01-01T12:00:00\"",
+                        "\"id\":1",
+                        "\"userId\":1",
+                        "\"btcAmount\":0.01",
+                        "\"transactionType\":\"BUY\"",
+                        "\"usdBalanceBefore\":1000.0",
+                        "\"btcBalanceBefore\":0.5",
+                        "\"usdBalanceAfter\":1200.0",
+                        "\"btcBalanceAfter\":0.6",
+                        "\"btcPriceHistory\"",
+                        "\"users\""
+                );
     }
 }

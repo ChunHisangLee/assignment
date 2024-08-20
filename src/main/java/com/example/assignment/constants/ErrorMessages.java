@@ -1,6 +1,9 @@
 package com.example.assignment.constants;
 
 public class ErrorMessages {
+    private ErrorMessages() {
+        throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
+    }
 
     // General Status Messages
     public static final String NOT_FOUND_STATUS = "Not Found";

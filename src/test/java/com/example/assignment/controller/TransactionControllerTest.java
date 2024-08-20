@@ -98,7 +98,7 @@ class TransactionControllerTest {
         Pageable pageable = PageRequest.of(0, 20);
         Page<TransactionDTO> page = new PageImpl<>(transactionDTOList, pageable, transactionDTOList.size());
 
-        when(transactionService.getUserTransactionHistory(eq(userId), eq(pageable))).thenReturn(page);
+        when(transactionService.getUserTransactionHistory(userId, pageable)).thenReturn(page);
 
         // Act & Assert
         mockMvc.perform(get("/api/transactions/history/{userId}", userId)
@@ -107,6 +107,6 @@ class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"content\":[{\"id\":1},{\"id\":2}]}"));
 
-        verify(transactionService, times(1)).getUserTransactionHistory(eq(userId), eq(pageable));
+        verify(transactionService, times(1)).getUserTransactionHistory(userId, pageable);
     }
 }

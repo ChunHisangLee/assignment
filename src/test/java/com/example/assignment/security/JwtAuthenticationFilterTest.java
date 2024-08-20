@@ -61,8 +61,9 @@ class JwtAuthenticationFilterTest {
         verify(filterChain, times(1)).doFilter(request, response);
 
         Authentication authInContext = SecurityContextHolder.getContext().getAuthentication();
-        assertThat(authInContext).isNotNull();
-        assertThat(authInContext).isEqualTo(authentication);
+        assertThat(authInContext)
+                .isNotNull()
+                .isEqualTo(authentication);
     }
 
     @Test

@@ -95,7 +95,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UsersDTO loginRequest) {
+    public ResponseEntity<JwtAuthenticationResponse> login(@RequestBody UsersDTO loginRequest) {
         logger.info("User login attempt with email: {}", loginRequest.getEmail());
         try {
             // Authenticate the user using the AuthenticationManager
@@ -112,7 +112,7 @@ public class UserController {
             return ResponseEntity.ok(new JwtAuthenticationResponse(token));
         } catch (RuntimeException ex) {
             logger.error("Invalid credentials for email: {}", loginRequest.getEmail());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
 

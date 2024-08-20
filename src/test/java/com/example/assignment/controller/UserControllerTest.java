@@ -111,7 +111,7 @@ class UserControllerTest {
 
     @Test
     void testGetUserById_Success() throws Exception {
-        when(userService.getUserById(eq(1L))).thenReturn(Optional.of(sampleUser));
+        when(userService.getUserById(1L)).thenReturn(Optional.of(sampleUser));
         when(usersMapper.toDto(any(Users.class))).thenReturn(sampleUserDTO);
 
         mockMvc.perform(get("/api/users/1")

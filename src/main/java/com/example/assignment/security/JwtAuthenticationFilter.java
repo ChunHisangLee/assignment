@@ -17,7 +17,7 @@ import java.io.IOException;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private static final Logger jwtLogger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -37,12 +37,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
                 Authentication authentication = jwtTokenProvider.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                logger.info("Authenticated request with token for user: {}", authentication.getName());
+                jwtLogger.info("Authenticated request with token for user: {}", authentication.getName());
             } else {
-                logger.warn("Invalid or missing JWT token in request");
+                jwtLogger.warn("Invalid or missing JWT token in request");
             }
         } catch (Exception ex) {
-            logger.error("Failed to authenticate user with token", ex);
+            jwtLogger.error("Failed to authenticate user with token", ex);
         }
 
         filterChain.doFilter(request, response);
