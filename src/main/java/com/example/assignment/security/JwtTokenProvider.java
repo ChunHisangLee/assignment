@@ -1,5 +1,6 @@
 package com.example.assignment.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -36,28 +37,25 @@ public class JwtTokenProvider {
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
 
         return Jwts.builder()
-                .setSubject(userPrincipal.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(secretKey)  // Updated method to use SecretKey directly
+                .subject(userPrincipal.getUsername())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .signWith(secretKey)
                 .compact();
     }
 
     public String getUsernameFromJwt(String token) {
-        JwtParser jwtParser = Jwts.parser()
-                .setSigningKey(secretKey)
-                .build();
-
-        return jwtParser.parseClaimsJws(token).getBody().getSubject();
+        Claims claims = getAllClaimsFromToken(token);
+        return claims.getSubject();
     }
 
     public boolean validateToken(String authToken) {
         try {
             JwtParser jwtParser = Jwts.parser()
-                    .setSigningKey(secretKey)
+                    .verifyWith(secretKey)
                     .build();
 
-            jwtParser.parseClaimsJws(authToken);
+            jwtParser.parseSignedClaims(authToken);
             logger.info("JWT token validated successfully.");
             return true;
         } catch (Exception ex) {
@@ -70,5 +68,13 @@ public class JwtTokenProvider {
         String username = getUsernameFromJwt(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    }
+
+    private Claims getAllClaimsFromToken(String token) {
+        JwtParser jwtParser = Jwts.parser()
+                .verifyWith(secretKey)
+                .build();
+
+        return jwtParser.parseSignedClaims(token).getPayload();
     }
 }

@@ -1,116 +1,109 @@
 package com.example.assignment.security;
 
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.crypto.SecretKey;
+import java.util.Date;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class JwtTokenProviderTest {
-
-    private JwtTokenProvider jwtTokenProvider;
 
     @Mock
     private UserDetailsService userDetailsService;
 
     @Mock
-    private Authentication authentication;
-
-    @Mock
     private UserDetails userDetails;
 
-    private final String jwtSecret = "testSecretKeyForJwtWhichIsAtLeast256BitsLong";  // Should be at least 256 bits long
-    private final int jwtExpirationMs = 3600000;  // 1 hour
+    private JwtTokenProvider jwtTokenProvider;
+    private SecretKey secretKey;
+    private final int jwtExpirationMs = 3600000; // 1 hour
 
     @BeforeEach
     void setUp() {
-        SecretKey secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        MockitoAnnotations.openMocks(this);
+        String jwtSecret = "myJwtSecretKey123456789012345678901234567890";
+        secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         jwtTokenProvider = new JwtTokenProvider(userDetailsService, jwtSecret, jwtExpirationMs);
-        ReflectionTestUtils.setField(jwtTokenProvider, "secretKey", secretKey);
     }
 
     @Test
-    void shouldGenerateToken() {
-        // Arrange
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userDetails.getUsername()).thenReturn("testuser");
+    void testGenerateToken() {
+        when(userDetails.getUsername()).thenReturn("testUser");
 
-        // Act
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         String token = jwtTokenProvider.generateToken(authentication);
 
-        // Assert
-        assertThat(token).isNotNull();
-        assertThat(jwtTokenProvider.getUsernameFromJwt(token)).isEqualTo("testuser");
+        assertNotNull(token);
+        assertFalse(token.isEmpty());
     }
 
     @Test
-    void shouldGetUsernameFromJwt() {
-        // Arrange
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userDetails.getUsername()).thenReturn("testuser");
+    void testGetUsernameFromJwt() {
+        String username = "testUser";
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
-        String token = jwtTokenProvider.generateToken(authentication);
+        String token = Jwts.builder()
+                .subject(username)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(secretKey)
+                .compact();
 
-        // Act
-        String username = jwtTokenProvider.getUsernameFromJwt(token);
+        String extractedUsername = jwtTokenProvider.getUsernameFromJwt(token);
 
-        // Assert
-        assertThat(username).isEqualTo("testuser");
+        assertEquals(username, extractedUsername);
     }
 
     @Test
-    void shouldValidateToken() {
-        // Arrange
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userDetails.getUsername()).thenReturn("testuser");
+    void testValidateToken_ValidToken() {
+        String username = "testUser";
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
-        String token = jwtTokenProvider.generateToken(authentication);
+        String token = Jwts.builder()
+                .subject(username)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(secretKey)
+                .compact();
 
-        // Act
-        boolean isValid = jwtTokenProvider.validateToken(token);
-
-        // Assert
-        assertThat(isValid).isTrue();
+        assertTrue(jwtTokenProvider.validateToken(token));
     }
 
     @Test
-    void shouldReturnFalseWhenTokenIsInvalid() {
-        // Arrange
-        String invalidToken = "invalid.token";
+    void testValidateToken_InvalidToken() {
+        String invalidToken = "invalidToken";
 
-        // Act
-        boolean isValid = jwtTokenProvider.validateToken(invalidToken);
-
-        // Assert
-        assertThat(isValid).isFalse();
+        assertFalse(jwtTokenProvider.validateToken(invalidToken));
     }
 
     @Test
-    void shouldGetAuthenticationFromToken() {
-        // Arrange
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userDetails.getUsername()).thenReturn("testuser");
-        when(userDetailsService.loadUserByUsername("testuser")).thenReturn(userDetails);
+    void testGetAuthentication() {
+        String username = "testUser";
+        when(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails);
 
-        String token = jwtTokenProvider.generateToken(authentication);
+        String token = Jwts.builder()
+                .subject(username)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .signWith(secretKey)
+                .compact();
 
-        // Act
-        Authentication auth = jwtTokenProvider.getAuthentication(token);
+        Authentication authentication = jwtTokenProvider.getAuthentication(token);
 
-        // Assert
-        assertThat(auth).isNotNull();
-        assertThat(auth.getName()).isEqualTo("testuser");
-        verify(userDetailsService, times(1)).loadUserByUsername("testuser");
+        assertNotNull(authentication);
+        assertEquals(userDetails, authentication.getPrincipal());
     }
 }

@@ -35,5 +35,5 @@ initial:
   price: 100
 
 app:
-  jwtSecret: 8HaCkmEifyOucan!@#7ForJwtWhichIsAtLeast256BitsLong
+  jwtSecret: Xb34fJd9kPbvmJc84mDkV9b3Xb4fJd9kPbvmJc84mDkV9b3Xb34fJd9kPbvmJc84
   jwtExpirationMs: 3600000
