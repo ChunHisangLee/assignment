@@ -37,3 +37,7 @@ initial:
 app:
   jwtSecret: Xb34fJd9kPbvmJc84mDkV9b3Xb4fJd9kPbvmJc84mDkV9b3Xb34fJd9kPbvmJc84
   jwtExpirationMs: 3600000
+
+security:
+  authentication:
+    enabled: false
