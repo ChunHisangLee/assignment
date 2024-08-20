@@ -4,46 +4,69 @@ import com.example.assignment.entity.Users;
 import com.example.assignment.repository.UsersRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class CustomUserDetailsServiceTest {
 
+    @Mock
     private UsersRepository usersRepository;
+
+    @InjectMocks
     private CustomUserDetailsService customUserDetailsService;
+
+    private Users sampleUser;
 
     @BeforeEach
     void setUp() {
-        usersRepository = mock(UsersRepository.class);
-        customUserDetailsService = new CustomUserDetailsService(usersRepository);
+        sampleUser = new Users();
+        sampleUser.setId(1L);
+        sampleUser.setName("Jack Lee");
+        sampleUser.setEmail("jacklee@example.com");
+        sampleUser.setPassword("encodedPassword");
     }
 
     @Test
-    void testLoadUserByUsername_UserExists() {
-        Users user = new Users();
-        user.setEmail("jacklee@example.com");
-        user.setPassword("password");
-        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+    void loadUserByUsername_ShouldReturnUserDetails_WhenUserExists() {
+        // Arrange
+        when(usersRepository.findByEmail(sampleUser.getEmail())).thenReturn(Optional.of(sampleUser));
 
-        org.springframework.security.core.userdetails.UserDetails userDetails =
-                customUserDetailsService.loadUserByUsername("jacklee@example.com");
+        // Act
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(sampleUser.getEmail());
 
-        assertEquals("jacklee@example.com", userDetails.getUsername());
-        assertEquals("password", userDetails.getPassword());
+        // Assert
+        assertThat(userDetails).isNotNull();
+        assertThat(userDetails.getUsername()).isEqualTo(sampleUser.getEmail());
+        assertThat(userDetails.getPassword()).isEqualTo(sampleUser.getPassword());
+        assertThat(userDetails.getAuthorities()).isEmpty();  // Since we used Collections.emptyList() for authorities
+
+        // Verify that the repository method was called exactly once
+        verify(usersRepository, times(1)).findByEmail(sampleUser.getEmail());
     }
 
     @Test
-    void testLoadUserByUsername_UserDoesNotExist() {
-        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    void loadUserByUsername_ShouldThrowException_WhenUserDoesNotExist() {
+        // Arrange
+        String nonExistentEmail = "jacklee@example.com";
+        when(usersRepository.findByEmail(nonExistentEmail)).thenReturn(Optional.empty());
 
-        assertThrows(UsernameNotFoundException.class, () ->
-                customUserDetailsService.loadUserByUsername("notfound@example.com"));
+        // Act & Assert
+        assertThatThrownBy(() -> customUserDetailsService.loadUserByUsername(nonExistentEmail))
+                .isInstanceOf(UsernameNotFoundException.class)
+                .hasMessageContaining("User not found with email: " + nonExistentEmail);
+
+        // Verify that the repository method was called exactly once
+        verify(usersRepository, times(1)).findByEmail(nonExistentEmail);
     }
 }
