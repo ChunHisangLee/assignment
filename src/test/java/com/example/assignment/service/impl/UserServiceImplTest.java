@@ -37,8 +37,8 @@ class UserServiceImplTest {
     void setUp() {
         user = Users.builder()
                 .id(1L)
-                .email("test@example.com")
-                .name("Test User")
+                .email("jacklee@example.com")
+                .name("Jack Lee")
                 .password("encodedPassword")
                 .build();
     }
@@ -135,7 +135,7 @@ class UserServiceImplTest {
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
         // Act
-        Users loggedInUser = userService.login("test@example.com", "password");
+        Users loggedInUser = userService.login("jacklee@example.com", "password");
 
         // Assert
         assertNotNull(loggedInUser);
@@ -151,7 +151,7 @@ class UserServiceImplTest {
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
         // Act & Assert
-        CustomErrorException exception = assertThrows(CustomErrorException.class, () -> userService.login("test@example.com", "wrongpassword"));
+        CustomErrorException exception = assertThrows(CustomErrorException.class, () -> userService.login("jacklee@example.com", "wrongpassword"));
         assertEquals(HttpStatus.UNAUTHORIZED.value(), exception.getStatusCode());
         verify(usersRepository, times(1)).findByEmail(anyString());
         verify(passwordEncoder, times(1)).matches(anyString(), anyString());
@@ -188,7 +188,7 @@ class UserServiceImplTest {
         when(usersRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
         // Act
-        Optional<Users> foundUser = userService.findByEmail("test@example.com");
+        Optional<Users> foundUser = userService.findByEmail("jacklee@example.com");
 
         // Assert
         assertTrue(foundUser.isPresent());

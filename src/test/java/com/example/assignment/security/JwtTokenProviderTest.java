@@ -4,8 +4,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,8 +16,9 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class JwtTokenProviderTest {
 
     @Mock
@@ -31,8 +33,7 @@ class JwtTokenProviderTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        String jwtSecret = "myJwtSecretKey123456789012345678901234567890";
+        String jwtSecret = "Xb34fJd9kPbvmJc84mDkV9b3Xb4fJd9kPbvmJc84mDkV9b3Xb34fJd9kPbvmJc84";
         secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         jwtTokenProvider = new JwtTokenProvider(userDetailsService, jwtSecret, jwtExpirationMs);
     }
