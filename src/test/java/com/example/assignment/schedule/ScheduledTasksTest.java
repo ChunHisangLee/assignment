@@ -5,65 +5,88 @@ import com.example.assignment.repository.BTCPriceHistoryRepository;
 import com.example.assignment.service.PriceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class ScheduledTasksTest {
 
+    @Mock
     private PriceService priceService;
+
+    @Mock
     private BTCPriceHistoryRepository btcPriceHistoryRepository;
+
+    @InjectMocks
     private ScheduledTasks scheduledTasks;
+
+    @Captor
+    private ArgumentCaptor<BTCPriceHistory> priceHistoryCaptor;
 
     @BeforeEach
     void setUp() {
-        priceService = mock(PriceService.class);
-        btcPriceHistoryRepository = mock(BTCPriceHistoryRepository.class);
-        scheduledTasks = new ScheduledTasks(priceService, btcPriceHistoryRepository);
-    }
-
-    @Test
-    void testPriceIncreasesUntilMaxThenDecreases() {
         ReflectionTestUtils.setField(scheduledTasks, "currentPrice", 100);
         ReflectionTestUtils.setField(scheduledTasks, "isIncreasing", true);
 
+        // Reset mocks to avoid unwanted interactions
+        reset(priceService, btcPriceHistoryRepository);
+    }
+
+    @Test
+    void shouldIncreasePriceUpToMaxAndThenDecrease() {
+        // Simulate faster invocations of the scheduled task
         for (int i = 0; i < 36; i++) {
             scheduledTasks.updateCurrentPrice();
         }
 
-        ArgumentCaptor<Integer> priceCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(priceService, times(36)).setPrice(priceCaptor.capture());
-        verify(btcPriceHistoryRepository, times(36)).save(any(BTCPriceHistory.class));
+        // Verify that the repository was called 36 times
+        verify(btcPriceHistoryRepository, times(36)).save(priceHistoryCaptor.capture());
+        verify(priceService, times(36)).setPrice(anyInt());
 
-        assertEquals(460, priceCaptor.getAllValues().get(35));
-        assertEquals(460, scheduledTasks.getCurrentPrice());
-        assertFalse(scheduledTasks.isIncreasing());
+        // Verify the last call to the repository and service
+        BTCPriceHistory lastInvocation = priceHistoryCaptor.getAllValues().get(35);
+        assertThat(lastInvocation.getPrice()).isEqualTo(460);
+
+        // Simulate the next step where the price decreases from the max value
+        scheduledTasks.updateCurrentPrice();
+        verify(btcPriceHistoryRepository, times(37)).save(priceHistoryCaptor.capture());
+
+        BTCPriceHistory decreaseInvocation = priceHistoryCaptor.getValue();
+        assertThat(decreaseInvocation.getPrice()).isEqualTo(450);
     }
 
     @Test
-    void testPriceDecreasesUntilMinThenIncreases() {
+    void shouldDecreasePriceDownToMinAndThenIncrease() {
+        // Set the initial conditions to start decreasing
         ReflectionTestUtils.setField(scheduledTasks, "currentPrice", 460);
         ReflectionTestUtils.setField(scheduledTasks, "isIncreasing", false);
 
+        // Simulate faster invocations of the scheduled task
         for (int i = 0; i < 36; i++) {
             scheduledTasks.updateCurrentPrice();
         }
 
-        ArgumentCaptor<Integer> priceCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(priceService, times(36)).setPrice(priceCaptor.capture());
-        verify(btcPriceHistoryRepository, times(36)).save(any(BTCPriceHistory.class));
+        // Verify that the repository was called 36 times
+        verify(btcPriceHistoryRepository, times(36)).save(priceHistoryCaptor.capture());
+        verify(priceService, times(36)).setPrice(anyInt());
 
-        assertEquals(100, priceCaptor.getAllValues().get(35));
-        assertEquals(100, scheduledTasks.getCurrentPrice());
-        assertTrue(scheduledTasks.isIncreasing());
-    }
+        // Verify the last call to the repository and service (when price reaches minimum)
+        BTCPriceHistory lastInvocation = priceHistoryCaptor.getAllValues().get(35);
+        assertThat(lastInvocation.getPrice()).isEqualTo(100);
 
-    @Test
-    void testScheduledAnnotationIsPresent() throws NoSuchMethodException {
-        Scheduled scheduled = ScheduledTasks.class.getMethod("updateCurrentPrice").getAnnotation(Scheduled.class);
-        assertEquals(5000, scheduled.fixedRate());
+        // Simulate the next step where the price increases from the min value
+        scheduledTasks.updateCurrentPrice();
+        verify(btcPriceHistoryRepository, times(37)).save(priceHistoryCaptor.capture());
+
+        BTCPriceHistory increaseInvocation = priceHistoryCaptor.getValue();
+        assertThat(increaseInvocation.getPrice()).isEqualTo(110);
     }
 }

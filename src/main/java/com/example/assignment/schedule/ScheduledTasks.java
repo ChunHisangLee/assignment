@@ -3,6 +3,7 @@ package com.example.assignment.schedule;
 import com.example.assignment.entity.BTCPriceHistory;
 import com.example.assignment.repository.BTCPriceHistoryRepository;
 import com.example.assignment.service.PriceService;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,11 +33,10 @@ public class ScheduledTasks {
     public ScheduledTasks(PriceService priceService, BTCPriceHistoryRepository btcPriceHistoryRepository) {
         this.priceService = priceService;
         this.btcPriceHistoryRepository = btcPriceHistoryRepository;
-        saveInitialPrice();
     }
 
+    @PostConstruct
     private void saveInitialPrice() {
-        // Save the initial price to Redis and database
         priceService.setPrice(currentPrice);
 
         BTCPriceHistory initialPriceHistory = new BTCPriceHistory();
@@ -52,11 +52,13 @@ public class ScheduledTasks {
     public void updateCurrentPrice() {
         if (isIncreasing) {
             currentPrice += PRICE_INCREMENT;
+
             if (currentPrice >= MAX_PRICE) {
                 isIncreasing = false;
             }
         } else {
             currentPrice -= PRICE_INCREMENT;
+
             if (currentPrice <= MIN_PRICE) {
                 isIncreasing = true;
             }
