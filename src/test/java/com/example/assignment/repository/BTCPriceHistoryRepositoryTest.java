@@ -38,7 +38,7 @@ class BTCPriceHistoryRepositoryTest {
     private BTCPriceHistory btcPriceHistory;
 
     @DynamicPropertySource
-    static void postgresqlProperties(DynamicPropertyRegistry registry) {
+    static void dataSourceProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgresqlContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgresqlContainer::getUsername);
         registry.add("spring.datasource.password", postgresqlContainer::getPassword);
@@ -47,7 +47,7 @@ class BTCPriceHistoryRepositoryTest {
     @BeforeEach
     void setUp() {
         btcPriceHistory = new BTCPriceHistory();
-        btcPriceHistory.setPrice(45000.0);
+        btcPriceHistory.setPrice(450.0);
         btcPriceHistory.setTimestamp(LocalDateTime.now());
     }
 
@@ -57,7 +57,7 @@ class BTCPriceHistoryRepositoryTest {
 
         Optional<BTCPriceHistory> latestRecord = btcPriceHistoryRepository.findTopByOrderByTimestampDesc();
         assertThat(latestRecord).isPresent();
-        assertThat(latestRecord.get().getPrice()).isEqualTo(45000.0);
+        assertThat(latestRecord.get().getPrice()).isEqualTo(450.0);
         assertThat(latestRecord.get().getTimestamp()).isEqualTo(savedRecord.getTimestamp());
     }
 

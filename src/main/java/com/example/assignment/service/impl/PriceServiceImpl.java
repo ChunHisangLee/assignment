@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class PriceServiceImpl implements PriceService {
 
     private static final Logger logger = LoggerFactory.getLogger(PriceServiceImpl.class);
-    private static final String REDIS_KEY = "BTC_CURRENT_PRICE";
+    public static final String REDIS_KEY = "BTC_CURRENT_PRICE";
 
     private final RedisTemplate<String, Object> redisTemplate;
 

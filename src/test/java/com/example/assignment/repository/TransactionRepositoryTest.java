@@ -58,42 +58,48 @@ class TransactionRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        user = new Users();
-        user.setName("Jack Lee");
-        user.setEmail("jacklee@example.com");
-        user.setPassword("encodedPassword");
+        user = Users.builder()
+                .name("Jack Lee")
+                .email("jacklee@example.com")
+                .password("encodedPassword")
+                .build();
         user = usersRepository.save(user);
 
-        btcPriceHistory = new BTCPriceHistory();
-        btcPriceHistory.setPrice(45000.0);
-        btcPriceHistory.setTimestamp(LocalDateTime.now());
+        btcPriceHistory = BTCPriceHistory.builder()
+                .price(450.0)
+                .timestamp(LocalDateTime.now())
+                .build();
         btcPriceHistory = btcPriceHistoryRepository.save(btcPriceHistory);
     }
 
     @Test
-    void testFindByUsers() {
-        // Save some transactions for the user
-        Transaction transaction1 = new Transaction();
-        transaction1.setUsers(user);
-        transaction1.setBtcPriceHistory(btcPriceHistory);
-        transaction1.setBtcAmount(0.01);
-        transaction1.setTransactionTime(LocalDateTime.now());
-        transaction1.setTransactionType(TransactionType.BUY);
+    void testFindByUsers_WithTransactions() {
+        // Create and save transactions for the user
+        Transaction transaction1 = Transaction.builder()
+                .users(user)
+                .btcPriceHistory(btcPriceHistory)
+                .btcAmount(0.01)
+                .transactionTime(LocalDateTime.now())
+                .transactionType(TransactionType.BUY)
+                .build();
         transactionRepository.save(transaction1);
 
-        Transaction transaction2 = new Transaction();
-        transaction2.setUsers(user);
-        transaction2.setBtcPriceHistory(btcPriceHistory);
-        transaction2.setBtcAmount(0.02);
-        transaction2.setTransactionTime(LocalDateTime.now());
-        transaction2.setTransactionType(TransactionType.SELL);
+        Transaction transaction2 = Transaction.builder()
+                .users(user)
+                .btcPriceHistory(btcPriceHistory)
+                .btcAmount(0.02)
+                .transactionTime(LocalDateTime.now())
+                .transactionType(TransactionType.SELL)
+                .build();
         transactionRepository.save(transaction2);
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Transaction> page = transactionRepository.findByUsers(user, pageable);
 
+        // Assertions
         assertThat(page.getTotalElements()).isEqualTo(2);
         assertThat(page.getContent()).contains(transaction1, transaction2);
+        assertThat(page.getContent()).allMatch(t -> t.getUsers().equals(user));
     }
 
     @Test
@@ -101,6 +107,8 @@ class TransactionRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Transaction> page = transactionRepository.findByUsers(user, pageable);
 
+        // Assertions
         assertThat(page.getTotalElements()).isEqualTo(0);
+        assertThat(page.getContent()).isEmpty();
     }
 }
