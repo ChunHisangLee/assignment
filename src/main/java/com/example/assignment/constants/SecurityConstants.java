@@ -11,6 +11,10 @@ public class SecurityConstants {
             "/api/auth/**",
             "/public/**",
             "/h2-console/**",
+            "/swagger-ui.html",
+            "/swagger-resources/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
             "/"
     };
 
