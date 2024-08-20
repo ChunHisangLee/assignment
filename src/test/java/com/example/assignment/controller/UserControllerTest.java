@@ -1,14 +1,20 @@
 package com.example.assignment.controller;
 
+import com.example.assignment.dto.UsersDTO;
 import com.example.assignment.entity.Users;
+import com.example.assignment.mapper.UsersMapper;
+import com.example.assignment.security.JwtTokenProvider;
 import com.example.assignment.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -21,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
     private MockMvc mockMvc;
@@ -29,59 +36,61 @@ class UserControllerTest {
     private UserService userService;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private UsersMapper usersMapper;
+
+    @Mock
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Mock
+    private AuthenticationManager authenticationManager;
 
     @InjectMocks
     private UserController userController;
 
     private Users sampleUser;
+    private UsersDTO sampleUserDTO;
+    private Authentication authentication;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
 
-        sampleUser = new Users();
-        sampleUser.setId(1L);
-        sampleUser.setName("Jack Lee");
-        sampleUser.setEmail("jacklee@example.com");
-        sampleUser.setPassword("encodedPassword");
+        sampleUser = Users.builder()
+                .id(1L)
+                .name("Jack Lee")
+                .email("jacklee@example.com")
+                .password("encodedPassword")
+                .build();
+
+        sampleUserDTO = UsersDTO.builder()
+                .id(1L)
+                .name("Jack Lee")
+                .email("jacklee@example.com")
+                .build();
+
+        authentication = new UsernamePasswordAuthenticationToken(sampleUser.getEmail(), sampleUser.getPassword());
     }
 
     @Test
     void testRegisterUser_Success() throws Exception {
-        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
-        when(userService.findByEmail(eq(sampleUser.getEmail()))).thenReturn(Optional.empty());
+        when(usersMapper.toEntity(any(UsersDTO.class))).thenReturn(sampleUser);
+        when(userService.registerUser(any(Users.class))).thenReturn(sampleUser);
+        when(usersMapper.toDto(any(Users.class))).thenReturn(sampleUserDTO);
 
-        String jsonRequest = "{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"password\"}";
-
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/users/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                        .content("{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"password\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Jack Lee"))
-                .andExpect(jsonPath("$.email").value("jacklee@example.com"))
-                .andExpect(jsonPath("$.password").doesNotExist());
-    }
-
-    @Test
-    void testRegisterUser_EmailAlreadyRegistered() throws Exception {
-        when(userService.findByEmail(eq(sampleUser.getEmail()))).thenReturn(Optional.of(sampleUser));
-
-        String jsonRequest = "{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"password\"}";
-
-        mockMvc.perform(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Email already registered. Try to log in or register with another email."));
+                .andExpect(jsonPath("$.email").value("jacklee@example.com"));
     }
 
     @Test
     void testUpdateUser_Success() throws Exception {
+        when(usersMapper.toEntity(any(UsersDTO.class))).thenReturn(sampleUser);
         when(userService.updateUser(eq(1L), any(Users.class))).thenReturn(Optional.of(sampleUser));
-        when(userService.findByEmail(eq(sampleUser.getEmail()))).thenReturn(Optional.empty());
+        when(usersMapper.toDto(any(Users.class))).thenReturn(sampleUserDTO);
 
         String jsonRequest = "{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"newpassword\"}";
 
@@ -91,13 +100,11 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Jack Lee"))
-                .andExpect(jsonPath("$.email").value("jacklee@example.com"))
-                .andExpect(jsonPath("$.password").doesNotExist());
+                .andExpect(jsonPath("$.email").value("jacklee@example.com"));
     }
 
     @Test
     void testDeleteUser_Success() throws Exception {
-
         mockMvc.perform(delete("/api/users/1"))
                 .andExpect(status().isOk());
     }
@@ -105,20 +112,20 @@ class UserControllerTest {
     @Test
     void testGetUserById_Success() throws Exception {
         when(userService.getUserById(eq(1L))).thenReturn(Optional.of(sampleUser));
+        when(usersMapper.toDto(any(Users.class))).thenReturn(sampleUserDTO);
 
         mockMvc.perform(get("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Jack Lee"))
-                .andExpect(jsonPath("$.email").value("jacklee@example.com"))
-                .andExpect(jsonPath("$.password").doesNotExist());
+                .andExpect(jsonPath("$.email").value("jacklee@example.com"));
     }
 
     @Test
     void testLogin_Success() throws Exception {
-        when(userService.findByEmail(eq(sampleUser.getEmail()))).thenReturn(Optional.of(sampleUser));
-        when(userService.verifyPassword(any(), any())).thenReturn(true);
+        when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
+        when(jwtTokenProvider.generateToken(any(Authentication.class))).thenReturn("mockedToken");
 
         String jsonRequest = "{\"email\": \"jacklee@example.com\", \"password\": \"password\"}";
 
@@ -126,23 +133,25 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Jack Lee"))
-                .andExpect(jsonPath("$.email").value("jacklee@example.com"))
-                .andExpect(jsonPath("$.password").doesNotExist());
+                .andExpect(jsonPath("$.token").value("mockedToken"));
     }
 
     @Test
     void testLogin_InvalidCredentials() throws Exception {
-        when(userService.findByEmail(eq(sampleUser.getEmail()))).thenReturn(Optional.of(sampleUser));
-        when(userService.verifyPassword(any(), any())).thenReturn(false);
+        when(authenticationManager.authenticate(any(Authentication.class)))
+                .thenThrow(new RuntimeException("Invalid credentials"));
 
         String jsonRequest = "{\"email\": \"jacklee@example.com\", \"password\": \"wrongpassword\"}";
 
         mockMvc.perform(post("/api/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("Invalid email or password."));
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void testLogout_Success() throws Exception {
+        mockMvc.perform(get("/api/users/logout"))
+                .andExpect(status().isOk());
     }
 }

@@ -97,18 +97,23 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UsersDTO loginRequest) {
         logger.info("User login attempt with email: {}", loginRequest.getEmail());
-        // Authenticate the user using the AuthenticationManager
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        try {
+            // Authenticate the user using the AuthenticationManager
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
-        // Set the authentication in the SecurityContext
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            // Set the authentication in the SecurityContext
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Generate JWT token
-        String token = jwtTokenProvider.generateToken(authentication);
+            // Generate JWT token
+            String token = jwtTokenProvider.generateToken(authentication);
 
-        logger.info("User with email: {} logged in successfully.", loginRequest.getEmail());
-        return ResponseEntity.ok(new JwtAuthenticationResponse(token));
+            logger.info("User with email: {} logged in successfully.", loginRequest.getEmail());
+            return ResponseEntity.ok(new JwtAuthenticationResponse(token));
+        } catch (RuntimeException ex) {
+            logger.error("Invalid credentials for email: {}", loginRequest.getEmail());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password.");
+        }
     }
 
     @GetMapping("/logout")
