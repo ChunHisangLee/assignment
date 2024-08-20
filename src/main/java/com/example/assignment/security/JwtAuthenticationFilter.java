@@ -31,6 +31,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
+        jwtLogger.info("JwtAuthenticationFilter is processing the request");
+
         try {
             String token = getJwtFromRequest(request);
 
@@ -50,6 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader(SecurityConstants.AUTHORIZATION_HEADER);
+
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(SecurityConstants.BEARER_PREFIX)) {
             return bearerToken.substring(SecurityConstants.BEARER_PREFIX.length());
         }
