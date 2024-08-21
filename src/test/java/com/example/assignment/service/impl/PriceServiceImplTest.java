@@ -1,5 +1,6 @@
 package com.example.assignment.service.impl;
 
+import com.example.assignment.schedule.ScheduledTasks;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,6 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -59,10 +62,11 @@ class PriceServiceImplTest {
     @Test
     void testSetPrice() {
         int newPrice = 130;
+        Duration ttl = Duration.ofMillis(ScheduledTasks.SCHEDULE_RATE_MS);
 
         priceService.setPrice(newPrice);
 
         verify(redisTemplate, times(1)).opsForValue();
-        verify(valueOperations, times(1)).set(PriceServiceImpl.REDIS_KEY, newPrice);
+        verify(valueOperations, times(1)).set(PriceServiceImpl.REDIS_KEY, newPrice, ttl);
     }
 }
