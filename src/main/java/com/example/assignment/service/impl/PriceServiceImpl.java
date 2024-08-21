@@ -1,11 +1,14 @@
 package com.example.assignment.service.impl;
 
+import com.example.assignment.schedule.ScheduledTasks;
 import com.example.assignment.service.PriceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
 
 @Service
 public class PriceServiceImpl implements PriceService {
@@ -39,7 +42,7 @@ public class PriceServiceImpl implements PriceService {
     @Override
     public void setPrice(int price) {
         logger.info("Setting current BTC price in Redis with key: {} to value: {}", REDIS_KEY, price);
-        redisTemplate.opsForValue().set(REDIS_KEY, price);
+        redisTemplate.opsForValue().set(REDIS_KEY, price, Duration.ofMillis(ScheduledTasks.SCHEDULE_RATE_MS));
         logger.info("BTC price set successfully in Redis.");
     }
 }

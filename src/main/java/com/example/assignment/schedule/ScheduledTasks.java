@@ -19,7 +19,7 @@ public class ScheduledTasks {
     private static final int MIN_PRICE = 100;
     private static final int MAX_PRICE = 460;
     private static final int PRICE_INCREMENT = 10;
-    private static final int SCHEDULE_RATE_MS = 5 * 1000;
+    public static final int SCHEDULE_RATE_MS = 5 * 1000;
 
     @Getter
     private boolean isIncreasing = true;
