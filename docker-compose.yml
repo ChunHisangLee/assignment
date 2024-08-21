@@ -1,8 +1,36 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Ab123456
+    ports:
+      - "5432:5432"
+    networks:
+      - assignment-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:latest
+    command: [ "redis-server", "--requirepass", "Ab123456" ]
+    ports:
+      - "6379:6379"  # Exposing Redis on port 6379
+    networks:
+      - assignment-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "Ab123456", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
-    image: assignment-app
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,24 +42,16 @@ services:
       SPRING_DATASOURCE_PASSWORD: Ab123456
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
-      INITIAL_PRICE: 100
-      APP_JWT_SECRET: Xb34fJd9kPbvmJc84mDkV9b3Xb4fJd9kPbvmJc84mDkV9b3Xb34fJd9kPbvmJc84
-      APP_JWT_EXPIRATION_MS: 3600000
-      SECURITY_AUTHENTICATION_ENABLED: false
+      SPRING_REDIS_PASSWORD: Ab123456
+      SPRING_PROFILES_ACTIVE: docker
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - assignment-network
 
-  db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Ab123456
-    ports:
-      - "5432:5432"
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
+networks:
+  assignment-network:
+    driver: bridge
