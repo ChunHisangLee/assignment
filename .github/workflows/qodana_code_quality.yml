@@ -28,6 +28,9 @@ jobs:
       # Run the Qodana code scan
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2023.2
+        with:
+          linter: jetbrains/qodana-jvm-community:latest  # 或其他合適的 linter
+          project-jdk: corretto-21
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}  # Secret token for Qodana authentication
 
