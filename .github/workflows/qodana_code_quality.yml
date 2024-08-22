@@ -1,7 +1,15 @@
 name: Qodana
+
 on:
+  # Manually trigger the workflow
   workflow_dispatch:
+
+  # Trigger on pull requests targeting the master branch
   pull_request:
+    branches:
+      - master
+
+  # Trigger on push events to the master branch
   push:
     branches:
       - master
@@ -9,11 +17,27 @@ on:
 jobs:
   qodana:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      # Checkout the repository to the GitHub Actions runner
+      - name: 'Checkout Code'
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Fetch all history for all branches and tags
+
+      # Run the Qodana code scan
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2023.2
+        with:
+          linter: jetbrains/qodana-jvm-community:latest  # 或其他合適的 linter
+          project-jdk: corretto-21
         env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}  # Secret token for Qodana authentication
+
+      # Optionally, add a step to upload Qodana results as an artifact
+      - name: 'Upload Qodana Report'
+        if: always()  # Ensure this step runs even if the previous step fails
+        uses: actions/upload-artifact@v3
+        with:
+          name: qodana-report
+          path: out/report  # Path to Qodana report output
