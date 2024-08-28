@@ -2,18 +2,16 @@ package com.example.assignment.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "btc_price_history")
+@Table(name = "btc_price_history", indexes = {
+        @Index(name = "idx_timestamp", columnList = "timestamp"),
+        @Index(name = "idx_price", columnList = "price")
+})
 @Getter
 @Setter
 @Builder
