@@ -7,7 +7,9 @@ import lombok.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "wallet")
+@Table(name = "wallet", indexes = {
+        @Index(name = "idx_user_id", columnList = "user_id")
+})
 @Getter
 @Setter
 @Builder
