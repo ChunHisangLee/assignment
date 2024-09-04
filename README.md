@@ -178,52 +178,60 @@ You can also use Docker Compose to run the entire stack (Spring Boot application
 
 ```yaml
 services:
-  app:
-    image: chunhsianglee/assignment:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=Ab123456
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
-      - APP_JWTSECRET=Xb34fJd9kPbvmJc84mDkV9b3Xb4fJd9kPbvmJc84mDkV9b3Xb34fJd9kPbvmJc84
-      - APP_JWTEXPIRATIONMS=3600000
-    depends_on:
-      - db
-      - redis
-
   db:
-    image: postgres:16
+    image: postgres:latest
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Ab123456
     ports:
       - "5432:5432"
+    networks:
+      - assignment-network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 30s
-      timeout: 10s
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
 
   redis:
     image: redis:latest
+    command: [ "redis-server", "--requirepass", "Ab123456" ]
     ports:
-      - "6379:6379"
+      - "6379:6379"  # Exposing Redis on port 6379
+    networks:
+      - assignment-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
+      test: [ "CMD", "redis-cli", "-a", "Ab123456", "ping" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Ab123456
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: Ab123456
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - assignment-network
+
 networks:
-  default:
-    name: assignment-network
+  assignment-network:
+    driver: bridge
 ```
 
 To build and run the stack using Docker Compose, run:
