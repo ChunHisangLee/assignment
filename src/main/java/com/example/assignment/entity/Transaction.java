@@ -9,7 +9,10 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "transactions", indexes = {
+        @Index(name = "idx_user_id", columnList = "user_id"),
+        @Index(name = "idx_btc_price_history_id", columnList = "btc_price_history_id")
+})
 @Getter
 @Setter
 @Builder
