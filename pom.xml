@@ -62,8 +62,7 @@
             <scope>runtime</scope>
         </dependency>
 
-
-        <!-- PostgreSQL Driver -->
+        <!-- PostgresSQL Driver -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>

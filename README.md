@@ -177,8 +177,6 @@ docker run --name assignment-redis -p 6379:6379 -d redis
 You can also use Docker Compose to run the entire stack (Spring Boot application, PostgreSQL, and Redis) together. Create a docker-compose.yml file with the following content:
 
 ```yaml
-version: '3.8'
-
 services:
   app:
     image: chunhsianglee/assignment:latest
