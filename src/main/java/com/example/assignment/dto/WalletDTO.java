@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WalletDTO {
-    private Long id;
-    private double usdBalance;
-    private double btcBalance;
+  private Long id;
+  private double usdBalance;
+  private double btcBalance;
 }

@@ -2,7 +2,9 @@
 
 ## Overview
 
-This project is a Spring Boot application designed to manage users, transactions, and Bitcoin pricing. The application is built using Java 21, Spring Boot, PostgreSQL, and Redis, providing a robust backend service. This documentation provides setup instructions, environment details, and references for developers working with this project.
+This project is a Spring Boot application designed to manage users, transactions, and Bitcoin pricing. The application
+is built using Java 21, Spring Boot, PostgreSQL, and Redis, providing a robust backend service. This documentation
+provides setup instructions, environment details, and references for developers working with this project.
 
 ## Prerequisites
 
@@ -27,7 +29,9 @@ cd assignment
 
 ### 2. Configure the Database
 
-The application uses PostgreSQL as the primary database and Redis for caching. You need to configure the database connections in the application.yml or application.properties file.
+The application uses PostgreSQL as the primary database and Redis for caching. You need to configure the database
+connections in the application.yml or application.properties file.
+
 #### PostgreSQL Configuration in application.yml:
 
 ```yaml
@@ -140,7 +144,9 @@ If you haven't already, create the database in PostgreSQL:
 ```sql
 CREATE DATABASE postgres;
 ```
+
 Initialize the database with the following table scripts:
+
 * [schema.sql](src/main/resources/SQL/schema.sql)
 
 ### 4. Build and Run the Application
@@ -167,6 +173,7 @@ You can access the application and its API documentation via the following link:
 ### 6. Docker Setup (Optional)
 
 If you prefer using Docker for PostgreSQL and Redis, use the following commands:
+
 ```bash
 docker run --name assignment-db -e POSTGRES_DB=postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=Ab123456 -p 5432:5432 -d postgres
 docker run --name assignment-redis -p 6379:6379 -d redis
@@ -174,7 +181,8 @@ docker run --name assignment-redis -p 6379:6379 -d redis
 
 ### 7. Docker Compose Setup
 
-You can also use Docker Compose to run the entire stack (Spring Boot application, PostgreSQL, and Redis) together. Create a docker-compose.yml file with the following content:
+You can also use Docker Compose to run the entire stack (Spring Boot application, PostgreSQL, and Redis) together.
+Create a docker-compose.yml file with the following content:
 
 ```yaml
 services:
@@ -267,6 +275,7 @@ This documentation provides detailed information about the available API endpoin
 ### The application includes the following additional configuration:
 
 JWT Settings:
+
 * jwtSecret: A secret key for signing JWTs.
 * jwtExpirationMs: The JWT expiration time is set to 3600000 milliseconds (1 hour).
 * Initial Price: The initial Bitcoin price is set to 100.

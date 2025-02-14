@@ -1,6 +1,9 @@
 package com.example.assignment.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.assignment.entity.Users;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,89 +17,85 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class UsersRepositoryTest {
 
-    @Container
-    public static PostgreSQLContainer<?> postgresqlContainer = new PostgreSQLContainer<>("postgres:latest")
-            .withDatabaseName("testdb")
-            .withUsername("testuser")
-            .withPassword("testpass");
+  @Container
+  public static PostgreSQLContainer<?> postgresqlContainer =
+      new PostgreSQLContainer<>("postgres:latest")
+          .withDatabaseName("testdb")
+          .withUsername("testuser")
+          .withPassword("testpass");
 
-    @Autowired
-    private UsersRepository usersRepository;
+  @Autowired private UsersRepository usersRepository;
 
-    private Users sampleUser;
+  private Users sampleUser;
 
-    @DynamicPropertySource
-    static void postgresqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgresqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", postgresqlContainer::getUsername);
-        registry.add("spring.datasource.password", postgresqlContainer::getPassword);
-    }
+  @DynamicPropertySource
+  static void postgresqlProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.datasource.url", postgresqlContainer::getJdbcUrl);
+    registry.add("spring.datasource.username", postgresqlContainer::getUsername);
+    registry.add("spring.datasource.password", postgresqlContainer::getPassword);
+  }
 
-    @BeforeEach
-    void setUp() {
-        sampleUser = createSampleUser();
-    }
+  @BeforeEach
+  void setUp() {
+    sampleUser = createSampleUser();
+  }
 
-    private Users createSampleUser() {
-        Users user = new Users();
-        user.setName("Jack Lee");
-        user.setEmail("jacklee@example.com");
-        user.setPassword("encodedPassword");
-        return user;
-    }
+  private Users createSampleUser() {
+    Users user = new Users();
+    user.setName("Jack Lee");
+    user.setEmail("jacklee@example.com");
+    user.setPassword("encodedPassword");
+    return user;
+  }
 
-    private Users saveSampleUser() {
-        return usersRepository.save(sampleUser);
-    }
+  private Users saveSampleUser() {
+    return usersRepository.save(sampleUser);
+  }
 
-    @Test
-    void shouldCreateUserSuccessfully() {
-        Users savedUser = saveSampleUser();
-        assertThat(savedUser.getId()).isNotNull();
-        assertThat(savedUser.getEmail()).isEqualTo("jacklee@example.com");
-    }
+  @Test
+  void shouldCreateUserSuccessfully() {
+    Users savedUser = saveSampleUser();
+    assertThat(savedUser.getId()).isNotNull();
+    assertThat(savedUser.getEmail()).isEqualTo("jacklee@example.com");
+  }
 
-    @Test
-    void shouldFindUserByIdSuccessfully() {
-        Users savedUser = saveSampleUser();
-        Optional<Users> foundUser = usersRepository.findById(savedUser.getId());
-        assertThat(foundUser).isPresent();
-        assertThat(foundUser.get().getEmail()).isEqualTo("jacklee@example.com");
-    }
+  @Test
+  void shouldFindUserByIdSuccessfully() {
+    Users savedUser = saveSampleUser();
+    Optional<Users> foundUser = usersRepository.findById(savedUser.getId());
+    assertThat(foundUser).isPresent();
+    assertThat(foundUser.get().getEmail()).isEqualTo("jacklee@example.com");
+  }
 
-    @Test
-    void shouldFindUserByEmailSuccessfully() {
-        saveSampleUser();
-        Optional<Users> foundUser = usersRepository.findByEmail("jacklee@example.com");
-        assertThat(foundUser).isPresent();
-        assertThat(foundUser.get().getName()).isEqualTo("Jack Lee");
-    }
+  @Test
+  void shouldFindUserByEmailSuccessfully() {
+    saveSampleUser();
+    Optional<Users> foundUser = usersRepository.findByEmail("jacklee@example.com");
+    assertThat(foundUser).isPresent();
+    assertThat(foundUser.get().getName()).isEqualTo("Jack Lee");
+  }
 
-    @Test
-    void shouldUpdateUserSuccessfully() {
-        Users savedUser = saveSampleUser();
-        savedUser.setName("Jack Lee Updated");
-        Users updatedUser = usersRepository.save(savedUser);
+  @Test
+  void shouldUpdateUserSuccessfully() {
+    Users savedUser = saveSampleUser();
+    savedUser.setName("Jack Lee Updated");
+    Users updatedUser = usersRepository.save(savedUser);
 
-        assertThat(updatedUser.getName()).isEqualTo("Jack Lee Updated");
-    }
+    assertThat(updatedUser.getName()).isEqualTo("Jack Lee Updated");
+  }
 
-    @Test
-    void shouldDeleteUserSuccessfully() {
-        Users savedUser = saveSampleUser();
-        usersRepository.deleteById(savedUser.getId());
+  @Test
+  void shouldDeleteUserSuccessfully() {
+    Users savedUser = saveSampleUser();
+    usersRepository.deleteById(savedUser.getId());
 
-        Optional<Users> deletedUser = usersRepository.findById(savedUser.getId());
-        assertThat(deletedUser).isEmpty();
-    }
+    Optional<Users> deletedUser = usersRepository.findById(savedUser.getId());
+    assertThat(deletedUser).isEmpty();
+  }
 }

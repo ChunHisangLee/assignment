@@ -1,6 +1,5 @@
 package com.example.assignment.dto;
 
-
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -11,7 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BTCPriceHistoryDTO {
-    private Long id;
-    private double price;
-    private LocalDateTime timestamp;
+  private Long id;
+  private double price;
+  private LocalDateTime timestamp;
 }

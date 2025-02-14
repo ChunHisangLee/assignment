@@ -5,76 +5,71 @@ import com.example.assignment.repository.BTCPriceHistoryRepository;
 import com.example.assignment.service.PriceService;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-
 @Component
 @Slf4j
 public class ScheduledTasks {
 
-    private static final int MIN_PRICE = 100;
-    private static final int MAX_PRICE = 460;
-    private static final int PRICE_INCREMENT = 10;
-    public static final int SCHEDULE_RATE_MS = 5 * 1000;
+  public static final int SCHEDULE_RATE_MS = 5 * 1000;
+  private static final int MIN_PRICE = 100;
+  private static final int MAX_PRICE = 460;
+  private static final int PRICE_INCREMENT = 10;
+  private final PriceService priceService;
+  private final BTCPriceHistoryRepository btcPriceHistoryRepository;
+  @Getter private boolean isIncreasing = true;
+  @Getter private int currentPrice = MIN_PRICE;
 
-    @Getter
-    private boolean isIncreasing = true;
+  public ScheduledTasks(
+      PriceService priceService, BTCPriceHistoryRepository btcPriceHistoryRepository) {
+    this.priceService = priceService;
+    this.btcPriceHistoryRepository = btcPriceHistoryRepository;
+  }
 
-    @Getter
-    private int currentPrice = MIN_PRICE;
+  @PostConstruct
+  private void saveInitialPrice() {
+    priceService.setPrice(currentPrice);
 
-    private final PriceService priceService;
-    private final BTCPriceHistoryRepository btcPriceHistoryRepository;
+    BTCPriceHistory initialPriceHistory = new BTCPriceHistory();
+    initialPriceHistory.setPrice(currentPrice);
+    initialPriceHistory.setTimestamp(LocalDateTime.now());
+    btcPriceHistoryRepository.save(initialPriceHistory);
 
-    public ScheduledTasks(PriceService priceService, BTCPriceHistoryRepository btcPriceHistoryRepository) {
-        this.priceService = priceService;
-        this.btcPriceHistoryRepository = btcPriceHistoryRepository;
+    log.info("Saved initial BTC Price to Redis and database: {}", currentPrice);
+  }
+
+  @Scheduled(fixedRate = SCHEDULE_RATE_MS)
+  @Transactional
+  public void updateCurrentPrice() {
+    if (isIncreasing) {
+      currentPrice += PRICE_INCREMENT;
+
+      if (currentPrice >= MAX_PRICE) {
+        isIncreasing = false;
+      }
+    } else {
+      currentPrice -= PRICE_INCREMENT;
+
+      if (currentPrice <= MIN_PRICE) {
+        isIncreasing = true;
+      }
     }
 
-    @PostConstruct
-    private void saveInitialPrice() {
-        priceService.setPrice(currentPrice);
+    log.info("Updated BTC Price: {}", currentPrice);
 
-        BTCPriceHistory initialPriceHistory = new BTCPriceHistory();
-        initialPriceHistory.setPrice(currentPrice);
-        initialPriceHistory.setTimestamp(LocalDateTime.now());
-        btcPriceHistoryRepository.save(initialPriceHistory);
+    // Save the updated price to Redis
+    priceService.setPrice(currentPrice);
 
-        log.info("Saved initial BTC Price to Redis and database: {}", currentPrice);
-    }
+    // Save the updated price to the database
+    BTCPriceHistory priceHistory = new BTCPriceHistory();
+    priceHistory.setPrice(currentPrice);
+    priceHistory.setTimestamp(LocalDateTime.now());
+    btcPriceHistoryRepository.save(priceHistory);
 
-    @Scheduled(fixedRate = SCHEDULE_RATE_MS)
-    @Transactional
-    public void updateCurrentPrice() {
-        if (isIncreasing) {
-            currentPrice += PRICE_INCREMENT;
-
-            if (currentPrice >= MAX_PRICE) {
-                isIncreasing = false;
-            }
-        } else {
-            currentPrice -= PRICE_INCREMENT;
-
-            if (currentPrice <= MIN_PRICE) {
-                isIncreasing = true;
-            }
-        }
-
-        log.info("Updated BTC Price: {}", currentPrice);
-
-        // Save the updated price to Redis
-        priceService.setPrice(currentPrice);
-
-        // Save the updated price to the database
-        BTCPriceHistory priceHistory = new BTCPriceHistory();
-        priceHistory.setPrice(currentPrice);
-        priceHistory.setTimestamp(LocalDateTime.now());
-        btcPriceHistoryRepository.save(priceHistory);
-
-        log.info("Saved updated BTC Price to Redis and database: {}", currentPrice);
-    }
+    log.info("Saved updated BTC Price to Redis and database: {}", currentPrice);
+  }
 }

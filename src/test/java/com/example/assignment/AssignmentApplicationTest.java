@@ -10,11 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest
 class AssignmentApplicationTest {
 
-    @Autowired
-    private ApplicationContext applicationContext;
+  @Autowired private ApplicationContext applicationContext;
 
-    @Test
-    void contextLoads() {
-        assertNotNull(applicationContext, "The application context should have loaded.");
-    }
+  @Test
+  void contextLoads() {
+    assertNotNull(applicationContext, "The application context should have loaded.");
+  }
 }

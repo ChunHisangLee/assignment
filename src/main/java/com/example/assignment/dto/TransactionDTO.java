@@ -11,17 +11,17 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionDTO {
-    private Long id;
-    private Long userId;
-    private double btcAmount;
-    private LocalDateTime transactionTime;
-    private TransactionType transactionType;
-    private BTCPriceHistoryDTO btcPriceHistory; // Nested DTO for BTCPriceHistory
-    private UsersDTO users; // Nested DTO for Users
+  private Long id;
+  private Long userId;
+  private double btcAmount;
+  private LocalDateTime transactionTime;
+  private TransactionType transactionType;
+  private BTCPriceHistoryDTO btcPriceHistory; // Nested DTO for BTCPriceHistory
+  private UsersDTO users; // Nested DTO for Users
 
-    // Fields to track balances before and after the transaction
-    private double usdBalanceBefore;
-    private double btcBalanceBefore;
-    private double usdBalanceAfter;
-    private double btcBalanceAfter;
+  // Fields to track balances before and after the transaction
+  private double usdBalanceBefore;
+  private double btcBalanceBefore;
+  private double usdBalanceAfter;
+  private double btcBalanceAfter;
 }

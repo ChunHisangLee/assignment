@@ -15,37 +15,43 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(RedisConfig.class);
+  private static final Logger logger = LoggerFactory.getLogger(RedisConfig.class);
 
-    @Value("${spring.data.redis.host}")
-    private String redisHost;
+  @Value("${spring.data.redis.host}")
+  private String redisHost;
 
-    @Value("${spring.data.redis.port}")
-    private int redisPort;
+  @Value("${spring.data.redis.port}")
+  private int redisPort;
 
-    @Value("${spring.data.redis.password}")
-    private String redisPassword;
+  @Value("${spring.data.redis.password}")
+  private String redisPassword;
 
-    @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
-        logger.info("Initializing RedisConnectionFactory with host: {} and port: {} and password: {}", redisHost, redisPort, redisPassword);
-        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
-        redisConfig.setHostName(redisHost);
-        redisConfig.setPort(redisPort);
-        redisConfig.setPassword(redisPassword);
+  @Bean
+  public RedisConnectionFactory redisConnectionFactory() {
+    logger.info(
+        "Initializing RedisConnectionFactory with host: {} and port: {} and password: {}",
+        redisHost,
+        redisPort,
+        redisPassword);
+    RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
+    redisConfig.setHostName(redisHost);
+    redisConfig.setPort(redisPort);
+    redisConfig.setPassword(redisPassword);
 
-        return new LettuceConnectionFactory(redisConfig);
-    }
+    return new LettuceConnectionFactory(redisConfig);
+  }
 
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+  @Bean
+  public RedisTemplate<String, Object> redisTemplate(
+      RedisConnectionFactory redisConnectionFactory) {
+    RedisTemplate<String, Object> template = new RedisTemplate<>();
+    template.setConnectionFactory(redisConnectionFactory);
+    template.setKeySerializer(new StringRedisSerializer());
+    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 
-        logger.info("Configured RedisTemplate with StringRedisSerializer for keys and GenericJackson2JsonRedisSerializer for values.");
+    logger.info(
+        "Configured RedisTemplate with StringRedisSerializer for keys and GenericJackson2JsonRedisSerializer for values.");
 
-        return template;
-    }
+    return template;
+  }
 }

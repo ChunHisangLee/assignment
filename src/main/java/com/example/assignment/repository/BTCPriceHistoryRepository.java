@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface BTCPriceHistoryRepository extends JpaRepository<BTCPriceHistory, Long> {
-    Optional<BTCPriceHistory> findTopByOrderByTimestampDesc();
+  Optional<BTCPriceHistory> findTopByOrderByTimestampDesc();
 }

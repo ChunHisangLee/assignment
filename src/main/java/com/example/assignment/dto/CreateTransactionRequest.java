@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateTransactionRequest {
-    private Long userId;
-    private double btcAmount;
+  private Long userId;
+  private double btcAmount;
 }

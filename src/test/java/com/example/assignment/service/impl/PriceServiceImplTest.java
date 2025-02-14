@@ -1,6 +1,10 @@
 package com.example.assignment.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
 import com.example.assignment.schedule.ScheduledTasks;
+import java.time.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,62 +15,54 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.Duration;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class PriceServiceImplTest {
 
-    @Mock
-    private RedisTemplate<String, Object> redisTemplate;
+  @Mock private RedisTemplate<String, Object> redisTemplate;
 
-    @Mock
-    private ValueOperations<String, Object> valueOperations;
+  @Mock private ValueOperations<String, Object> valueOperations;
 
-    @InjectMocks
-    private PriceServiceImpl priceService;
+  @InjectMocks private PriceServiceImpl priceService;
 
-    @BeforeEach
-    void setUp() {
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        // Set initialPrice field explicitly for the test
-        ReflectionTestUtils.setField(priceService, "initialPrice", 100);
-    }
+  @BeforeEach
+  void setUp() {
+    when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+    // Set initialPrice field explicitly for the test
+    ReflectionTestUtils.setField(priceService, "initialPrice", 100);
+  }
 
-    @Test
-    void testGetPriceWhenPriceIsInRedis() {
-        int expectedPrice = 120;
-        when(valueOperations.get(PriceServiceImpl.REDIS_KEY)).thenReturn(expectedPrice);
+  @Test
+  void testGetPriceWhenPriceIsInRedis() {
+    int expectedPrice = 120;
+    when(valueOperations.get(PriceServiceImpl.REDIS_KEY)).thenReturn(expectedPrice);
 
-        int actualPrice = priceService.getPrice();
+    int actualPrice = priceService.getPrice();
 
-        assertEquals(expectedPrice, actualPrice);
-        verify(redisTemplate, times(1)).opsForValue();
-        verify(valueOperations, times(1)).get(PriceServiceImpl.REDIS_KEY);
-    }
+    assertEquals(expectedPrice, actualPrice);
+    verify(redisTemplate, times(1)).opsForValue();
+    verify(valueOperations, times(1)).get(PriceServiceImpl.REDIS_KEY);
+  }
 
-    @Test
-    void testGetPriceWhenPriceIsNotInRedis() {
-        int expectedPrice = 100; // Assuming this is the value of initialPrice
-        when(valueOperations.get(PriceServiceImpl.REDIS_KEY)).thenReturn(null);
+  @Test
+  void testGetPriceWhenPriceIsNotInRedis() {
+    int expectedPrice = 100; // Assuming this is the value of initialPrice
+    when(valueOperations.get(PriceServiceImpl.REDIS_KEY)).thenReturn(null);
 
-        int actualPrice = priceService.getPrice();
+    int actualPrice = priceService.getPrice();
 
-        assertEquals(expectedPrice, actualPrice);
-        verify(redisTemplate, times(1)).opsForValue();
-        verify(valueOperations, times(1)).get(PriceServiceImpl.REDIS_KEY);
-    }
+    assertEquals(expectedPrice, actualPrice);
+    verify(redisTemplate, times(1)).opsForValue();
+    verify(valueOperations, times(1)).get(PriceServiceImpl.REDIS_KEY);
+  }
 
-    @Test
-    void testSetPrice() {
-        int newPrice = 130;
-        Duration ttl = Duration.ofMillis(ScheduledTasks.SCHEDULE_RATE_MS);
+  @Test
+  void testSetPrice() {
+    int newPrice = 130;
+    Duration ttl = Duration.ofMillis(ScheduledTasks.SCHEDULE_RATE_MS);
 
-        priceService.setPrice(newPrice);
+    priceService.setPrice(newPrice);
 
-        verify(redisTemplate, times(1)).opsForValue();
-        verify(valueOperations, times(1)).set(PriceServiceImpl.REDIS_KEY, newPrice, ttl);
-    }
+    verify(redisTemplate, times(1)).opsForValue();
+    verify(valueOperations, times(1)).set(PriceServiceImpl.REDIS_KEY, newPrice, ttl);
+  }
 }
