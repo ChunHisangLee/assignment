@@ -19,7 +19,8 @@ public class UsersMapper {
     return Users.builder()
         .id(usersDto.getId())
         .name(usersDto.getName())
-        .email(usersDto.getEmail()) // Ensure password is mapped if provided
+        .email(usersDto.getEmail())
+        .password(usersDto.getPassword())
         .build();
   }
 }

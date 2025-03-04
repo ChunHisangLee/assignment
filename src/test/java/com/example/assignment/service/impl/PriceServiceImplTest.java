@@ -28,30 +28,30 @@ class PriceServiceImplTest {
   @BeforeEach
   void setUp() {
     when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-    // Set initialPrice field explicitly for the test
-    ReflectionTestUtils.setField(priceService, "initialPrice", 100);
+    // Set initialPrice field explicitly for the test as a BigDecimal
+    ReflectionTestUtils.setField(priceService, "initialPrice", BigDecimal.valueOf(100));
   }
 
   @Test
   void testGetPriceWhenPriceIsInRedis() {
-    int expectedPrice = 120;
+    double expectedPrice = 120;
     when(valueOperations.get(PriceServiceImpl.REDIS_KEY)).thenReturn(expectedPrice);
 
     BigDecimal actualPrice = priceService.getPrice();
 
-    assertEquals(expectedPrice, actualPrice);
+    assertEquals(BigDecimal.valueOf(expectedPrice), actualPrice);
     verify(redisTemplate, times(1)).opsForValue();
     verify(valueOperations, times(1)).get(PriceServiceImpl.REDIS_KEY);
   }
 
   @Test
   void testGetPriceWhenPriceIsNotInRedis() {
-    int expectedPrice = 100; // Assuming this is the value of initialPrice
+    int expectedPrice = 100; // initialPrice value
     when(valueOperations.get(PriceServiceImpl.REDIS_KEY)).thenReturn(null);
 
     BigDecimal actualPrice = priceService.getPrice();
 
-    assertEquals(expectedPrice, actualPrice);
+    assertEquals(BigDecimal.valueOf(expectedPrice), actualPrice);
     verify(redisTemplate, times(1)).opsForValue();
     verify(valueOperations, times(1)).get(PriceServiceImpl.REDIS_KEY);
   }
@@ -64,6 +64,7 @@ class PriceServiceImplTest {
     priceService.setPrice(BigDecimal.valueOf(newPrice));
 
     verify(redisTemplate, times(1)).opsForValue();
-    verify(valueOperations, times(1)).set(PriceServiceImpl.REDIS_KEY, newPrice, ttl);
+    verify(valueOperations, times(1))
+        .set(PriceServiceImpl.REDIS_KEY, BigDecimal.valueOf(newPrice), ttl);
   }
 }

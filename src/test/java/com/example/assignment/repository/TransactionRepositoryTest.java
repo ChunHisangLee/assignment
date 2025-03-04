@@ -6,6 +6,7 @@ import com.example.assignment.entity.BTCPriceHistory;
 import com.example.assignment.entity.Transaction;
 import com.example.assignment.entity.TransactionType;
 import com.example.assignment.entity.Users;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,7 +64,11 @@ class TransactionRepositoryTest {
             .build();
     user = usersRepository.save(user);
 
-    btcPriceHistory = BTCPriceHistory.builder().price(450.0).timestamp(LocalDateTime.now()).build();
+    btcPriceHistory =
+        BTCPriceHistory.builder()
+            .price(BigDecimal.valueOf(450.0))
+            .timestamp(LocalDateTime.now())
+            .build();
     btcPriceHistory = btcPriceHistoryRepository.save(btcPriceHistory);
   }
 
@@ -74,7 +79,7 @@ class TransactionRepositoryTest {
         Transaction.builder()
             .users(user)
             .btcPriceHistory(btcPriceHistory)
-            .btcAmount(0.01)
+            .btcAmount(BigDecimal.valueOf(0.01))
             .transactionTime(LocalDateTime.now())
             .transactionType(TransactionType.BUY)
             .build();
@@ -84,7 +89,7 @@ class TransactionRepositoryTest {
         Transaction.builder()
             .users(user)
             .btcPriceHistory(btcPriceHistory)
-            .btcAmount(0.02)
+            .btcAmount(BigDecimal.valueOf(0.02))
             .transactionTime(LocalDateTime.now())
             .transactionType(TransactionType.SELL)
             .build();

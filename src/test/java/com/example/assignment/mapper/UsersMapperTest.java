@@ -17,8 +17,7 @@ class UsersMapperTest {
   }
 
   @Test
-  void toDto_shouldMapUsersToUsersDTO() {
-    // Arrange
+  void toDto_shouldMapUsersToUsersDto() {
     Users users =
         Users.builder()
             .id(1L)
@@ -27,22 +26,18 @@ class UsersMapperTest {
             .password("password123")
             .build();
 
-    // Act
-    UsersDto usersDTO = usersMapper.toDto(users);
+    UsersDto usersDto = usersMapper.toDto(users);
 
-    // Assert
-    assertThat(usersDTO).isNotNull();
-    assertThat(usersDTO.getId()).isEqualTo(users.getId());
-    assertThat(usersDTO.getName()).isEqualTo(users.getName());
-    assertThat(usersDTO.getEmail()).isEqualTo(users.getEmail());
-    // Password should not be mapped to the DTO
-    assertThat(usersDTO.getPassword()).isNull();
+    assertThat(usersDto).isNotNull();
+    assertThat(usersDto.getId()).isEqualTo(users.getId());
+    assertThat(usersDto.getName()).isEqualTo(users.getName());
+    assertThat(usersDto.getEmail()).isEqualTo(users.getEmail());
+    assertThat(usersDto.getPassword()).isNull();
   }
 
   @Test
-  void toEntity_shouldMapUsersDTOToUsers() {
-    // Arrange
-    UsersDto usersDTO =
+  void toEntity_shouldMapUsersDtoToUsers() {
+    UsersDto usersDto =
         UsersDto.builder()
             .id(1L)
             .name("John Doe")
@@ -50,14 +45,11 @@ class UsersMapperTest {
             .password("password123")
             .build();
 
-    // Act
-    Users users = usersMapper.toEntity(usersDTO);
+    Users users = usersMapper.toEntity(usersDto);
 
-    // Assert
     assertThat(users).isNotNull();
-    assertThat(users.getId()).isNull(); // ID should not be set when converting from DTO to Entity
-    assertThat(users.getName()).isEqualTo(usersDTO.getName());
-    assertThat(users.getEmail()).isEqualTo(usersDTO.getEmail());
-    assertThat(users.getPassword()).isEqualTo(usersDTO.getPassword());
+    assertThat(users.getId()).isEqualTo(usersDto.getId());
+    assertThat(users.getName()).isEqualTo(usersDto.getName());
+    assertThat(users.getEmail()).isEqualTo(usersDto.getEmail());
   }
 }

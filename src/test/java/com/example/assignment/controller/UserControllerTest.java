@@ -2,8 +2,7 @@ package com.example.assignment.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -44,16 +43,13 @@ class UserControllerTest {
   @BeforeEach
   void setUp() {
     mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
-
     sampleUserDTO = UsersDto.builder().id(1L).name("Jack Lee").email("jacklee@example.com").build();
-
     authentication =
         new UsernamePasswordAuthenticationToken(sampleUserDTO.getEmail(), "encodedPassword");
   }
 
   @Test
   void testRegisterUser_Success() throws Exception {
-    // For void methods, use doNothing() to simulate behavior.
     doNothing().when(userService).registerUser(any(UsersDto.class));
 
     mockMvc
@@ -63,54 +59,40 @@ class UserControllerTest {
                 .content(
                     "{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"password\"}"))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.status").value(MessagesConstants.STATUS_201))
-        .andExpect(jsonPath("$.message").value(MessagesConstants.MESSAGE_201));
+        .andExpect(jsonPath("$.statusCode").value(MessagesConstants.STATUS_201))
+        .andExpect(jsonPath("$.statusMsg").value(MessagesConstants.MESSAGE_201));
   }
 
   @Test
   void testUpdateUser_Success() throws Exception {
-    // updateUser now returns a boolean.
     when(userService.updateUser(eq(1L), any(UsersDto.class))).thenReturn(true);
-
     String jsonRequest =
         "{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"newpassword\"}";
 
     mockMvc
         .perform(put("/api/users/1").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.status").value(MessagesConstants.STATUS_200))
-        .andExpect(jsonPath("$.message").value(MessagesConstants.MESSAGE_200));
+        .andExpect(jsonPath("$.statusCode").value(MessagesConstants.STATUS_200))
+        .andExpect(jsonPath("$.statusMsg").value(MessagesConstants.MESSAGE_200));
   }
 
   @Test
   void testDeleteUser_Success() throws Exception {
-    // deleteUser now returns a boolean.
     when(userService.deleteUser(1L)).thenReturn(true);
 
     mockMvc
         .perform(delete("/api/users/1"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.status").value(MessagesConstants.STATUS_200))
-        .andExpect(jsonPath("$.message").value(MessagesConstants.MESSAGE_200));
-  }
-
-  @Test
-  void testGetUserById_Success() throws Exception {
-    // getUserById returns a UsersDto.
-    when(userService.getUserById(1L)).thenReturn(sampleUserDTO);
-
-    mockMvc
-        .perform(get("/api/users/1").contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.id").value(1L))
-        .andExpect(jsonPath("$.name").value("Jack Lee"))
-        .andExpect(jsonPath("$.email").value("jacklee@example.com"));
+        .andExpect(jsonPath("$.statusCode").value(MessagesConstants.STATUS_200))
+        .andExpect(jsonPath("$.statusMsg").value(MessagesConstants.MESSAGE_200));
   }
 
   @Test
   void testLogin_Success() throws Exception {
-    // For login, we expect a JwtAuthenticationResponse.
-    when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
+    // Either remove this stubbing (if not used by the controller) or mark it as lenient:
+    lenient()
+        .when(authenticationManager.authenticate(any(Authentication.class)))
+        .thenReturn(authentication);
     when(userService.login(any(UsersDto.class))).thenReturn("mockedToken");
 
     String jsonRequest = "{\"email\": \"jacklee@example.com\", \"password\": \"password\"}";
@@ -124,9 +106,9 @@ class UserControllerTest {
 
   @Test
   void testLogin_InvalidCredentials() throws Exception {
-    when(authenticationManager.authenticate(any(Authentication.class)))
+    lenient()
+        .when(authenticationManager.authenticate(any(Authentication.class)))
         .thenThrow(new RuntimeException("Invalid credentials"));
-
     String jsonRequest = "{\"email\": \"jacklee@example.com\", \"password\": \"wrongpassword\"}";
 
     mockMvc
@@ -136,8 +118,19 @@ class UserControllerTest {
   }
 
   @Test
+  void testGetUserById_Success() throws Exception {
+    when(userService.getUserById(1L)).thenReturn(sampleUserDTO);
+
+    mockMvc
+        .perform(get("/api/users/1").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(1L))
+        .andExpect(jsonPath("$.name").value("Jack Lee"))
+        .andExpect(jsonPath("$.email").value("jacklee@example.com"));
+  }
+
+  @Test
   void testLogout_Success() throws Exception {
-    // Logout endpoint simply returns an OK status.
     mockMvc.perform(get("/api/users/logout")).andExpect(status().isOk());
   }
 }

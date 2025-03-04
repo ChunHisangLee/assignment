@@ -76,10 +76,10 @@ class TransactionMapperTest {
     when(usersMapper.toDto(user)).thenReturn(null); // Mock return value
 
     // When
-    TransactionDto transactionDTO =
+    TransactionDto transactionDto =
         transactionMapper.toDto(transaction, BigDecimal.valueOf(1000.0), BigDecimal.valueOf(0.5));
 
     // Then
-    assertThat(transactionDTO).usingRecursiveComparison().isEqualTo(expectedTransactionDto);
+    assertThat(transactionDto).usingRecursiveComparison().isEqualTo(expectedTransactionDto);
   }
 }

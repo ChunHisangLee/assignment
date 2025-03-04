@@ -58,7 +58,7 @@ class BTCPriceHistoryRepositoryTest {
     Optional<BTCPriceHistory> latestRecord =
         btcPriceHistoryRepository.findTopByOrderByTimestampDesc();
     assertThat(latestRecord).isPresent();
-    assertThat(latestRecord.get().getPrice()).isEqualTo(450.0);
+    assertThat(latestRecord.get().getPrice()).isEqualTo(BigDecimal.valueOf(450.0));
     assertThat(latestRecord.get().getTimestamp()).isEqualTo(savedRecord.getTimestamp());
   }
 
