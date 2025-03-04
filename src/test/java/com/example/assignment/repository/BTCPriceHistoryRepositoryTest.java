@@ -1,6 +1,11 @@
 package com.example.assignment.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.assignment.entity.BTCPriceHistory;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,56 +19,53 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class BTCPriceHistoryRepositoryTest {
 
-    @Container
-    @SuppressWarnings("resource")
-    public static PostgreSQLContainer<?> postgresqlContainer = new PostgreSQLContainer<>("postgres:latest")
-            .withDatabaseName("testdb")
-            .withUsername("testuser")
-            .withPassword("testpass");
+  @Container
+  @SuppressWarnings("resource")
+  public static PostgreSQLContainer<?> postgresqlContainer =
+      new PostgreSQLContainer<>("postgres:latest")
+          .withDatabaseName("testdb")
+          .withUsername("testuser")
+          .withPassword("testpass");
 
-    @Autowired
-    private BTCPriceHistoryRepository btcPriceHistoryRepository;
+  @Autowired private BTCPriceHistoryRepository btcPriceHistoryRepository;
 
-    private BTCPriceHistory btcPriceHistory;
+  private BTCPriceHistory btcPriceHistory;
 
-    @DynamicPropertySource
-    static void dataSourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgresqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", postgresqlContainer::getUsername);
-        registry.add("spring.datasource.password", postgresqlContainer::getPassword);
-    }
+  @DynamicPropertySource
+  static void dataSourceProperties(DynamicPropertyRegistry registry) {
+    registry.add("spring.datasource.url", postgresqlContainer::getJdbcUrl);
+    registry.add("spring.datasource.username", postgresqlContainer::getUsername);
+    registry.add("spring.datasource.password", postgresqlContainer::getPassword);
+  }
 
-    @BeforeEach
-    void setUp() {
-        btcPriceHistory = new BTCPriceHistory();
-        btcPriceHistory.setPrice(450.0);
-        btcPriceHistory.setTimestamp(LocalDateTime.now());
-    }
+  @BeforeEach
+  void setUp() {
+    btcPriceHistory = new BTCPriceHistory();
+    btcPriceHistory.setPrice(BigDecimal.valueOf(450.0));
+    btcPriceHistory.setTimestamp(LocalDateTime.now());
+  }
 
-    @Test
-    void testSaveAndFindTopByOrderByTimestampDesc() {
-        BTCPriceHistory savedRecord = btcPriceHistoryRepository.save(btcPriceHistory);
+  @Test
+  void testSaveAndFindTopByOrderByTimestampDesc() {
+    BTCPriceHistory savedRecord = btcPriceHistoryRepository.save(btcPriceHistory);
 
-        Optional<BTCPriceHistory> latestRecord = btcPriceHistoryRepository.findTopByOrderByTimestampDesc();
-        assertThat(latestRecord).isPresent();
-        assertThat(latestRecord.get().getPrice()).isEqualTo(450.0);
-        assertThat(latestRecord.get().getTimestamp()).isEqualTo(savedRecord.getTimestamp());
-    }
+    Optional<BTCPriceHistory> latestRecord =
+        btcPriceHistoryRepository.findTopByOrderByTimestampDesc();
+    assertThat(latestRecord).isPresent();
+    assertThat(latestRecord.get().getPrice()).isEqualTo(450.0);
+    assertThat(latestRecord.get().getTimestamp()).isEqualTo(savedRecord.getTimestamp());
+  }
 
-    @Test
-    void testFindTopByOrderByTimestampDesc_NoRecords() {
-        Optional<BTCPriceHistory> latestRecord = btcPriceHistoryRepository.findTopByOrderByTimestampDesc();
-        assertThat(latestRecord).isEmpty();
-    }
+  @Test
+  void testFindTopByOrderByTimestampDesc_NoRecords() {
+    Optional<BTCPriceHistory> latestRecord =
+        btcPriceHistoryRepository.findTopByOrderByTimestampDesc();
+    assertThat(latestRecord).isEmpty();
+  }
 }

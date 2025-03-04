@@ -1,7 +1,7 @@
 package com.example.assignment.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,43 +9,53 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
+@Slf4j
 public class RedisConfig {
+  @Value("${spring.data.redis.host}")
+  private String redisHost;
 
-    private static final Logger logger = LoggerFactory.getLogger(RedisConfig.class);
+  @Value("${spring.data.redis.port}")
+  private int redisPort;
 
-    @Value("${spring.data.redis.host}")
-    private String redisHost;
+  @Value("${spring.data.redis.password}")
+  private String redisPassword;
 
-    @Value("${spring.data.redis.port}")
-    private int redisPort;
+  @Bean
+  public RedisConnectionFactory redisConnectionFactory() {
+    log.info(
+        "Initializing RedisConnectionFactory with host: {} and port: {} and password: {}",
+        redisHost,
+        redisPort,
+        redisPassword);
+    RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
+    redisConfig.setHostName(redisHost);
+    redisConfig.setPort(redisPort);
+    redisConfig.setPassword(redisPassword);
 
-    @Value("${spring.data.redis.password}")
-    private String redisPassword;
+    return new LettuceConnectionFactory(redisConfig);
+  }
 
-    @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
-        logger.info("Initializing RedisConnectionFactory with host: {} and port: {} and password: {}", redisHost, redisPort, redisPassword);
-        RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
-        redisConfig.setHostName(redisHost);
-        redisConfig.setPort(redisPort);
-        redisConfig.setPassword(redisPassword);
+  @Bean
+  public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+    RedisTemplate<String, Object> template = new RedisTemplate<>();
+    template.setConnectionFactory(connectionFactory);
 
-        return new LettuceConnectionFactory(redisConfig);
-    }
+    // Configure key serializer
+    template.setKeySerializer(new StringRedisSerializer());
 
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+    // Configure value serializer using Jackson with a custom ObjectMapper
+    ObjectMapper mapper = new ObjectMapper();
+    mapper
+        .findAndRegisterModules(); // Registers modules for Java 8 date/time and BigDecimal support
+    Jackson2JsonRedisSerializer<Object> serializer =
+        new Jackson2JsonRedisSerializer<>(mapper, Object.class);
+    template.setValueSerializer(serializer);
 
-        logger.info("Configured RedisTemplate with StringRedisSerializer for keys and GenericJackson2JsonRedisSerializer for values.");
-
-        return template;
-    }
+    template.afterPropertiesSet();
+    return template;
+  }
 }

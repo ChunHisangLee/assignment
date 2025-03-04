@@ -1,6 +1,9 @@
 package com.example.assignment.service;
 
+import java.math.BigDecimal;
+
 public interface PriceService {
-    void setPrice(int price);
-    int getPrice();
+  BigDecimal getPrice();
+
+  void setPrice(BigDecimal price);
 }
