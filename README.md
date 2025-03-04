@@ -2,7 +2,9 @@
 
 ## Overview
 
-This project is a Spring Boot application designed to manage users, transactions, and Bitcoin pricing. The application is built using Java 21, Spring Boot, PostgreSQL, and Redis, providing a robust backend service. This documentation provides setup instructions, environment details, and references for developers working with this project.
+This project is a Spring Boot application designed to manage users, transactions, and Bitcoin pricing. The application
+is built using Java 21, Spring Boot, PostgreSQL, and Redis, providing a robust backend service. This documentation
+provides setup instructions, environment details, and references for developers working with this project.
 
 ## Prerequisites
 
@@ -27,7 +29,9 @@ cd assignment
 
 ### 2. Configure the Database
 
-The application uses PostgreSQL as the primary database and Redis for caching. You need to configure the database connections in the application.yml or application.properties file.
+The application uses PostgreSQL as the primary database and Redis for caching. You need to configure the database
+connections in the application.yml or application.properties file.
+
 #### PostgreSQL Configuration in application.yml:
 
 ```yaml
@@ -140,7 +144,9 @@ If you haven't already, create the database in PostgreSQL:
 ```sql
 CREATE DATABASE postgres;
 ```
+
 Initialize the database with the following table scripts:
+
 * [schema.sql](src/main/resources/SQL/schema.sql)
 
 ### 4. Build and Run the Application
@@ -167,6 +173,7 @@ You can access the application and its API documentation via the following link:
 ### 6. Docker Setup (Optional)
 
 If you prefer using Docker for PostgreSQL and Redis, use the following commands:
+
 ```bash
 docker run --name assignment-db -e POSTGRES_DB=postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=Ab123456 -p 5432:5432 -d postgres
 docker run --name assignment-redis -p 6379:6379 -d redis
@@ -174,58 +181,65 @@ docker run --name assignment-redis -p 6379:6379 -d redis
 
 ### 7. Docker Compose Setup
 
-You can also use Docker Compose to run the entire stack (Spring Boot application, PostgreSQL, and Redis) together. Create a docker-compose.yml file with the following content:
+You can also use Docker Compose to run the entire stack (Spring Boot application, PostgreSQL, and Redis) together.
+Create a docker-compose.yml file with the following content:
 
 ```yaml
-version: '3.8'
-
 services:
-  app:
-    image: chunhsianglee/assignment:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=Ab123456
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
-      - APP_JWTSECRET=Xb34fJd9kPbvmJc84mDkV9b3Xb4fJd9kPbvmJc84mDkV9b3Xb34fJd9kPbvmJc84
-      - APP_JWTEXPIRATIONMS=3600000
-    depends_on:
-      - db
-      - redis
-
   db:
-    image: postgres:16
+    image: postgres:latest
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Ab123456
     ports:
       - "5432:5432"
+    networks:
+      - assignment-network
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "postgres"]
-      interval: 30s
-      timeout: 10s
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
 
   redis:
     image: redis:latest
+    command: [ "redis-server", "--requirepass", "Ab123456" ]
     ports:
-      - "6379:6379"
+      - "6379:6379"  # Exposing Redis on port 6379
+    networks:
+      - assignment-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
+      test: [ "CMD", "redis-cli", "-a", "Ab123456", "ping" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Ab123456
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      SPRING_REDIS_PASSWORD: Ab123456
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - assignment-network
+
 networks:
-  default:
-    name: assignment-network
+  assignment-network:
+    driver: bridge
 ```
 
 To build and run the stack using Docker Compose, run:
@@ -261,6 +275,7 @@ This documentation provides detailed information about the available API endpoin
 ### The application includes the following additional configuration:
 
 JWT Settings:
+
 * jwtSecret: A secret key for signing JWTs.
 * jwtExpirationMs: The JWT expiration time is set to 3600000 milliseconds (1 hour).
 * Initial Price: The initial Bitcoin price is set to 100.

@@ -1,7 +1,11 @@
 package com.example.assignment.service.impl;
 
-import com.example.assignment.dto.CreateTransactionRequest;
-import com.example.assignment.dto.TransactionDTO;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+import com.example.assignment.dto.CreateTransactionRequestDto;
+import com.example.assignment.dto.TransactionDto;
 import com.example.assignment.entity.Transaction;
 import com.example.assignment.entity.TransactionType;
 import com.example.assignment.entity.Users;
@@ -10,6 +14,9 @@ import com.example.assignment.mapper.TransactionMapper;
 import com.example.assignment.repository.TransactionRepository;
 import com.example.assignment.repository.UsersRepository;
 import com.example.assignment.service.PriceService;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,146 +27,154 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceImplTest {
 
-    @Mock
-    private TransactionRepository transactionRepository;
+  @Mock private TransactionRepository transactionRepository;
 
-    @Mock
-    private UsersRepository usersRepository;
+  @Mock private UsersRepository usersRepository;
 
-    @Mock
-    private TransactionMapper transactionMapper;
+  @Mock private TransactionMapper transactionMapper;
 
-    @Mock
-    private PriceService priceService;
+  @Mock private PriceService priceService;
 
-    @InjectMocks
-    private TransactionServiceImpl transactionService;
+  @InjectMocks private TransactionServiceImpl transactionService;
 
-    @Test
-    void createTransaction_BuySuccess() {
-        // Arrange
-        Long userId = 1L;
-        double btcAmount = 0.5;
-        int currentPrice = 100;
-        double usdBalance = 200.0;
+  @Test
+  void createTransaction_BuySuccess() {
+    // Arrange
+    Long userId = 1L;
+    BigDecimal btcAmount = BigDecimal.valueOf(0.5);
+    BigDecimal currentPrice = BigDecimal.valueOf(100);
+    BigDecimal usdBalance = BigDecimal.valueOf(200.0);
 
-        Users user = new Users();
-        user.setId(userId);
-        Wallet wallet = new Wallet(userId, usdBalance, 0.0, user);
-        user.setWallet(wallet);
+    Users user = new Users();
+    user.setId(userId);
+    Wallet wallet = new Wallet(userId, usdBalance, BigDecimal.ZERO, user);
+    user.setWallet(wallet);
 
-        CreateTransactionRequest request = new CreateTransactionRequest(userId, btcAmount);
-        TransactionDTO transactionDTO = new TransactionDTO();
+    CreateTransactionRequestDto request = new CreateTransactionRequestDto(userId, btcAmount);
+    TransactionDto transactionDTO = new TransactionDto();
 
-        when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(priceService.getPrice()).thenReturn(currentPrice);
-        when(transactionMapper.toDto(any(Transaction.class), anyDouble(), anyDouble())).thenReturn(transactionDTO);
+    when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(priceService.getPrice()).thenReturn(currentPrice);
+    when(transactionMapper.toDto(
+            any(Transaction.class), any(BigDecimal.class), any(BigDecimal.class)))
+        .thenReturn(transactionDTO);
 
-        // Act
-        TransactionDTO result = transactionService.createTransaction(request, TransactionType.BUY);
+    // Act
+    TransactionDto result = transactionService.createTransaction(request, TransactionType.BUY);
 
-        // Assert
-        assertNotNull(result);
-        verify(usersRepository, times(1)).findById(userId);
-        verify(priceService, times(1)).getPrice();
-        verify(transactionRepository, times(1)).save(any(Transaction.class));
-        verify(transactionMapper, times(1)).toDto(any(Transaction.class), anyDouble(), anyDouble());
+    // Assert
+    assertNotNull(result);
+    verify(usersRepository, times(1)).findById(userId);
+    verify(priceService, times(1)).getPrice();
+    verify(transactionRepository, times(1)).save(any(Transaction.class));
+    verify(transactionMapper, times(1))
+        .toDto(any(Transaction.class), any(BigDecimal.class), any(BigDecimal.class));
 
-        assertEquals(usdBalance - btcAmount * currentPrice, wallet.getUsdBalance());
-        assertEquals(btcAmount, wallet.getBtcBalance());
-    }
+    // Calculate expected balances
+    BigDecimal totalCost = btcAmount.multiply(currentPrice);
+    BigDecimal expectedUsdBalance = usdBalance.subtract(totalCost);
+    BigDecimal expectedBtcBalance = BigDecimal.ZERO.add(btcAmount);
 
-    @Test
-    void createTransaction_SellSuccess() {
-        // Arrange
-        Long userId = 1L;
-        double btcAmount = 0.5;
-        int currentPrice = 100;
-        double btcBalance = 1.0;
+    assertEquals(0, wallet.getUsdBalance().compareTo(expectedUsdBalance));
+    assertEquals(0, wallet.getBtcBalance().compareTo(expectedBtcBalance));
+  }
 
-        Users user = new Users();
-        user.setId(userId);
-        Wallet wallet = new Wallet(userId, 0.0, btcBalance, user);
-        user.setWallet(wallet);
+  @Test
+  void createTransaction_SellSuccess() {
+    // Arrange
+    Long userId = 1L;
+    BigDecimal btcAmount = BigDecimal.valueOf(0.5);
+    BigDecimal currentPrice = BigDecimal.valueOf(100);
+    BigDecimal btcBalance = BigDecimal.valueOf(1.0);
 
-        CreateTransactionRequest request = new CreateTransactionRequest(userId, btcAmount);
-        TransactionDTO transactionDTO = new TransactionDTO();
+    Users user = new Users();
+    user.setId(userId);
+    Wallet wallet = new Wallet(userId, BigDecimal.ZERO, btcBalance, user);
+    user.setWallet(wallet);
 
-        when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(priceService.getPrice()).thenReturn(currentPrice);
-        when(transactionMapper.toDto(any(Transaction.class), anyDouble(), anyDouble())).thenReturn(transactionDTO);
+    CreateTransactionRequestDto request = new CreateTransactionRequestDto(userId, btcAmount);
+    TransactionDto transactionDTO = new TransactionDto();
 
-        // Act
-        TransactionDTO result = transactionService.createTransaction(request, TransactionType.SELL);
+    when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(priceService.getPrice()).thenReturn(currentPrice);
+    when(transactionMapper.toDto(
+            any(Transaction.class), any(BigDecimal.class), any(BigDecimal.class)))
+        .thenReturn(transactionDTO);
 
-        // Assert
-        assertNotNull(result);
-        verify(usersRepository, times(1)).findById(userId);
-        verify(priceService, times(1)).getPrice();
-        verify(transactionRepository, times(1)).save(any(Transaction.class));
-        verify(transactionMapper, times(1)).toDto(any(Transaction.class), anyDouble(), anyDouble());
+    // Act
+    TransactionDto result = transactionService.createTransaction(request, TransactionType.SELL);
 
-        assertEquals(btcBalance - btcAmount, wallet.getBtcBalance());
-        assertEquals(btcAmount * currentPrice, wallet.getUsdBalance());
-    }
+    // Assert
+    assertNotNull(result);
+    verify(usersRepository, times(1)).findById(userId);
+    verify(priceService, times(1)).getPrice();
+    verify(transactionRepository, times(1)).save(any(Transaction.class));
+    verify(transactionMapper, times(1))
+        .toDto(any(Transaction.class), any(BigDecimal.class), any(BigDecimal.class));
 
-    @Test
-    void createTransaction_UserNotFound() {
-        // Arrange
-        Long userId = 1L;
-        CreateTransactionRequest request = new CreateTransactionRequest(userId, 0.5);
+    // Calculate expected balances
+    BigDecimal totalProceeds = btcAmount.multiply(currentPrice);
+    BigDecimal expectedBtcBalance = btcBalance.subtract(btcAmount);
+    BigDecimal expectedUsdBalance = BigDecimal.ZERO.add(totalProceeds);
 
-        when(usersRepository.findById(userId)).thenReturn(Optional.empty());
+    assertEquals(0, wallet.getBtcBalance().compareTo(expectedBtcBalance));
+    assertEquals(0, wallet.getUsdBalance().compareTo(expectedUsdBalance));
+  }
 
-        // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                transactionService.createTransaction(request, TransactionType.BUY));
+  @Test
+  void createTransaction_UserNotFound() {
+    // Arrange
+    Long userId = 1L;
+    CreateTransactionRequestDto request =
+        new CreateTransactionRequestDto(userId, BigDecimal.valueOf(0.5));
 
-        assertEquals("User not found", exception.getMessage());
-        verify(usersRepository, times(1)).findById(userId);
-        verify(priceService, times(0)).getPrice();
-        verify(transactionRepository, times(0)).save(any(Transaction.class));
-    }
+    when(usersRepository.findById(userId)).thenReturn(Optional.empty());
 
-    @Test
-    void getUserTransactionHistory_Success() {
-        // Arrange
-        Long userId = 1L;
-        Users user = new Users();
-        user.setId(userId);
+    // Act & Assert
+    IllegalArgumentException exception =
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> transactionService.createTransaction(request, TransactionType.BUY));
 
-        Wallet wallet = new Wallet(userId, 1000.0, 0.5, user);
-        user.setWallet(wallet);
+    assertEquals("User not found", exception.getMessage());
+    verify(usersRepository, times(1)).findById(userId);
+    verify(priceService, never()).getPrice();
+    verify(transactionRepository, never()).save(any(Transaction.class));
+  }
 
-        Transaction transaction = new Transaction();
-        transaction.setUsers(user);
+  @Test
+  void getUserTransactionHistory_Success() {
+    // Arrange
+    Long userId = 1L;
+    Users user = new Users();
+    user.setId(userId);
 
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Transaction> transactionPage = new PageImpl<>(List.of(transaction));
+    Wallet wallet = new Wallet(userId, BigDecimal.valueOf(1000.0), BigDecimal.valueOf(0.5), user);
+    user.setWallet(wallet);
 
-        when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(transactionRepository.findByUsers(user, pageable)).thenReturn(transactionPage);
-        when(transactionMapper.toDto(any(Transaction.class), anyDouble(), anyDouble()))
-                .thenReturn(new TransactionDTO());
+    Transaction transaction = new Transaction();
+    transaction.setUsers(user);
 
-        // Act
-        Page<TransactionDTO> result = transactionService.getUserTransactionHistory(userId, pageable);
+    Pageable pageable = PageRequest.of(0, 10);
+    Page<Transaction> transactionPage = new PageImpl<>(List.of(transaction));
 
-        // Assert
-        assertNotNull(result);
-        verify(usersRepository, times(1)).findById(userId);
-        verify(transactionRepository, times(1)).findByUsers(user, pageable);
-        verify(transactionMapper, times(1)).toDto(any(Transaction.class), anyDouble(), anyDouble());
-    }
+    when(usersRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(transactionRepository.findByUsers(user, pageable)).thenReturn(transactionPage);
+    when(transactionMapper.toDto(
+            any(Transaction.class), any(BigDecimal.class), any(BigDecimal.class)))
+        .thenReturn(new TransactionDto());
 
+    // Act
+    Page<TransactionDto> result = transactionService.getUserTransactionHistory(userId, pageable);
+
+    // Assert
+    assertNotNull(result);
+    verify(usersRepository, times(1)).findById(userId);
+    verify(transactionRepository, times(1)).findByUsers(user, pageable);
+    verify(transactionMapper, times(1))
+        .toDto(any(Transaction.class), any(BigDecimal.class), any(BigDecimal.class));
+  }
 }

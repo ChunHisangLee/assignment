@@ -1,8 +1,7 @@
 package com.example.assignment.security;
 
 import com.example.assignment.constants.SecurityConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -22,69 +21,72 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@Slf4j
 public class WebSecurityConfig {
+  private final CustomUserDetailsService customUserDetailsService;
+  private final JwtTokenProvider jwtTokenProvider;
 
-    private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
+  @Value("${security.authentication.enabled:true}")
+  private boolean authenticationEnabled;
 
-    private final CustomUserDetailsService customUserDetailsService;
-    private final JwtTokenProvider jwtTokenProvider;
+  @Autowired
+  public WebSecurityConfig(
+      CustomUserDetailsService customUserDetailsService, JwtTokenProvider jwtTokenProvider) {
+    this.customUserDetailsService = customUserDetailsService;
+    this.jwtTokenProvider = jwtTokenProvider;
+  }
 
-    @Value("${security.authentication.enabled:true}")
-    private boolean authenticationEnabled;
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    log.info("Configuring security filter chain");
 
-    @Autowired
-    public WebSecurityConfig(CustomUserDetailsService customUserDetailsService, JwtTokenProvider jwtTokenProvider) {
-        this.customUserDetailsService = customUserDetailsService;
-        this.jwtTokenProvider = jwtTokenProvider;
+    if (authenticationEnabled) {
+      log.info("Authentication is ON");
+      http.csrf(AbstractHttpConfigurer::disable)
+          .authorizeHttpRequests(
+              authorize ->
+                  authorize
+                      .requestMatchers(SecurityConstants.getPublicUrls())
+                      .permitAll()
+                      .anyRequest()
+                      .authenticated())
+          .sessionManagement(
+              session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+          .addFilterBefore(
+              new JwtAuthenticationFilter(jwtTokenProvider),
+              UsernamePasswordAuthenticationFilter.class);
+    } else {
+      log.info("Authentication is OFF");
+      http.csrf(AbstractHttpConfigurer::disable)
+          .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        logger.info("Configuring security filter chain");
+    log.info("Security filter chain configured successfully");
+    return http.build();
+  }
 
-        if (authenticationEnabled) {
-            logger.info("Authentication is ON");
-            http
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(authorize -> authorize
-                            .requestMatchers(SecurityConstants.getPublicUrls()).permitAll()
-                            .anyRequest().authenticated())
-                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                    .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
-        } else {
-            logger.info("Authentication is OFF");
-            http
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(authorize -> authorize
-                            .anyRequest().permitAll());
-        }
+  @Bean
+  public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+    log.info("Creating AuthenticationManager bean");
+    AuthenticationManager authenticationManager =
+        http.getSharedObject(AuthenticationManagerBuilder.class).build();
+    log.info("AuthenticationManager bean created successfully");
+    return authenticationManager;
+  }
 
-        logger.info("Security filter chain configured successfully");
-        return http.build();
-    }
+  @Bean
+  public AuthenticationProvider authenticationProvider() {
+    log.info("Creating AuthenticationProvider bean");
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+    authProvider.setPasswordEncoder(passwordEncoder());
+    authProvider.setUserDetailsService(customUserDetailsService);
+    log.info("AuthenticationProvider bean created successfully");
+    return authProvider;
+  }
 
-    @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        logger.info("Creating AuthenticationManager bean");
-        AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManagerBuilder.class)
-                .build();
-        logger.info("AuthenticationManager bean created successfully");
-        return authenticationManager;
-    }
-
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        logger.info("Creating AuthenticationProvider bean");
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setPasswordEncoder(passwordEncoder());
-        authProvider.setUserDetailsService(customUserDetailsService);
-        logger.info("AuthenticationProvider bean created successfully");
-        return authProvider;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        logger.info("Creating PasswordEncoder bean");
-        return new BCryptPasswordEncoder();
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    log.info("Creating PasswordEncoder bean");
+    return new BCryptPasswordEncoder();
+  }
 }

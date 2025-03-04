@@ -1,9 +1,17 @@
 package com.example.assignment.controller;
 
-import com.example.assignment.dto.UsersDTO;
-import com.example.assignment.entity.Users;
-import com.example.assignment.mapper.UsersMapper;
-import com.example.assignment.security.JwtTokenProvider;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.example.assignment.constants.MessagesConstants;
+import com.example.assignment.dto.UsersDto;
 import com.example.assignment.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,140 +26,111 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
-    private MockMvc mockMvc;
+  private MockMvc mockMvc;
 
-    @Mock
-    private UserService userService;
+  @Mock private UserService userService;
 
-    @Mock
-    private UsersMapper usersMapper;
+  @Mock private AuthenticationManager authenticationManager;
 
-    @Mock
-    private JwtTokenProvider jwtTokenProvider;
+  @InjectMocks private UserController userController;
 
-    @Mock
-    private AuthenticationManager authenticationManager;
+  private UsersDto sampleUserDTO;
+  private Authentication authentication;
 
-    @InjectMocks
-    private UserController userController;
+  @BeforeEach
+  void setUp() {
+    mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+    sampleUserDTO = UsersDto.builder().id(1L).name("Jack Lee").email("jacklee@example.com").build();
+    authentication =
+        new UsernamePasswordAuthenticationToken(sampleUserDTO.getEmail(), "encodedPassword");
+  }
 
-    private Users sampleUser;
-    private UsersDTO sampleUserDTO;
-    private Authentication authentication;
+  @Test
+  void testRegisterUser_Success() throws Exception {
+    doNothing().when(userService).registerUser(any(UsersDto.class));
 
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
+    mockMvc
+        .perform(
+            post("/api/users/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    "{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"password\"}"))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.statusCode").value(MessagesConstants.STATUS_201))
+        .andExpect(jsonPath("$.statusMsg").value(MessagesConstants.MESSAGE_201));
+  }
 
-        sampleUser = Users.builder()
-                .id(1L)
-                .name("Jack Lee")
-                .email("jacklee@example.com")
-                .password("encodedPassword")
-                .build();
+  @Test
+  void testUpdateUser_Success() throws Exception {
+    when(userService.updateUser(eq(1L), any(UsersDto.class))).thenReturn(true);
+    String jsonRequest =
+        "{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"newpassword\"}";
 
-        sampleUserDTO = UsersDTO.builder()
-                .id(1L)
-                .name("Jack Lee")
-                .email("jacklee@example.com")
-                .build();
+    mockMvc
+        .perform(put("/api/users/1").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.statusCode").value(MessagesConstants.STATUS_200))
+        .andExpect(jsonPath("$.statusMsg").value(MessagesConstants.MESSAGE_200));
+  }
 
-        authentication = new UsernamePasswordAuthenticationToken(sampleUser.getEmail(), sampleUser.getPassword());
-    }
+  @Test
+  void testDeleteUser_Success() throws Exception {
+    when(userService.deleteUser(1L)).thenReturn(true);
 
-    @Test
-    void testRegisterUser_Success() throws Exception {
-        when(usersMapper.toEntity(any(UsersDTO.class))).thenReturn(sampleUser);
-        when(userService.registerUser(any(Users.class))).thenReturn(sampleUser);
-        when(usersMapper.toDto(any(Users.class))).thenReturn(sampleUserDTO);
+    mockMvc
+        .perform(delete("/api/users/1"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.statusCode").value(MessagesConstants.STATUS_200))
+        .andExpect(jsonPath("$.statusMsg").value(MessagesConstants.MESSAGE_200));
+  }
 
-        mockMvc.perform(post("/api/users/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"password\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Jack Lee"))
-                .andExpect(jsonPath("$.email").value("jacklee@example.com"));
-    }
+  @Test
+  void testLogin_Success() throws Exception {
+    // Either remove this stubbing (if not used by the controller) or mark it as lenient:
+    lenient()
+        .when(authenticationManager.authenticate(any(Authentication.class)))
+        .thenReturn(authentication);
+    when(userService.login(any(UsersDto.class))).thenReturn("mockedToken");
 
-    @Test
-    void testUpdateUser_Success() throws Exception {
-        when(usersMapper.toEntity(any(UsersDTO.class))).thenReturn(sampleUser);
-        when(userService.updateUser(eq(1L), any(Users.class))).thenReturn(Optional.of(sampleUser));
-        when(usersMapper.toDto(any(Users.class))).thenReturn(sampleUserDTO);
+    String jsonRequest = "{\"email\": \"jacklee@example.com\", \"password\": \"password\"}";
 
-        String jsonRequest = "{\"name\": \"Jack Lee\", \"email\": \"jacklee@example.com\", \"password\": \"newpassword\"}";
+    mockMvc
+        .perform(
+            post("/api/users/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.token").value("mockedToken"));
+  }
 
-        mockMvc.perform(put("/api/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Jack Lee"))
-                .andExpect(jsonPath("$.email").value("jacklee@example.com"));
-    }
+  @Test
+  void testLogin_InvalidCredentials() throws Exception {
+    lenient()
+        .when(authenticationManager.authenticate(any(Authentication.class)))
+        .thenThrow(new RuntimeException("Invalid credentials"));
+    String jsonRequest = "{\"email\": \"jacklee@example.com\", \"password\": \"wrongpassword\"}";
 
-    @Test
-    void testDeleteUser_Success() throws Exception {
-        mockMvc.perform(delete("/api/users/1"))
-                .andExpect(status().isOk());
-    }
+    mockMvc
+        .perform(
+            post("/api/users/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .andExpect(status().isUnauthorized());
+  }
 
-    @Test
-    void testGetUserById_Success() throws Exception {
-        when(userService.getUserById(1L)).thenReturn(Optional.of(sampleUser));
-        when(usersMapper.toDto(any(Users.class))).thenReturn(sampleUserDTO);
+  @Test
+  void testGetUserById_Success() throws Exception {
+    when(userService.getUserById(1L)).thenReturn(sampleUserDTO);
 
-        mockMvc.perform(get("/api/users/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Jack Lee"))
-                .andExpect(jsonPath("$.email").value("jacklee@example.com"));
-    }
+    mockMvc
+        .perform(get("/api/users/1").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(1L))
+        .andExpect(jsonPath("$.name").value("Jack Lee"))
+        .andExpect(jsonPath("$.email").value("jacklee@example.com"));
+  }
 
-    @Test
-    void testLogin_Success() throws Exception {
-        when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
-        when(jwtTokenProvider.generateToken(any(Authentication.class))).thenReturn("mockedToken");
-
-        String jsonRequest = "{\"email\": \"jacklee@example.com\", \"password\": \"password\"}";
-
-        mockMvc.perform(post("/api/users/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("mockedToken"));
-    }
-
-    @Test
-    void testLogin_InvalidCredentials() throws Exception {
-        when(authenticationManager.authenticate(any(Authentication.class)))
-                .thenThrow(new RuntimeException("Invalid credentials"));
-
-        String jsonRequest = "{\"email\": \"jacklee@example.com\", \"password\": \"wrongpassword\"}";
-
-        mockMvc.perform(post("/api/users/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void testLogout_Success() throws Exception {
-        mockMvc.perform(get("/api/users/logout"))
-                .andExpect(status().isOk());
-    }
+  @Test
+  void testLogout_Success() throws Exception {
+    mockMvc.perform(get("/api/users/logout")).andExpect(status().isOk());
+  }
 }

@@ -1,211 +1,205 @@
 package com.example.assignment.service.impl;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+import com.example.assignment.dto.UsersDto;
 import com.example.assignment.entity.Users;
 import com.example.assignment.exception.CustomErrorException;
+import com.example.assignment.exception.ResourceNotFoundException;
+import com.example.assignment.mapper.UsersMapper;
 import com.example.assignment.repository.UsersRepository;
+import com.example.assignment.security.JwtTokenProvider;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
 
-    @Mock
-    private UsersRepository usersRepository;
+  @Mock private UsersRepository usersRepository;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+  @Mock private PasswordEncoder passwordEncoder;
 
-    @InjectMocks
-    private UserServiceImpl userService;
+  @Mock private UsersMapper usersMapper;
 
-    private Users user;
+  @Mock private AuthenticationManager authenticationManager;
 
-    @BeforeEach
-    void setUp() {
-        user = Users.builder()
-                .id(1L)
-                .email("jacklee@example.com")
-                .name("Jack Lee")
-                .password("encodedPassword")
-                .build();
-    }
+  @Mock private JwtTokenProvider jwtTokenProvider;
 
-    @Test
-    void registerUser_Success() {
-        // Arrange
-        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(usersRepository.save(any(Users.class))).thenReturn(user);
+  @InjectMocks private UserServiceImpl userService;
 
-        // Act
-        Users savedUser = userService.registerUser(user);
+  private Users user;
+  private UsersDto usersDto;
 
-        // Assert
-        assertNotNull(savedUser);
-        assertEquals(user.getId(), savedUser.getId());
-        verify(usersRepository, times(1)).findByEmail(anyString());
-        verify(passwordEncoder, times(1)).encode(anyString());
-        verify(usersRepository, times(1)).save(any(Users.class));
-    }
+  @BeforeEach
+  void setUp() {
+    user =
+        Users.builder()
+            .id(1L)
+            .email("jacklee@example.com")
+            .name("Jack Lee")
+            .password("rawPassword")
+            .build();
 
-    @Test
-    void registerUser_EmailAlreadyRegistered() {
-        // Arrange
-        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+    usersDto =
+        UsersDto.builder()
+            .id(1L)
+            .email("jacklee@example.com")
+            .name("Jack Lee")
+            .password("rawPassword")
+            .build();
+  }
 
-        // Act & Assert
-        CustomErrorException exception = assertThrows(CustomErrorException.class, () -> userService.registerUser(user));
-        assertEquals(HttpStatus.CONFLICT.value(), exception.getStatusCode());
-        verify(usersRepository, times(1)).findByEmail(anyString());
-        verify(usersRepository, never()).save(any(Users.class));
-    }
+  @Test
+  void registerUser_Success() {
+    when(usersMapper.toEntity(any(UsersDto.class))).thenReturn(user);
+    when(usersRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+    when(usersRepository.save(any(Users.class))).thenReturn(user);
 
-    @Test
-    void updateUser_Success() {
-        // Arrange
-        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        when(usersRepository.save(any(Users.class))).thenReturn(user);
+    userService.registerUser(usersDto);
 
-        // Act
-        Optional<Users> updatedUser = userService.updateUser(1L, user);
+    verify(usersMapper, times(1)).toEntity(any(UsersDto.class));
+    verify(usersRepository, times(1)).findByEmail(anyString());
+    verify(passwordEncoder, times(1)).encode(anyString());
+    verify(usersRepository, times(1)).save(any(Users.class));
+  }
 
-        // Assert
-        assertTrue(updatedUser.isPresent());
-        assertEquals(user.getId(), updatedUser.get().getId());
-        verify(usersRepository, times(1)).findById(anyLong());
-        verify(usersRepository, times(1)).save(any(Users.class));
-    }
+  @Test
+  void registerUser_EmailAlreadyRegistered() {
+    when(usersMapper.toEntity(any(UsersDto.class))).thenReturn(user);
+    when(usersRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
-    @Test
-    void updateUser_UserNotFound() {
-        // Arrange
-        when(usersRepository.findById(anyLong())).thenReturn(Optional.empty());
+    CustomErrorException exception =
+        assertThrows(CustomErrorException.class, () -> userService.registerUser(usersDto));
+    assertTrue(exception.getMessage().contains("Customer already registered with given Email"));
+    verify(usersRepository, times(1)).findByEmail(anyString());
+    verify(usersRepository, never()).save(any(Users.class));
+  }
 
-        // Act & Assert
-        CustomErrorException exception = assertThrows(CustomErrorException.class, () -> userService.updateUser(1L, user));
-        assertEquals(HttpStatus.NOT_FOUND.value(), exception.getStatusCode());
-        verify(usersRepository, times(1)).findById(anyLong());
-        verify(usersRepository, never()).save(any(Users.class));
-    }
+  @Test
+  void updateUser_Success() {
+    when(usersMapper.toEntity(any(UsersDto.class))).thenReturn(user);
+    when(usersRepository.findById(anyLong())).thenReturn(Optional.of(user));
+    when(usersRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+    when(usersRepository.save(any(Users.class))).thenReturn(user);
 
-    @Test
-    void deleteUser_Success() {
-        // Arrange
-        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        doNothing().when(usersRepository).delete(any(Users.class));
+    boolean result = userService.updateUser(1L, usersDto);
 
-        // Act
-        userService.deleteUser(1L);
+    assertTrue(result);
+    verify(usersRepository, times(1)).findById(anyLong());
+    verify(usersRepository, times(1)).save(any(Users.class));
+  }
 
-        // Assert
-        verify(usersRepository, times(1)).findById(anyLong());
-        verify(usersRepository, times(1)).delete(any(Users.class));
-    }
+  @Test
+  void updateUser_UserNotFound() {
+    when(usersMapper.toEntity(any(UsersDto.class))).thenReturn(user);
+    when(usersRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-    @Test
-    void deleteUser_UserNotFound() {
-        // Arrange
-        when(usersRepository.findById(anyLong())).thenReturn(Optional.empty());
+    ResourceNotFoundException exception =
+        assertThrows(ResourceNotFoundException.class, () -> userService.updateUser(1L, usersDto));
+    assertTrue(exception.getMessage().toLowerCase().contains("not found"));
+    verify(usersRepository, times(1)).findById(anyLong());
+    verify(usersRepository, never()).save(any(Users.class));
+  }
 
-        // Act & Assert
-        CustomErrorException exception = assertThrows(CustomErrorException.class, () -> userService.deleteUser(1L));
-        assertEquals(HttpStatus.NOT_FOUND.value(), exception.getStatusCode());
-        verify(usersRepository, times(1)).findById(anyLong());
-        verify(usersRepository, never()).delete(any(Users.class));
-    }
+  @Test
+  void deleteUser_Success() {
+    when(usersRepository.findById(anyLong())).thenReturn(Optional.of(user));
+    doNothing().when(usersRepository).delete(any(Users.class));
 
-    @Test
-    void login_Success() {
-        // Arrange
-        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+    boolean result = userService.deleteUser(1L);
 
-        // Act
-        Users loggedInUser = userService.login("jacklee@example.com", "password");
+    assertTrue(result);
+    verify(usersRepository, times(1)).findById(anyLong());
+    verify(usersRepository, times(1)).delete(any(Users.class));
+  }
 
-        // Assert
-        assertNotNull(loggedInUser);
-        assertEquals(user.getId(), loggedInUser.getId());
-        verify(usersRepository, times(1)).findByEmail(anyString());
-        verify(passwordEncoder, times(1)).matches(anyString(), anyString());
-    }
+  @Test
+  void deleteUser_UserNotFound() {
+    when(usersRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-    @Test
-    void login_InvalidPassword() {
-        // Arrange
-        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+    ResourceNotFoundException exception =
+        assertThrows(ResourceNotFoundException.class, () -> userService.deleteUser(1L));
+    assertTrue(exception.getMessage().toLowerCase().contains("not found"));
+    verify(usersRepository, times(1)).findById(anyLong());
+    verify(usersRepository, never()).delete(any(Users.class));
+  }
 
-        // Act & Assert
-        CustomErrorException exception = assertThrows(CustomErrorException.class, () -> userService.login("jacklee@example.com", "wrongpassword"));
-        assertEquals(HttpStatus.UNAUTHORIZED.value(), exception.getStatusCode());
-        verify(usersRepository, times(1)).findByEmail(anyString());
-        verify(passwordEncoder, times(1)).matches(anyString(), anyString());
-    }
+  @Test
+  void login_Success() {
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
+    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+        .thenReturn(authentication);
+    when(jwtTokenProvider.generateToken(any(Authentication.class))).thenReturn("mockedToken");
 
-    @Test
-    void getUserById_Success() {
-        // Arrange
-        when(usersRepository.findById(anyLong())).thenReturn(Optional.of(user));
+    String token = userService.login(usersDto);
 
-        // Act
-        Optional<Users> foundUser = userService.getUserById(1L);
+    assertNotNull(token);
+    assertEquals("mockedToken", token);
+    verify(authenticationManager, times(1))
+        .authenticate(any(UsernamePasswordAuthenticationToken.class));
+    verify(jwtTokenProvider, times(1)).generateToken(any(Authentication.class));
+  }
 
-        // Assert
-        assertTrue(foundUser.isPresent());
-        assertEquals(user.getId(), foundUser.get().getId());
-        verify(usersRepository, times(1)).findById(anyLong());
-    }
+  @Test
+  void login_InvalidCredentials() {
+    when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+        .thenThrow(new AuthenticationException("Invalid credentials") {});
 
-    @Test
-    void getUserById_UserNotFound() {
-        // Arrange
-        when(usersRepository.findById(anyLong())).thenReturn(Optional.empty());
+    String token = userService.login(usersDto);
 
-        // Act & Assert
-        CustomErrorException exception = assertThrows(CustomErrorException.class, () -> userService.getUserById(1L));
-        assertEquals(HttpStatus.NOT_FOUND.value(), exception.getStatusCode());
-        verify(usersRepository, times(1)).findById(anyLong());
-    }
+    assertNull(token);
+    verify(authenticationManager, times(1))
+        .authenticate(any(UsernamePasswordAuthenticationToken.class));
+    verify(jwtTokenProvider, never()).generateToken(any(Authentication.class));
+  }
 
-    @Test
-    void findByEmail_Success() {
-        // Arrange
-        when(usersRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
-        // Act
-        Optional<Users> foundUser = userService.findByEmail("jacklee@example.com");
+  @Test
+  void getUserById_Success() {
+    when(usersRepository.findById(anyLong())).thenReturn(Optional.of(user));
+    when(usersMapper.toDto(any(Users.class))).thenReturn(usersDto);
 
-        // Assert
-        assertTrue(foundUser.isPresent());
-        assertEquals(user.getId(), foundUser.get().getId());
-        verify(usersRepository, times(1)).findByEmail(anyString());
-    }
+    UsersDto foundUser = userService.getUserById(1L);
 
-    @Test
-    void verifyPassword_Success() {
-        // Arrange
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+    assertNotNull(foundUser);
+    assertEquals(user.getId(), foundUser.getId());
+    verify(usersRepository, times(1)).findById(anyLong());
+  }
 
-        // Act
-        boolean isMatch = userService.verifyPassword("rawPassword", "encodedPassword");
+  @Test
+  void getUserById_UserNotFound() {
+    when(usersRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        // Assert
-        assertTrue(isMatch);
-        verify(passwordEncoder, times(1)).matches(anyString(), anyString());
-    }
+    ResourceNotFoundException exception =
+        assertThrows(ResourceNotFoundException.class, () -> userService.getUserById(1L));
+
+    assertTrue(exception.getMessage().toLowerCase().contains("not found"));
+    verify(usersRepository, times(1)).findById(anyLong());
+  }
+
+  @Test
+  void verifyPassword_Success() {
+    when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+
+    boolean isMatch = userService.verifyPassword("rawPassword", "encodedPassword");
+
+    assertTrue(isMatch);
+    verify(passwordEncoder, times(1)).matches(anyString(), anyString());
+  }
 }

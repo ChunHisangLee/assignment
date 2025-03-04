@@ -1,3 +1,5 @@
+\c postgres
+
 -- Drop users' table if exists
 DROP TABLE IF EXISTS users CASCADE;
 

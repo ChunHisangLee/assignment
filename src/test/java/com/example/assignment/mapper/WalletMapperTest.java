@@ -1,74 +1,72 @@
 package com.example.assignment.mapper;
 
-import com.example.assignment.dto.WalletDTO;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.example.assignment.dto.WalletDto;
 import com.example.assignment.entity.Wallet;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 class WalletMapperTest {
 
-    private WalletMapper walletMapper;
+  private WalletMapper walletMapper;
 
-    @BeforeEach
-    void setUp() {
-        walletMapper = new WalletMapper();
-    }
+  @BeforeEach
+  void setUp() {
+    walletMapper = new WalletMapper();
+  }
 
-    @Test
-    void toDto_shouldMapWalletToWalletDTO() {
-        // Arrange
-        Wallet wallet = Wallet.builder()
-                .id(1L)
-                .usdBalance(1000.0)
-                .btcBalance(0.5)
-                .build();
+  @Test
+  void toDto_shouldMapWalletToWalletDto() {
+    // Arrange
+    Wallet wallet = Wallet.builder().id(1L).usdBalance(BigDecimal.valueOf(1000.0)).btcBalance(BigDecimal.valueOf(0.5)).build();
 
-        // Act
-        WalletDTO walletDTO = walletMapper.toDto(wallet);
+    // Act
+    WalletDto walletDto = walletMapper.toDto(wallet);
 
-        // Assert
-        assertThat(walletDTO).isNotNull();
-        assertThat(walletDTO.getId()).isEqualTo(wallet.getId());
-        assertThat(walletDTO.getUsdBalance()).isEqualTo(wallet.getUsdBalance());
-        assertThat(walletDTO.getBtcBalance()).isEqualTo(wallet.getBtcBalance());
-    }
+    // Assert
+    assertThat(walletDto).isNotNull();
+    assertThat(walletDto.getId()).isEqualTo(wallet.getId());
+    assertThat(walletDto.getUsdBalance()).isEqualTo(wallet.getUsdBalance());
+    assertThat(walletDto.getBtcBalance()).isEqualTo(wallet.getBtcBalance());
+  }
 
-    @Test
-    void toDto_shouldReturnNullWhenWalletIsNull() {
-        // Act
-        WalletDTO walletDTO = walletMapper.toDto(null);
+  @Test
+  void toDto_shouldReturnNullWhenWalletIsNull() {
+    // Act
+    WalletDto walletDto = walletMapper.toDto(null);
 
-        // Assert
-        assertThat(walletDTO).isNull();
-    }
+    // Assert
+    assertThat(walletDto).isNull();
+  }
 
-    @Test
-    void toEntity_shouldMapWalletDTOToWallet() {
-        // Arrange
-        WalletDTO walletDTO = WalletDTO.builder()
-                .id(1L)
-                .usdBalance(1000.0)
-                .btcBalance(0.5)
-                .build();
+  @Test
+  void toEntity_shouldMapWalletDtoToWallet() {
+    // Arrange
+    WalletDto walletDto =
+        WalletDto.builder()
+            .id(1L)
+            .usdBalance(BigDecimal.valueOf(1000.0))
+            .btcBalance(BigDecimal.valueOf(0.5))
+            .build();
 
-        // Act
-        Wallet wallet = walletMapper.toEntity(walletDTO);
+    // Act
+    Wallet wallet = walletMapper.toEntity(walletDto);
 
-        // Assert
-        assertThat(wallet).isNotNull();
-        assertThat(wallet.getId()).isNull(); // ID should not be set when converting from DTO to Entity
-        assertThat(wallet.getUsdBalance()).isEqualTo(walletDTO.getUsdBalance());
-        assertThat(wallet.getBtcBalance()).isEqualTo(walletDTO.getBtcBalance());
-    }
+    // Assert
+    assertThat(wallet).isNotNull();
+    assertThat(wallet.getId()).isNull(); // ID should not be set when converting from Dto to Entity
+    assertThat(wallet.getUsdBalance()).isEqualTo(walletDto.getUsdBalance());
+    assertThat(wallet.getBtcBalance()).isEqualTo(walletDto.getBtcBalance());
+  }
 
-    @Test
-    void toEntity_shouldReturnNullWhenWalletDTOIsNull() {
-        // Act
-        Wallet wallet = walletMapper.toEntity(null);
+  @Test
+  void toEntity_shouldReturnNullWhenWalletDtoIsNull() {
+    // Act
+    Wallet wallet = walletMapper.toEntity(null);
 
-        // Assert
-        assertThat(wallet).isNull();
-    }
+    // Assert
+    assertThat(wallet).isNull();
+  }
 }
