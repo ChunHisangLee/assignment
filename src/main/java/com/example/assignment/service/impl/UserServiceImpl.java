@@ -8,6 +8,7 @@ import com.example.assignment.mapper.UsersMapper;
 import com.example.assignment.repository.UsersRepository;
 import com.example.assignment.security.JwtTokenProvider;
 import com.example.assignment.service.UserService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
   private final AuthenticationManager authenticationManager;
@@ -25,19 +27,6 @@ public class UserServiceImpl implements UserService {
   private final UsersRepository usersRepository;
   private final PasswordEncoder passwordEncoder;
   private final UsersMapper usersMapper;
-
-  public UserServiceImpl(
-      AuthenticationManager authenticationManager,
-      JwtTokenProvider jwtTokenProvider,
-      UsersRepository usersRepository,
-      PasswordEncoder passwordEncoder,
-      UsersMapper usersMapper) {
-    this.authenticationManager = authenticationManager;
-    this.jwtTokenProvider = jwtTokenProvider;
-    this.usersRepository = usersRepository;
-    this.passwordEncoder = passwordEncoder;
-    this.usersMapper = usersMapper;
-  }
 
   @Override
   public void registerUser(UsersDto usersDto) {

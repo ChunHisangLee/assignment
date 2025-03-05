@@ -9,6 +9,7 @@ import com.example.assignment.repository.UsersRepository;
 import com.example.assignment.service.PriceService;
 import com.example.assignment.service.TransactionService;
 import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,23 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@AllArgsConstructor
 @Slf4j
 public class TransactionServiceImpl implements TransactionService {
   private final TransactionRepository transactionRepository;
   private final UsersRepository usersRepository;
   private final TransactionMapper transactionMapper;
   private final PriceService priceService;
-
-  public TransactionServiceImpl(
-      TransactionRepository transactionRepository,
-      UsersRepository usersRepository,
-      TransactionMapper transactionMapper,
-      PriceService priceService) {
-    this.transactionRepository = transactionRepository;
-    this.usersRepository = usersRepository;
-    this.transactionMapper = transactionMapper;
-    this.priceService = priceService;
-  }
 
   @Override
   @Transactional
