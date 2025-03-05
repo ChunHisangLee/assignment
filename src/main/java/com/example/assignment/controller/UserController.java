@@ -7,7 +7,6 @@ import com.example.assignment.security.JwtAuthenticationResponse;
 import com.example.assignment.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequestMapping("/api/users")
 public class UserController {
+
   private final UserService userService;
 
   public UserController(UserService userService) {
@@ -27,7 +27,7 @@ public class UserController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<ResponseDto> registerUser(@Valid @RequestBody UsersDto usersDto) {
+  public ResponseEntity<ResponseDto> registerUser(@RequestBody UsersDto usersDto) {
     userService.registerUser(usersDto);
     log.info("User registered successfully with ID: {}", usersDto.getId());
     return ResponseEntity.status(HttpStatus.CREATED)
@@ -36,7 +36,7 @@ public class UserController {
 
   @PutMapping("/{id}")
   public ResponseEntity<ResponseDto> updateUser(
-      @PathVariable Long id, @Valid @RequestBody UsersDto usersDto) {
+      @PathVariable Long id, @RequestBody UsersDto usersDto) {
     boolean isUpdated = userService.updateUser(id, usersDto);
 
     if (isUpdated) {

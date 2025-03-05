@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequestMapping("/api/transactions")
 public class TransactionController {
+
   private final TransactionService transactionService;
 
   public TransactionController(TransactionService transactionService) {
@@ -27,19 +28,23 @@ public class TransactionController {
   @PostMapping("/buy")
   public ResponseEntity<TransactionDto> buyBtc(@RequestBody CreateTransactionRequestDto request) {
     log.info("Initiating BTC buy transaction for user ID: {}", request.getUserId());
-    TransactionDto transactionDTO =
+
+    TransactionDto transactionDto =
         transactionService.createTransaction(request, TransactionType.BUY);
+
     log.info("BTC buy transaction completed for user ID: {}", request.getUserId());
-    return ResponseEntity.ok(transactionDTO);
+    return ResponseEntity.ok(transactionDto);
   }
 
   @PostMapping("/sell")
   public ResponseEntity<TransactionDto> sellBtc(@RequestBody CreateTransactionRequestDto request) {
     log.info("Initiating BTC sell transaction for user ID: {}", request.getUserId());
-    TransactionDto transactionDTO =
+
+    TransactionDto transactionDto =
         transactionService.createTransaction(request, TransactionType.SELL);
+
     log.info("BTC sell transaction completed for user ID: {}", request.getUserId());
-    return ResponseEntity.ok(transactionDTO);
+    return ResponseEntity.ok(transactionDto);
   }
 
   @GetMapping("/history/{userId}")
@@ -53,9 +58,11 @@ public class TransactionController {
         userId,
         page,
         size);
+
     Pageable pageable = PageRequest.of(page, size);
     Page<TransactionDto> transactions =
         transactionService.getUserTransactionHistory(userId, pageable);
+
     log.info("Fetched {} transactions for user ID: {}", transactions.getTotalElements(), userId);
     return ResponseEntity.ok(transactions);
   }
