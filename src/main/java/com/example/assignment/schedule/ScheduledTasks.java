@@ -53,11 +53,13 @@ public class ScheduledTasks {
   private void adjustCurrentPrice() {
     if (isIncreasing) {
       currentPrice = currentPrice.add(PRICE_INCREMENT);
+
       if (currentPrice.compareTo(MAX_PRICE) >= 0) {
         isIncreasing = false;
       }
     } else {
       currentPrice = currentPrice.subtract(PRICE_INCREMENT);
+
       if (currentPrice.compareTo(MIN_PRICE) <= 0) {
         isIncreasing = true;
       }
@@ -69,9 +71,8 @@ public class ScheduledTasks {
   }
 
   private void savePriceHistory() {
-    BTCPriceHistory priceHistory = new BTCPriceHistory();
-    priceHistory.setPrice(currentPrice);
-    priceHistory.setTimestamp(LocalDateTime.now());
+    BTCPriceHistory priceHistory =
+        BTCPriceHistory.builder().price(currentPrice).timestamp(LocalDateTime.now()).build();
     btcPriceHistoryRepository.save(priceHistory);
   }
 }

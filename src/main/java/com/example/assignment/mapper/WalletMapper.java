@@ -11,6 +11,7 @@ public class WalletMapper {
     if (wallet == null) {
       return null;
     }
+
     return WalletDto.builder()
         .id(wallet.getId())
         .usdBalance(wallet.getUsdBalance())
@@ -22,6 +23,7 @@ public class WalletMapper {
     if (walletDto == null) {
       return null;
     }
+
     return Wallet.builder()
         .usdBalance(walletDto.getUsdBalance())
         .btcBalance(walletDto.getBtcBalance())
