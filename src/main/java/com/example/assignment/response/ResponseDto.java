@@ -1,4 +1,4 @@
-package com.example.assignment.dto;
+package com.example.assignment.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

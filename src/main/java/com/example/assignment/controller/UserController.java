@@ -1,12 +1,20 @@
 package com.example.assignment.controller;
 
 import com.example.assignment.constants.MessagesConstants;
-import com.example.assignment.dto.ResponseDto;
 import com.example.assignment.dto.UsersDto;
+import com.example.assignment.response.ErrorResponseDto;
+import com.example.assignment.response.ResponseDto;
 import com.example.assignment.security.JwtAuthenticationResponse;
 import com.example.assignment.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,17 +23,30 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(
+    name = "CRUD REST APIs for User",
+    description = "CRUD REST APIs to CREATE, UPDATE, FETCH AND DELETE")
 @RestController
 @Slf4j
 @RequestMapping("/api/users")
+@AllArgsConstructor
 public class UserController {
 
   private final UserService userService;
 
-  public UserController(UserService userService) {
-    this.userService = userService;
-  }
-
+  @Operation(summary = "Register a new user", description = "REST API to register a new user")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = MessagesConstants.MESSAGE_201,
+        description = MessagesConstants.MESSAGE_201),
+    @ApiResponse(
+        responseCode = MessagesConstants.STATUS_409,
+        description = MessagesConstants.MESSAGE_409),
+    @ApiResponse(
+        responseCode = MessagesConstants.STATUS_500,
+        description = MessagesConstants.MESSAGE_500,
+        content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+  })
   @PostMapping("/register")
   public ResponseEntity<ResponseDto> registerUser(@RequestBody UsersDto usersDto) {
     userService.registerUser(usersDto);
@@ -34,6 +55,21 @@ public class UserController {
         .body(new ResponseDto(MessagesConstants.STATUS_201, MessagesConstants.MESSAGE_201));
   }
 
+  @Operation(
+      summary = "Update an existing user",
+      description = "REST API to update an existing user")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = MessagesConstants.MESSAGE_200,
+        description = MessagesConstants.MESSAGE_200),
+    @ApiResponse(
+        responseCode = MessagesConstants.STATUS_417,
+        description = MessagesConstants.MESSAGE_417_UPDATE),
+    @ApiResponse(
+        responseCode = MessagesConstants.STATUS_500,
+        description = MessagesConstants.MESSAGE_500,
+        content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+  })
   @PutMapping("/{id}")
   public ResponseEntity<ResponseDto> updateUser(
       @PathVariable Long id, @RequestBody UsersDto usersDto) {
@@ -50,6 +86,21 @@ public class UserController {
     }
   }
 
+  @Operation(
+      summary = "Delete an existing user",
+      description = "REST API to delete an existing user")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = MessagesConstants.MESSAGE_200,
+        description = MessagesConstants.MESSAGE_200),
+    @ApiResponse(
+        responseCode = MessagesConstants.STATUS_417,
+        description = MessagesConstants.MESSAGE_417_DELETE),
+    @ApiResponse(
+        responseCode = MessagesConstants.STATUS_500,
+        description = MessagesConstants.MESSAGE_500,
+        content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+  })
   @DeleteMapping("/{id}")
   public ResponseEntity<ResponseDto> deleteUser(@PathVariable Long id) {
     boolean isDeleted = userService.deleteUser(id);
@@ -65,6 +116,16 @@ public class UserController {
     }
   }
 
+  @Operation(summary = "Get user by ID", description = "REST API to get a user by ID")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = MessagesConstants.MESSAGE_200,
+        description = MessagesConstants.MESSAGE_200),
+    @ApiResponse(
+        responseCode = MessagesConstants.STATUS_500,
+        description = MessagesConstants.MESSAGE_500,
+        content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+  })
   @GetMapping("/{id}")
   public ResponseEntity<UsersDto> getUserById(@PathVariable Long id) {
     UsersDto usersDto = userService.getUserById(id);
@@ -72,6 +133,19 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.OK).body(usersDto);
   }
 
+  @Operation(summary = "Login a user", description = "REST API to login a user")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = MessagesConstants.MESSAGE_200,
+        description = MessagesConstants.MESSAGE_200),
+    @ApiResponse(
+        responseCode = MessagesConstants.STATUS_401,
+        description = MessagesConstants.MESSAGE_401),
+    @ApiResponse(
+        responseCode = MessagesConstants.STATUS_500,
+        description = MessagesConstants.MESSAGE_500,
+        content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+  })
   @PostMapping("/login")
   public ResponseEntity<JwtAuthenticationResponse> login(@RequestBody UsersDto userDto) {
     log.info("User login attempt with email: {}", userDto.getEmail());
@@ -86,6 +160,16 @@ public class UserController {
     }
   }
 
+  @Operation(summary = "Logout a user", description = "REST API to logout a user")
+  @ApiResponses({
+    @ApiResponse(
+        responseCode = MessagesConstants.MESSAGE_200,
+        description = MessagesConstants.MESSAGE_200),
+    @ApiResponse(
+        responseCode = MessagesConstants.STATUS_500,
+        description = MessagesConstants.MESSAGE_500,
+        content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
+  })
   @GetMapping("/logout")
   public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
