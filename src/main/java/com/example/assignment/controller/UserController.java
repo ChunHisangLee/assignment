@@ -37,7 +37,7 @@ public class UserController {
   @Operation(summary = "Register a new user", description = "REST API to register a new user")
   @ApiResponses({
     @ApiResponse(
-        responseCode = MessagesConstants.MESSAGE_201,
+        responseCode = MessagesConstants.STATUS_201,
         description = MessagesConstants.MESSAGE_201),
     @ApiResponse(
         responseCode = MessagesConstants.STATUS_409,
@@ -60,7 +60,7 @@ public class UserController {
       description = "REST API to update an existing user")
   @ApiResponses({
     @ApiResponse(
-        responseCode = MessagesConstants.MESSAGE_200,
+        responseCode = MessagesConstants.STATUS_200,
         description = MessagesConstants.MESSAGE_200),
     @ApiResponse(
         responseCode = MessagesConstants.STATUS_417,
@@ -91,7 +91,7 @@ public class UserController {
       description = "REST API to delete an existing user")
   @ApiResponses({
     @ApiResponse(
-        responseCode = MessagesConstants.MESSAGE_200,
+        responseCode = MessagesConstants.STATUS_200,
         description = MessagesConstants.MESSAGE_200),
     @ApiResponse(
         responseCode = MessagesConstants.STATUS_417,
@@ -119,7 +119,7 @@ public class UserController {
   @Operation(summary = "Get user by ID", description = "REST API to get a user by ID")
   @ApiResponses({
     @ApiResponse(
-        responseCode = MessagesConstants.MESSAGE_200,
+        responseCode = MessagesConstants.STATUS_200,
         description = MessagesConstants.MESSAGE_200),
     @ApiResponse(
         responseCode = MessagesConstants.STATUS_500,
@@ -136,7 +136,7 @@ public class UserController {
   @Operation(summary = "Login a user", description = "REST API to login a user")
   @ApiResponses({
     @ApiResponse(
-        responseCode = MessagesConstants.MESSAGE_200,
+        responseCode = MessagesConstants.STATUS_200,
         description = MessagesConstants.MESSAGE_200),
     @ApiResponse(
         responseCode = MessagesConstants.STATUS_401,
@@ -163,7 +163,7 @@ public class UserController {
   @Operation(summary = "Logout a user", description = "REST API to logout a user")
   @ApiResponses({
     @ApiResponse(
-        responseCode = MessagesConstants.MESSAGE_200,
+        responseCode = MessagesConstants.STATUS_200,
         description = MessagesConstants.MESSAGE_200),
     @ApiResponse(
         responseCode = MessagesConstants.STATUS_500,
